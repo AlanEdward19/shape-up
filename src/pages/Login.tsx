@@ -29,6 +29,8 @@ const Login = () => {
     }
   };
 
+  const isFormValid = email.trim() !== "" && password.trim() !== "";
+
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left side - Branding */}
@@ -80,7 +82,7 @@ const Login = () => {
                   Esqueceu sua senha?
                 </Link>
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={!isFormValid}>
                 Continuar
               </Button>
               <div className="text-center">
