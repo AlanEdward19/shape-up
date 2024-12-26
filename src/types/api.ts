@@ -44,6 +44,12 @@ export interface ViewProfileResponse {
   id: string;
   firstName: string;
   lastName: string;
+  city: string;
+  state: string;
+  country: string;
+  birthDate: string;
+  bio: string;
+  gender: number;
   email: string;
   imageUrl: string;
   followers: number;
@@ -58,10 +64,7 @@ export interface FollowUser {
 }
 
 export interface FriendRecommendation {
-  profileId: string;
-  firstName: string;
-  lastName: string;
-  imageUrl: string;
+  profile: ViewProfileResponse;
   mutualFriends: number;
 }
 
