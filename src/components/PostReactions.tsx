@@ -36,7 +36,7 @@ const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps)
           <span>{reactions.length}</span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="bg-secondary border border-muted">
         <div className="grid grid-cols-5 gap-2 p-2">
           {Object.entries(reactionEmojis).map(([type, emoji]) => (
             <DropdownMenuItem
