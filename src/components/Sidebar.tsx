@@ -16,7 +16,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Home className="h-6 w-6" />
+              <Home className="h-6 w-6 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Início</TooltipContent>
@@ -25,7 +25,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Users className="h-6 w-6" />
+              <Users className="h-6 w-6 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Amigos</TooltipContent>
@@ -34,7 +34,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Dumbbell className="h-6 w-6" />
+              <Dumbbell className="h-6 w-6 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Treinos</TooltipContent>
@@ -43,7 +43,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Utensils className="h-6 w-6" />
+              <Utensils className="h-6 w-6 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Nutrição</TooltipContent>
@@ -52,7 +52,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <UserCircle className="h-6 w-6" />
+              <UserCircle className="h-6 w-6 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Perfil</TooltipContent>
@@ -61,30 +61,32 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <ListTodo className="h-6 w-6" />
+              <ListTodo className="h-6 w-6 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Planos</TooltipContent>
         </Tooltip>
+      </div>
 
+      <div className="space-y-4">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Settings className="h-6 w-6" />
+              <Settings className="h-6 w-6 text-primary" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Opções</TooltipContent>
         </Tooltip>
-      </div>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" onClick={handleLogout}>
-            <LogOut className="h-6 w-6" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="right">Sair</TooltipContent>
-      </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={handleLogout}>
+              <LogOut className="h-6 w-6 text-primary" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Sair</TooltipContent>
+        </Tooltip>
+      </div>
     </div>
   );
 };
