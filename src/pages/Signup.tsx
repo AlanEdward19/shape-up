@@ -37,6 +37,8 @@ const Signup = () => {
       city,
       state,
     });
+    // Navigate to login page after signup
+    navigate("/login");
   };
 
   return (
