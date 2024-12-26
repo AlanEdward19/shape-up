@@ -1,7 +1,7 @@
 export enum Visibility {
   Public = 0,
   FriendsOnly = 1,
-  Private = 3
+  Private = 2
 }
 
 export enum Gender {
@@ -41,4 +41,8 @@ export interface FriendRecommendation {
 
 export interface FriendRecommendationsResponse {
   recommendations: FriendRecommendation[];
+}
+
+export interface CreatePostResponse {
+  id: string;
 }

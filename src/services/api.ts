@@ -42,6 +42,33 @@ export const SocialService = {
       console.error('Error fetching friend recommendations:', error);
       throw error;
     }
+  },
+
+  createPost: async (data: { content: string; visibility: number }): Promise<{ id: string }> => {
+    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Post/CreatePost`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create post');
+    }
+
+    return response.json();
+  },
+
+  uploadPostImages: async (postId: string, formData: FormData): Promise<void> => {
+    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Post/${postId}/uploadPostImages`, {
+      method: 'PUT',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload post images');
+    }
   }
 };
 

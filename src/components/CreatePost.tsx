@@ -1,6 +1,7 @@
 import { Camera, Video, Apple, Dumbbell, Star, Globe2, Users, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -8,10 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SocialService } from "@/services/api";
 
 const actions = [
-  { icon: Camera, label: "Foto" },
-  { icon: Video, label: "Video" },
+  { icon: Camera, label: "Foto", accept: "image/*" },
+  { icon: Video, label: "Video", accept: "video/*" },
   { icon: Apple, label: "Dieta" },
   { icon: Dumbbell, label: "Treino" },
   { icon: Star, label: "Evolução" },
@@ -25,6 +27,66 @@ const visibilityOptions = [
 
 const CreatePost = () => {
   const [visibility, setVisibility] = useState("0");
+  const [content, setContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [currentAction, setCurrentAction] = useState<string>("");
+
+  const handleFileSelect = (actionType: string, accept: string) => {
+    setCurrentAction(actionType);
+    if (fileInputRef.current) {
+      fileInputRef.current.accept = accept;
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      setSelectedFiles(files);
+      toast.success(`${files.length} arquivo(s) selecionado(s)`);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!content.trim()) {
+      toast.error("O conteúdo do post não pode estar vazio");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Create post
+      const postResponse = await SocialService.createPost({
+        content,
+        visibility: parseInt(visibility)
+      });
+
+      // Upload files if any were selected
+      if (selectedFiles && selectedFiles.length > 0) {
+        const formData = new FormData();
+        Array.from(selectedFiles).forEach(file => {
+          formData.append('files', file);
+        });
+
+        await SocialService.uploadPostImages(postResponse.id, formData);
+      }
+
+      // Reset form
+      setContent("");
+      setSelectedFiles(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      toast.success("Post criado com sucesso!");
+    } catch (error) {
+      console.error("Error creating post:", error);
+      toast.error("Erro ao criar o post. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="bg-secondary rounded-lg p-4 mb-6">
@@ -33,15 +95,32 @@ const CreatePost = () => {
         <Input
           placeholder="No que está pensando?"
           className="flex-1 bg-muted border-none text-foreground"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
         />
       </div>
       
       <div className="flex justify-between items-center">
         <div className="flex gap-4">
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileChange}
+            multiple
+          />
           {actions.map((action) => (
             <button
               key={action.label}
               className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => action.accept && handleFileSelect(action.label, action.accept)}
+              disabled={isSubmitting}
             >
               <action.icon className="w-5 h-5" />
               <span>{action.label}</span>
