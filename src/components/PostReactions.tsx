@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PostReaction } from "@/types/api";
 import { ReactionType, reactionEmojis, getReactionEmoji } from "@/types/reactions";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -29,7 +28,10 @@ const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps)
     setIsOpen(false);
   };
 
-  const handleMainReactionClick = () => {
+  const handleMainReactionClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (userReaction) {
       // If already reacted, clicking the main button removes the reaction
       onReact(Number(userReaction.reactionType));
