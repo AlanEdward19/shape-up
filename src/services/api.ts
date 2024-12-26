@@ -1,5 +1,5 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { ActivityFeedResponse, Post, FriendRecommendationsResponse, FriendRecommendation } from '@/types/api';
+import { ActivityFeedResponse, Post, FriendRecommendationsResponse, FriendRecommendation, ViewProfileResponse } from '@/types/api';
 
 export const getTimeDifference = (updatedAt: string): string => {
   const now = new Date();
@@ -68,6 +68,18 @@ export const SocialService = {
 
     if (!response.ok) {
       throw new Error('Failed to upload post images');
+    }
+  },
+
+  viewProfile: async (id: string): Promise<ViewProfileResponse> => {
+    try {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Profile/viewProfile/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch profile');
+      
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
     }
   }
 };

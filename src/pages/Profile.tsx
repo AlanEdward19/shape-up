@@ -5,14 +5,13 @@ import { Gender } from "@/types/api";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 
 const Profile = () => {
   const { id } = useParams();
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', id],
-    queryFn: () => SocialService.getFriendRecommendations().then(
-      recommendations => recommendations.find(r => r.profile.id === id)?.profile
-    ),
+    queryFn: () => SocialService.viewProfile(id!),
     meta: {
       onError: (error: Error) => {
         console.error('Failed to fetch profile:', error);

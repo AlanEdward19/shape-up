@@ -46,3 +46,5 @@ export interface FriendRecommendationsResponse {
 export interface CreatePostResponse {
   id: string;
 }
+
+export interface ViewProfileResponse extends Profile {}
