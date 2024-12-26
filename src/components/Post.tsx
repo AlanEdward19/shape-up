@@ -1,6 +1,46 @@
+import { useState } from "react";
 import { MessageCircle, Heart, Share2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const Post = ({ author, content, likes }: { author: string; content: string; likes: number }) => {
+interface PostProps {
+  author: string;
+  content: string;
+  likes: number;
+  image?: string;
+}
+
+const reactions = [
+  { name: "Like", emoji: "👍" },
+  { name: "Dislike", emoji: "👎" },
+  { name: "Love", emoji: "❤️" },
+  { name: "Haha", emoji: "😄" },
+  { name: "Wow", emoji: "😮" },
+  { name: "Sad", emoji: "😢" },
+  { name: "Angry", emoji: "😠" },
+  { name: "Care", emoji: "🤗" },
+  { name: "Support", emoji: "💪" },
+  { name: "Celebrate", emoji: "🎉" },
+];
+
+const Post = ({ author, content, likes, image }: PostProps) => {
+  const [currentReaction, setCurrentReaction] = useState({ name: "Like", emoji: "👍" });
+  const [reactionCount, setReactionCount] = useState(likes);
+
+  const handleReaction = (reaction: typeof reactions[0]) => {
+    if (currentReaction.name === reaction.name) {
+      setCurrentReaction({ name: "Like", emoji: "👍" });
+      setReactionCount(prev => prev - 1);
+    } else {
+      setCurrentReaction(reaction);
+      setReactionCount(prev => prev + 1);
+    }
+  };
+
   return (
     <div className="bg-secondary rounded-lg p-4 mb-4">
       <div className="flex items-center gap-3 mb-4">
@@ -13,11 +53,34 @@ const Post = ({ author, content, likes }: { author: string; content: string; lik
       
       <p className="text-left mb-4">{content}</p>
       
+      {image && (
+        <div className="mb-4 rounded-lg overflow-hidden">
+          <img src={image} alt="Post content" className="w-full h-auto" />
+        </div>
+      )}
+      
       <div className="flex justify-between items-center text-muted-foreground">
-        <button className="flex items-center gap-2 hover:text-primary transition-colors">
-          <Heart className="w-5 h-5" />
-          <span>{likes}</span>
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-2 hover:text-primary transition-colors">
+              <span className="text-xl">{currentReaction.emoji}</span>
+              <span>{reactionCount}</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <div className="grid grid-cols-5 gap-2 p-2">
+              {reactions.map((reaction) => (
+                <DropdownMenuItem
+                  key={reaction.name}
+                  onClick={() => handleReaction(reaction)}
+                  className="cursor-pointer text-xl text-center hover:bg-primary/20"
+                >
+                  {reaction.emoji}
+                </DropdownMenuItem>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <button className="flex items-center gap-2 hover:text-primary transition-colors">
           <MessageCircle className="w-5 h-5" />
           <span>Comentar</span>

@@ -1,8 +1,8 @@
-import Sidebar from "@/components/Sidebar";
 import CreatePost from "@/components/CreatePost";
 import Stories from "@/components/Stories";
 import Suggestions from "@/components/Suggestions";
 import Post from "@/components/Post";
+import Chat from "@/components/Chat";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const mockPosts = [
@@ -11,6 +11,7 @@ const mockPosts = [
     author: "João Silva",
     content: "Hoje foi dia de treino pesado! 💪 Superando limites a cada dia.",
     likes: 24,
+    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop"
   },
   {
     id: 2,
@@ -23,6 +24,7 @@ const mockPosts = [
     author: "Pedro Costa",
     content: "Novo recorde pessoal no supino! 🏋️‍♂️ A consistência é a chave do sucesso.",
     likes: 32,
+    image: "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?q=80&w=1000&auto=format&fit=crop"
   },
 ];
 
@@ -43,6 +45,7 @@ const Index = () => {
                   author={post.author}
                   content={post.content}
                   likes={post.likes}
+                  image={post.image}
                 />
               ))}
             </div>
@@ -53,6 +56,8 @@ const Index = () => {
           <Suggestions />
         </div>
       </main>
+
+      <Chat />
     </div>
   );
 };
