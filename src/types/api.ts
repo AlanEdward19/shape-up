@@ -4,6 +4,11 @@ export enum Visibility {
   Private = 3
 }
 
+export enum Gender {
+  Male = 0,
+  Female = 1
+}
+
 export interface Post {
   updatedAt: string;
   images: string[];
@@ -13,4 +18,27 @@ export interface Post {
 
 export interface ActivityFeedResponse {
   posts: Post[];
+}
+
+export interface Profile {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  city: string;
+  state: string;
+  country: string;
+  imageUrl: string;
+  bio: string;
+  birthDate: string;
+  gender: Gender;
+}
+
+export interface FriendRecommendation {
+  profile: Profile;
+  mutualFriends: number;
+}
+
+export interface FriendRecommendationsResponse {
+  recommendations: FriendRecommendation[];
 }

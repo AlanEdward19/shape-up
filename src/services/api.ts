@@ -1,5 +1,5 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { ActivityFeedResponse, Post } from '@/types/api';
+import { ActivityFeedResponse, Post, FriendRecommendationsResponse, FriendRecommendation } from '@/types/api';
 
 export const getTimeDifference = (updatedAt: string): string => {
   const now = new Date();
@@ -27,6 +27,19 @@ export const SocialService = {
       return data.posts;
     } catch (error) {
       console.error('Error fetching activity feed:', error);
+      throw error;
+    }
+  },
+
+  getFriendRecommendations: async (): Promise<FriendRecommendation[]> => {
+    try {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Recommendation/FriendRecommendations`);
+      if (!response.ok) throw new Error('Failed to fetch friend recommendations');
+      
+      const data: FriendRecommendationsResponse = await response.json();
+      return data.recommendations;
+    } catch (error) {
+      console.error('Error fetching friend recommendations:', error);
       throw error;
     }
   }
