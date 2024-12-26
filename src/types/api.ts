@@ -30,6 +30,9 @@ export interface PostReaction {
 
 export interface PostComment {
   profileId: string;
+  profileFirstName: string;
+  profileLastName: string;
+  profileImageUrl: string;
   postId: string;
   createdAt: string;
   content: string;

@@ -51,9 +51,11 @@ const Post = ({ post }: { post: PostType }) => {
   const handleReaction = async (reactionType: number) => {
     try {
       const userReaction = reactions.find(r => r.profileId === userId);
+
+      console.log("userReaction", userReaction);
       
       if (userReaction) {
-        if (userReaction.reactionType === reactionType.toString()) {
+        if (reactionType.toString() === 'NaN') {
           await SocialService.deleteReaction(post.id);
         } else {
           await SocialService.reactToPost(post.id, reactionType);
