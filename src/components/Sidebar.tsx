@@ -11,12 +11,12 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-24 bg-secondary flex flex-col items-center justify-between py-6">
+    <div className="fixed left-0 top-0 h-screen w-20 bg-secondary flex flex-col items-center justify-between py-6">
       <div className="flex flex-col items-center space-y-6">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
-              <Home className="h-8 w-8 text-primary" />
+              <Home className="h-10 w-10 text-primary" />
               <span className="text-xs text-primary">Início</span>
             </Button>
           </TooltipTrigger>
@@ -26,7 +26,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
-              <Users className="h-8 w-8 text-primary" />
+              <Users className="h-10 w-10 text-primary" />
               <span className="text-xs text-primary">Amigos</span>
             </Button>
           </TooltipTrigger>
@@ -36,7 +36,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
-              <Dumbbell className="h-8 w-8 text-primary" />
+              <Dumbbell className="h-10 w-10 text-primary" />
               <span className="text-xs text-primary">Treinos</span>
             </Button>
           </TooltipTrigger>
@@ -46,7 +46,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
-              <Utensils className="h-8 w-8 text-primary" />
+              <Utensils className="h-10 w-10 text-primary" />
               <span className="text-xs text-primary">Nutrição</span>
             </Button>
           </TooltipTrigger>
@@ -56,7 +56,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
-              <UserCircle className="h-8 w-8 text-primary" />
+              <UserCircle className="h-10 w-10 text-primary" />
               <span className="text-xs text-primary">Perfil</span>
             </Button>
           </TooltipTrigger>
@@ -66,7 +66,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
-              <ListTodo className="h-8 w-8 text-primary" />
+              <ListTodo className="h-10 w-10 text-primary" />
               <span className="text-xs text-primary">Planos</span>
             </Button>
           </TooltipTrigger>
@@ -78,7 +78,7 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
-              <Settings className="h-8 w-8 text-primary" />
+              <Settings className="h-10 w-10 text-primary" />
               <span className="text-xs text-primary">Opções</span>
             </Button>
           </TooltipTrigger>
@@ -93,7 +93,7 @@ const Sidebar = () => {
               onClick={handleLogout}
               className="flex flex-col items-center gap-1 h-auto p-2"
             >
-              <LogOut className="h-8 w-8 text-primary" />
+              <LogOut className="h-10 w-10 text-primary" />
               <span className="text-xs text-primary">Sair</span>
             </Button>
           </TooltipTrigger>
