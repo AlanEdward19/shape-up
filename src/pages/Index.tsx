@@ -16,22 +16,23 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Extrair o ID do usuário da URL após o redirecionamento do Azure AD B2C
-    const params = new URLSearchParams(location.search);
-    const userId = params.get('userId');
+    // Extrair o ID do token da URL após o redirecionamento do Azure AD B2C
+    const hash = location.hash;
+    if (hash && hash.includes('#id_token=')) {
+      const token = hash.split('#id_token=')[1];
+      if (token) {
+        // Salvar o ID do usuário no localStorage ou sessionStorage
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
+        if (rememberMe) {
+          localStorage.setItem('userId', token);
+        } else {
+          sessionStorage.setItem('userId', token);
+        }
 
-    if (userId) {
-      // Salvar o ID do usuário no localStorage ou sessionStorage
-      const rememberMe = localStorage.getItem('rememberMe') === 'true';
-      if (rememberMe) {
-        localStorage.setItem('userId', userId);
-      } else {
-        sessionStorage.setItem('userId', userId);
+        // Limpar a URL após salvar o ID
+        navigate('/index', { replace: true });
+        toast.success('Login realizado com sucesso!');
       }
-
-      // Limpar a URL após salvar o ID
-      navigate('/index', { replace: true });
-      toast.success('Login realizado com sucesso!');
     }
   }, [location, navigate]);
 
