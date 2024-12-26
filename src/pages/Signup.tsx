@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
+import { signUp } from "@/utils/auth";
+import { toast } from "sonner";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -24,21 +26,26 @@ const Signup = () => {
     console.log("Sending verification code to:", email);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Signup attempt with:", {
-      email,
-      verificationCode,
-      firstName,
-      lastName,
-      password,
-      confirmPassword,
-      country,
-      city,
-      state,
-    });
-    // Navigate to login page after signup
-    navigate("/login");
+    
+    if (password !== confirmPassword) {
+      toast.error("As senhas não coincidem");
+      return;
+    }
+
+    try {
+      const result = await signUp(email, password);
+      if (result.success) {
+        toast.success("Conta criada com sucesso!");
+        navigate("/login");
+      } else {
+        toast.error("Erro ao criar conta");
+      }
+    } catch (error) {
+      toast.error("Erro ao criar conta");
+      console.error("Signup error:", error);
+    }
   };
 
   return (
