@@ -1,5 +1,14 @@
 import { SERVICES, STORAGE } from '@/config/services';
 import { ActivityFeedResponse, Post, FriendRecommendationsResponse, FriendRecommendation, ViewProfileResponse, FollowUser } from '@/types/api';
+import { getAuthToken } from '@/utils/auth';
+
+const createHeaders = () => {
+  const token = getAuthToken();
+  return {
+    'Authorization': token ? `Bearer ${token}` : '',
+    'Content-Type': 'application/json',
+  };
+};
 
 export const getTimeDifference = (updatedAt: string): string => {
   const now = new Date();
@@ -20,7 +29,9 @@ export const getImageUrl = (imageGuid: string): string => {
 export const SocialService = {
   getActivityFeed: async (): Promise<Post[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.activityFeed}`);
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.activityFeed}`, {
+        headers: createHeaders(),
+      });
       if (!response.ok) throw new Error('Failed to fetch activity feed');
       
       const data: ActivityFeedResponse = await response.json();
@@ -33,7 +44,9 @@ export const SocialService = {
 
   getFriendRecommendations: async (): Promise<FriendRecommendation[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Recommendation/FriendRecommendations`);
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Recommendation/FriendRecommendations`, {
+        headers: createHeaders(),
+      });
       if (!response.ok) throw new Error('Failed to fetch friend recommendations');
       
       const data: FriendRecommendationsResponse = await response.json();
@@ -47,9 +60,7 @@ export const SocialService = {
   createPost: async (data: { content: string; visibility: number }): Promise<{ id: string }> => {
     const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Post/CreatePost`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: createHeaders(),
       body: JSON.stringify(data),
     });
 
@@ -61,8 +72,12 @@ export const SocialService = {
   },
 
   uploadPostImages: async (postId: string, formData: FormData): Promise<void> => {
+    const headers = createHeaders();
+    delete headers['Content-Type']; // Let the browser set the correct content type for FormData
+    
     const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Post/${postId}/uploadPostImages`, {
       method: 'PUT',
+      headers: headers,
       body: formData,
     });
 
@@ -73,7 +88,9 @@ export const SocialService = {
 
   viewProfile: async (id: string): Promise<ViewProfileResponse> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Profile/viewProfile/${id}`);
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Profile/viewProfile/${id}`, {
+        headers: createHeaders(),
+      });
       if (!response.ok) throw new Error('Failed to fetch profile');
       
       return response.json();
@@ -85,7 +102,9 @@ export const SocialService = {
 
   getFollowers: async (id: string): Promise<FollowUser[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/getFollowers/${id}`);
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/getFollowers/${id}`, {
+        headers: createHeaders(),
+      });
       if (!response.ok) throw new Error('Failed to fetch followers');
       
       return response.json();
@@ -97,7 +116,9 @@ export const SocialService = {
 
   getFollowing: async (id: string): Promise<FollowUser[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/getFollowing/${id}`);
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/getFollowing/${id}`, {
+        headers: createHeaders(),
+      });
       if (!response.ok) throw new Error('Failed to fetch following');
       
       return response.json();
@@ -110,6 +131,7 @@ export const SocialService = {
   followUser: async (id: string): Promise<void> => {
     const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/followUser/${id}`, {
       method: 'POST',
+      headers: createHeaders(),
     });
 
     if (!response.ok) {
@@ -120,6 +142,7 @@ export const SocialService = {
   unfollowUser: async (id: string): Promise<void> => {
     const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/unfollowUser/${id}`, {
       method: 'DELETE',
+      headers: createHeaders(),
     });
 
     if (!response.ok) {

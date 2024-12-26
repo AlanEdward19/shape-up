@@ -9,6 +9,7 @@ import Chat from "@/components/Chat";
 import Sidebar from "@/components/Sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SocialService, getTimeDifference, getImageUrl } from "@/services/api";
+import { setAuthData } from "@/utils/auth";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -16,20 +17,16 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Extrair o ID do token da URL após o redirecionamento do Azure AD B2C
+    // Extrair o token da URL após o redirecionamento do Azure AD B2C
     const hash = location.hash;
     if (hash && hash.includes('#id_token=')) {
       const token = hash.split('#id_token=')[1];
       if (token) {
-        // Salvar o ID do usuário no localStorage ou sessionStorage
+        // Salvar o token e extrair o ID do usuário
         const rememberMe = localStorage.getItem('rememberMe') === 'true';
-        if (rememberMe) {
-          localStorage.setItem('userId', token);
-        } else {
-          sessionStorage.setItem('userId', token);
-        }
+        setAuthData(token, rememberMe);
 
-        // Limpar a URL após salvar o ID
+        // Limpar a URL após salvar os dados
         navigate('/index', { replace: true });
         toast.success('Login realizado com sucesso!');
       }
