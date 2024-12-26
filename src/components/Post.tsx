@@ -57,6 +57,7 @@ const Post = ({ post }: PostProps) => {
 
   useEffect(() => {
     fetchReactions();
+    fetchComments();
   }, [post.id]);
 
   useEffect(() => {
