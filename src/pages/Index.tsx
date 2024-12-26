@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import CreatePost from "@/components/CreatePost";
 import Stories from "@/components/Stories";
 import Suggestions from "@/components/Suggestions";
@@ -5,31 +6,19 @@ import Post from "@/components/Post";
 import Chat from "@/components/Chat";
 import Sidebar from "@/components/Sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-const mockPosts = [
-  {
-    id: 1,
-    author: "João Silva",
-    content: "Hoje foi dia de treino pesado! 💪 Superando limites a cada dia.",
-    likes: 24,
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop"
-  },
-  {
-    id: 2,
-    author: "Maria Santos",
-    content: "Compartilhando minha nova dieta low carb! Quem mais está nessa jornada? 🥗",
-    likes: 15,
-  },
-  {
-    id: 3,
-    author: "Pedro Costa",
-    content: "Novo recorde pessoal no supino! 🏋️‍♂️ A consistência é a chave do sucesso.",
-    likes: 32,
-    image: "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?q=80&w=1000&auto=format&fit=crop"
-  },
-];
+import { SocialService, getTimeDifference, getImageUrl } from "@/services/api";
+import { toast } from "sonner";
 
 const Index = () => {
+  const { data: posts, isLoading, error } = useQuery({
+    queryKey: ['activityFeed'],
+    queryFn: SocialService.getActivityFeed,
+    onError: (error) => {
+      console.error('Failed to fetch posts:', error);
+      toast.error("Falha ao carregar os posts. Tente novamente mais tarde.");
+    }
+  });
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Sidebar />
@@ -40,15 +29,21 @@ const Index = () => {
           <Stories />
           <ScrollArea className="h-[calc(100vh-300px)]">
             <div className="space-y-6">
-              {mockPosts.map((post) => (
-                <Post
-                  key={post.id}
-                  author={post.author}
-                  content={post.content}
-                  likes={post.likes}
-                  image={post.image}
-                />
-              ))}
+              {isLoading ? (
+                <div className="text-center">Carregando posts...</div>
+              ) : error ? (
+                <div className="text-center text-red-500">Erro ao carregar posts</div>
+              ) : (
+                posts?.map((post, index) => (
+                  <Post
+                    key={index}
+                    author="Usuário" // This should come from the API
+                    content={post.content}
+                    likes={0} // This should come from the API
+                    image={post.images?.[0] ? getImageUrl(post.images[0]) : undefined}
+                  />
+                ))
+              )}
             </div>
           </ScrollArea>
         </div>
