@@ -1,8 +1,14 @@
+import { create } from "domain";
+
 export const SERVICES = {
   SOCIAL: {
-    baseUrl: 'https://api.social.example.com/v1',
+    baseUrl: import.meta.env.VITE_SOCIAL_API_BASE_URL,
     endpoints: {
-      activityFeed: '/ActivityFeed/BuildActivityFeed'
+      viewProfile: '/Profile/v1/ViewProfile/id',
+      activityFeed: '/ActivityFeed/v1/BuildActivityFeed',
+      friendRecommendations: '/Recommendation/v1/FriendRecommendations',
+      createPost: '/Post/v1/CreatePost',
+      uploadPostImages: '/Post/v1/id/UploadPostImages'
     }
   },
   NUTRITION: {

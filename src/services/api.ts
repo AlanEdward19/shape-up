@@ -44,7 +44,7 @@ export const SocialService = {
 
   getFriendRecommendations: async (): Promise<FriendRecommendation[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Recommendation/FriendRecommendations`, {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.friendRecommendations}`, {
         headers: createHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch friend recommendations');
@@ -58,7 +58,7 @@ export const SocialService = {
   },
 
   createPost: async (data: { content: string; visibility: number }): Promise<{ id: string }> => {
-    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Post/CreatePost`, {
+    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.createPost}`, {
       method: 'POST',
       headers: createHeaders(),
       body: JSON.stringify(data),
@@ -75,7 +75,7 @@ export const SocialService = {
     const headers = createHeaders();
     delete headers['Content-Type']; // Let the browser set the correct content type for FormData
     
-    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Post/${postId}/uploadPostImages`, {
+    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.uploadPostImages.replace('id', postId)}`, {
       method: 'PUT',
       headers: headers,
       body: formData,
@@ -88,7 +88,7 @@ export const SocialService = {
 
   viewProfile: async (id: string): Promise<ViewProfileResponse> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Profile/viewProfile/${id}`, {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfile.replace('id', id)}`, {
         headers: createHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch profile');

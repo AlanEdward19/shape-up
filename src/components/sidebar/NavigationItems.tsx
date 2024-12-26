@@ -4,7 +4,7 @@ import SidebarItem from "./SidebarItem";
 
 const NavigationItems = () => {
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+  const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
 
   const items = [
     { icon: Home, label: "Início", onClick: () => navigate('/index') },
