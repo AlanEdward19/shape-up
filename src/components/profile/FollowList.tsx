@@ -9,6 +9,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 interface FollowListProps {
   users?: FollowUser[];
@@ -39,6 +47,10 @@ const FollowList = ({
     setItemsPerPage(value);
     onRowsChange(value);
   };
+
+  const totalPages = Math.ceil(totalUsers / Number(itemsPerPage));
+  const hasNextPage = currentPage < totalPages;
+  const hasPreviousPage = currentPage > 1;
 
   return (
     <div className="space-y-4">
@@ -82,6 +94,42 @@ const FollowList = ({
           ))}
         </div>
       </ScrollArea>
+
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            {hasPreviousPage && (
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => onPageChange(currentPage - 1)}
+                  className="cursor-pointer"
+                />
+              </PaginationItem>
+            )}
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={() => onPageChange(page)}
+                  isActive={currentPage === page}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            {hasNextPage && (
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => onPageChange(currentPage + 1)}
+                  className="cursor-pointer"
+                />
+              </PaginationItem>
+            )}
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 };

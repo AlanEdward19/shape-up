@@ -17,8 +17,12 @@ const Profile = () => {
   const [showFollowing, setShowFollowing] = useState(false);
   const currentUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const isOwnProfile = currentUserId === id;
-  const [itemsPerPage, setItemsPerPage] = useState("10");
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Separate pagination states for followers and following
+  const [followersPage, setFollowersPage] = useState(1);
+  const [followersPerPage, setFollowersPerPage] = useState("10");
+  const [followingPage, setFollowingPage] = useState(1);
+  const [followingPerPage, setFollowingPerPage] = useState("10");
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', id],
@@ -32,8 +36,8 @@ const Profile = () => {
   });
 
   const { data: followers, isLoading: isLoadingFollowers } = useQuery({
-    queryKey: ['followers', id, currentPage, itemsPerPage],
-    queryFn: () => SocialService.getFollowers(id!, currentPage, Number(itemsPerPage)),
+    queryKey: ['followers', id, followersPage, followersPerPage],
+    queryFn: () => SocialService.getFollowers(id!, followersPage, Number(followersPerPage)),
     enabled: showFollowers,
     meta: {
       onError: (error: Error) => {
@@ -44,8 +48,8 @@ const Profile = () => {
   });
 
   const { data: following, isLoading: isLoadingFollowing } = useQuery({
-    queryKey: ['following', id, currentPage, itemsPerPage],
-    queryFn: () => SocialService.getFollowing(id!, currentPage, Number(itemsPerPage)),
+    queryKey: ['following', id, followingPage, followingPerPage],
+    queryFn: () => SocialService.getFollowing(id!, followingPage, Number(followingPerPage)),
     enabled: showFollowing,
     meta: {
       onError: (error: Error) => {
@@ -95,13 +99,22 @@ const Profile = () => {
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  const handleFollowersPageChange = (page: number) => {
+    setFollowersPage(page);
   };
 
-  const handleRowsChange = (rows: string) => {
-    setItemsPerPage(rows);
-    setCurrentPage(1);
+  const handleFollowersRowsChange = (rows: string) => {
+    setFollowersPerPage(rows);
+    setFollowersPage(1);
+  };
+
+  const handleFollowingPageChange = (page: number) => {
+    setFollowingPage(page);
+  };
+
+  const handleFollowingRowsChange = (rows: string) => {
+    setFollowingPerPage(rows);
+    setFollowingPage(1);
   };
 
   if (isLoading) {
@@ -157,9 +170,9 @@ const Profile = () => {
                 users={followers}
                 isLoading={isLoadingFollowers}
                 title="Seguidores"
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                onRowsChange={handleRowsChange}
+                currentPage={followersPage}
+                onPageChange={handleFollowersPageChange}
+                onRowsChange={handleFollowersRowsChange}
                 totalUsers={profile.followers}
               />
             </DialogContent>
@@ -174,9 +187,9 @@ const Profile = () => {
                 users={following}
                 isLoading={isLoadingFollowing}
                 title="Seguindo"
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                onRowsChange={handleRowsChange}
+                currentPage={followingPage}
+                onPageChange={handleFollowingPageChange}
+                onRowsChange={handleFollowingRowsChange}
                 totalUsers={profile.following}
               />
             </DialogContent>
