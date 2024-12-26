@@ -102,7 +102,7 @@ export const SocialService = {
 
   getFollowers: async (id: string): Promise<FollowUser[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/getFollowers/${id}`, {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowers.replace('id', id)}`, {
         headers: createHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch followers');
@@ -116,7 +116,7 @@ export const SocialService = {
 
   getFollowing: async (id: string): Promise<FollowUser[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/getFollowing/${id}`, {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowing.replace('id', id)}`, {
         headers: createHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch following');

@@ -8,7 +8,9 @@ export const SERVICES = {
       activityFeed: '/ActivityFeed/v1/BuildActivityFeed',
       friendRecommendations: '/Recommendation/v1/FriendRecommendations',
       createPost: '/Post/v1/CreatePost',
-      uploadPostImages: '/Post/v1/id/UploadPostImages'
+      uploadPostImages: '/Post/v1/id/UploadPostImages',
+      getFollowers: '/Follow/v1/GetFollowers/id',
+      getFollowing: '/Follow/v1/GetFollowing/id',
     }
   },
   NUTRITION: {
