@@ -1,11 +1,15 @@
 import { Settings, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { clearAuthConfig } from "@/utils/auth";
+import { toast } from "sonner";
 import SidebarItem from "./SidebarItem";
 
 const BottomItems = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    clearAuthConfig();
+    toast.success("Logout realizado com sucesso!");
     navigate("/login");
   };
 

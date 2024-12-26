@@ -3,16 +3,30 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { signIn } from "@/utils/auth";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt with:", { email, password });
-    navigate("/index");
+    try {
+      const result = await signIn(email, password, rememberMe);
+      if (result.success) {
+        toast.success("Login realizado com sucesso!");
+        navigate("/index");
+      } else {
+        toast.error("Erro ao fazer login");
+      }
+    } catch (error) {
+      toast.error("Erro ao fazer login");
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -48,7 +62,20 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              <div className="text-right">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Lembrar-me
+                  </label>
+                </div>
                 <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                   Esqueceu sua senha?
                 </Link>
