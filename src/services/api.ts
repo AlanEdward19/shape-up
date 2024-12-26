@@ -100,9 +100,14 @@ export const SocialService = {
     }
   },
 
-  getFollowers: async (id: string): Promise<FollowUser[]> => {
+  getFollowers: async (id: string, page: number = 1, rows: number = 10): Promise<FollowUser[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowers.replace('id', id)}`, {
+      const endpoint = SERVICES.SOCIAL.endpoints.getFollowers
+        .replace('id', id)
+        .replace('{page}', page.toString())
+        .replace('{rows}', rows.toString());
+      
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${endpoint}`, {
         headers: createHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch followers');
@@ -114,9 +119,14 @@ export const SocialService = {
     }
   },
 
-  getFollowing: async (id: string): Promise<FollowUser[]> => {
+  getFollowing: async (id: string, page: number = 1, rows: number = 10): Promise<FollowUser[]> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowing.replace('id', id)}`, {
+      const endpoint = SERVICES.SOCIAL.endpoints.getFollowing
+        .replace('id', id)
+        .replace('{page}', page.toString())
+        .replace('{rows}', rows.toString());
+      
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${endpoint}`, {
         headers: createHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch following');

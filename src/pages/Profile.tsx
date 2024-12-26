@@ -17,6 +17,8 @@ const Profile = () => {
   const [showFollowing, setShowFollowing] = useState(false);
   const currentUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const isOwnProfile = currentUserId === id;
+  const [itemsPerPage, setItemsPerPage] = useState("10");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', id],
@@ -30,8 +32,8 @@ const Profile = () => {
   });
 
   const { data: followers, isLoading: isLoadingFollowers } = useQuery({
-    queryKey: ['followers', id],
-    queryFn: () => SocialService.getFollowers(id!),
+    queryKey: ['followers', id, currentPage, itemsPerPage],
+    queryFn: () => SocialService.getFollowers(id!, currentPage, Number(itemsPerPage)),
     enabled: showFollowers,
     meta: {
       onError: (error: Error) => {
@@ -42,8 +44,8 @@ const Profile = () => {
   });
 
   const { data: following, isLoading: isLoadingFollowing } = useQuery({
-    queryKey: ['following', id],
-    queryFn: () => SocialService.getFollowing(id!),
+    queryKey: ['following', id, currentPage, itemsPerPage],
+    queryFn: () => SocialService.getFollowing(id!, currentPage, Number(itemsPerPage)),
     enabled: showFollowing,
     meta: {
       onError: (error: Error) => {

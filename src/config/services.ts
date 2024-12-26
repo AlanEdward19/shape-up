@@ -9,8 +9,8 @@ export const SERVICES = {
       friendRecommendations: '/Recommendation/v1/FriendRecommendations',
       createPost: '/Post/v1/CreatePost',
       uploadPostImages: '/Post/v1/id/UploadPostImages',
-      getFollowers: '/Follow/v1/GetFollowers/id',
-      getFollowing: '/Follow/v1/GetFollowing/id',
+      getFollowers: '/Follow/v1/GetFollowers/id?Page={page}&Rows={rows}',
+      getFollowing: '/Follow/v1/GetFollowing/id?Page={page}&Rows={rows}',
     }
   },
   NUTRITION: {

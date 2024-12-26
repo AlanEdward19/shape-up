@@ -25,9 +25,6 @@ const FollowList = ({ users, isLoading, title }: FollowListProps) => {
   if (!users) return null;
 
   const totalUsers = users.length;
-  const startIndex = (currentPage - 1) * Number(itemsPerPage);
-  const endIndex = startIndex + Number(itemsPerPage);
-  const currentUsers = users.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-4">
@@ -56,7 +53,7 @@ const FollowList = ({ users, isLoading, title }: FollowListProps) => {
 
       <ScrollArea className="h-[300px]">
         <div className="space-y-4">
-          {currentUsers.map((user) => (
+          {users.map((user) => (
             <div
               key={user.profileId}
               className="flex items-center space-x-4 p-2 hover:bg-secondary/50 rounded-lg cursor-pointer"
