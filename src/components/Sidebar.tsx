@@ -1,54 +1,72 @@
-import { Home, Users, Dumbbell, Leaf, User, CreditCard, Settings, LogOut } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-const navItems = [
-  { icon: Home, label: "Início", href: "/" },
-  { icon: Users, label: "Amigos", href: "/friends" },
-  { icon: Dumbbell, label: "Treinos", href: "/workouts" },
-  { icon: Leaf, label: "Nutrição", href: "/nutrition" },
-  { icon: User, label: "Perfil", href: "/profile" },
-  { icon: CreditCard, label: "Planos", href: "/plans" },
-];
-
-const bottomItems = [
-  { icon: Settings, label: "Opções", href: "/settings" },
-  { icon: LogOut, label: "Sair", href: "/logout" },
-];
+import { Home, Search, Bell, MessageCircle, UserCircle, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const Sidebar = () => {
-  return (
-    <div className="fixed left-0 top-0 h-full w-20 bg-secondary flex flex-col items-center py-6">
-      <div className="text-xl font-bold text-primary mb-8">SU</div>
-      
-      <nav className="flex-1 flex flex-col items-center gap-6">
-        {navItems.map((item) => (
-          <a
-            key={item.label}
-            href={item.href}
-            className="text-muted-foreground hover:text-primary transition-colors group"
-          >
-            <div className="flex flex-col items-center gap-1">
-              <item.icon className="w-6 h-6" />
-              <span className="text-xs">{item.label}</span>
-            </div>
-          </a>
-        ))}
-      </nav>
+  const navigate = useNavigate();
 
-      <div className="mt-auto flex flex-col items-center gap-6">
-        {bottomItems.map((item) => (
-          <a
-            key={item.label}
-            href={item.href}
-            className="text-muted-foreground hover:text-primary transition-colors"
-          >
-            <div className="flex flex-col items-center gap-1">
-              <item.icon className="w-6 h-6" />
-              <span className="text-xs">{item.label}</span>
-            </div>
-          </a>
-        ))}
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
+  return (
+    <div className="fixed left-0 top-0 h-screen w-20 bg-secondary flex flex-col items-center justify-between py-4">
+      <div className="space-y-4">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Home className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Início</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Search className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Pesquisar</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Bell className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Notificações</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MessageCircle className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Mensagens</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <UserCircle className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Perfil</TooltipContent>
+        </Tooltip>
       </div>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <LogOut className="h-6 w-6" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">Sair</TooltipContent>
+      </Tooltip>
     </div>
   );
 };
