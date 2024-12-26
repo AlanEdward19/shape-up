@@ -28,7 +28,7 @@ const Chat = () => {
         <div className="w-3 h-3 bg-green-500 rounded-full absolute top-0 right-0" />
         <div className="w-10 h-10 rounded-full bg-primary/20" />
       </PopoverTrigger>
-      <PopoverContent className="w-80 h-[500px] p-0" side="top" align="end">
+      <PopoverContent className="w-80 h-[500px] p-0 bg-background border border-border" side="top" align="end">
         <div className="p-4 space-y-4">
           <h2 className="text-lg font-semibold">Conversando</h2>
           <div className="relative">
