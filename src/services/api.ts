@@ -105,6 +105,38 @@ export const SocialService = {
       console.error('Error fetching following:', error);
       throw error;
     }
+  },
+
+  followUser: async (id: string): Promise<void> => {
+    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/followUser/${id}`, {
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to follow user');
+    }
+  },
+
+  unfollowUser: async (id: string): Promise<void> => {
+    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/unfollowUser/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to unfollow user');
+    }
+  },
+
+  getCurrentUserFollowData: async (id: string): Promise<{
+    followers: FollowUser[];
+    following: FollowUser[];
+  }> => {
+    const [followers, following] = await Promise.all([
+      SocialService.getFollowers(id),
+      SocialService.getFollowing(id)
+    ]);
+
+    return { followers, following };
   }
 };
 
