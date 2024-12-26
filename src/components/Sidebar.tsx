@@ -11,12 +11,13 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-20 bg-secondary flex flex-col items-center justify-between py-4">
-      <div className="space-y-4">
+    <div className="fixed left-0 top-0 h-screen w-24 bg-secondary flex flex-col items-center justify-between py-6">
+      <div className="flex flex-col items-center space-y-6">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Home className="h-6 w-6 text-primary" />
+            <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
+              <Home className="h-8 w-8 text-primary" />
+              <span className="text-xs text-primary">Início</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Início</TooltipContent>
@@ -24,8 +25,9 @@ const Sidebar = () => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Users className="h-6 w-6 text-primary" />
+            <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
+              <Users className="h-8 w-8 text-primary" />
+              <span className="text-xs text-primary">Amigos</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Amigos</TooltipContent>
@@ -33,8 +35,9 @@ const Sidebar = () => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Dumbbell className="h-6 w-6 text-primary" />
+            <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
+              <Dumbbell className="h-8 w-8 text-primary" />
+              <span className="text-xs text-primary">Treinos</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Treinos</TooltipContent>
@@ -42,8 +45,9 @@ const Sidebar = () => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Utensils className="h-6 w-6 text-primary" />
+            <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
+              <Utensils className="h-8 w-8 text-primary" />
+              <span className="text-xs text-primary">Nutrição</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Nutrição</TooltipContent>
@@ -51,8 +55,9 @@ const Sidebar = () => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <UserCircle className="h-6 w-6 text-primary" />
+            <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
+              <UserCircle className="h-8 w-8 text-primary" />
+              <span className="text-xs text-primary">Perfil</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Perfil</TooltipContent>
@@ -60,19 +65,21 @@ const Sidebar = () => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <ListTodo className="h-6 w-6 text-primary" />
+            <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
+              <ListTodo className="h-8 w-8 text-primary" />
+              <span className="text-xs text-primary">Planos</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Planos</TooltipContent>
         </Tooltip>
       </div>
 
-      <div className="space-y-4">
+      <div className="flex flex-col items-center space-y-6">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-6 w-6 text-primary" />
+            <Button variant="ghost" size="icon" className="flex flex-col items-center gap-1 h-auto p-2">
+              <Settings className="h-8 w-8 text-primary" />
+              <span className="text-xs text-primary">Opções</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Opções</TooltipContent>
@@ -80,8 +87,14 @@ const Sidebar = () => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="h-6 w-6 text-primary" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleLogout}
+              className="flex flex-col items-center gap-1 h-auto p-2"
+            >
+              <LogOut className="h-8 w-8 text-primary" />
+              <span className="text-xs text-primary">Sair</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Sair</TooltipContent>
