@@ -15,50 +15,27 @@ export interface Post {
   publisherFirstName: string;
   publisherLastName: string;
   publisherImageUrl: string;
-  updatedAt: string;
+  visibility: Visibility;
   images: string[];
   content: string;
-  visibility: Visibility;
 }
 
 export interface ActivityFeedResponse {
   posts: Post[];
 }
 
-export interface Profile {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  city: string;
-  state: string;
-  country: string;
-  imageUrl: string;
-  bio: string;
-  birthDate: string;
-  gender: Gender;
-  followers: number;
-  following: number;
-}
-
-export interface FriendRecommendation {
-  profile: Profile;
-  mutualFriends: number;
-}
-
-export interface FriendRecommendationsResponse {
-  recommendations: FriendRecommendation[];
-}
-
-export interface CreatePostResponse {
-  id: string;
-}
-
-export interface ViewProfileResponse extends Profile {}
-
-export interface FollowUser {
-  firstName: string;
-  lastName: string;
+export interface PostReaction {
   profileId: string;
-  imageUrl: string;
+  createdAt: string;
+  reactionType: string;
+  postId: string;
+  id: string;
+}
+
+export interface PostComment {
+  profileId: string;
+  postId: string;
+  createdAt: string;
+  content: string;
+  id: string;
 }

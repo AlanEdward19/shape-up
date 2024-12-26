@@ -1,5 +1,14 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { ActivityFeedResponse, Post, FriendRecommendationsResponse, FriendRecommendation, ViewProfileResponse, FollowUser } from '@/types/api';
+import { 
+  ActivityFeedResponse, 
+  Post, 
+  PostReaction, 
+  PostComment,
+  FriendRecommendationsResponse, 
+  FriendRecommendation, 
+  ViewProfileResponse, 
+  FollowUser 
+} from '@/types/api';
 import { getAuthToken } from '@/utils/auth';
 
 const createHeaders = () => {
@@ -170,6 +179,82 @@ export const SocialService = {
     ]);
 
     return { followers, following };
+  },
+
+  getPostReactions: async (postId: string): Promise<PostReaction[]> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getPostReactions.replace('id', postId)}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch post reactions');
+    return response.json();
+  },
+
+  reactToPost: async (postId: string, reactionType: number): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.reactToPost.replace('id', postId)}`,
+      {
+        method: 'PUT',
+        headers: createHeaders(),
+        body: JSON.stringify({ reactionType })
+      }
+    );
+    if (!response.ok) throw new Error('Failed to react to post');
+  },
+
+  deleteReaction: async (postId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.deleteReaction.replace('id', postId)}`,
+      {
+        method: 'DELETE',
+        headers: createHeaders()
+      }
+    );
+    if (!response.ok) throw new Error('Failed to delete reaction');
+  },
+
+  getComments: async (postId: string): Promise<PostComment[]> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getComments.replace('id', postId)}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch comments');
+    return response.json();
+  },
+
+  commentOnPost: async (postId: string, content: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.commentOnPost.replace('id', postId)}`,
+      {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({ content })
+      }
+    );
+    if (!response.ok) throw new Error('Failed to comment on post');
+  },
+
+  deleteComment: async (commentId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.deleteComment.replace('id', commentId)}`,
+      {
+        method: 'DELETE',
+        headers: createHeaders()
+      }
+    );
+    if (!response.ok) throw new Error('Failed to delete comment');
+  },
+
+  editComment: async (commentId: string, content: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.editComment.replace('id', commentId)}`,
+      {
+        method: 'PUT',
+        headers: createHeaders(),
+        body: JSON.stringify({ content })
+      }
+    );
+    if (!response.ok) throw new Error('Failed to edit comment');
   }
 };
 
