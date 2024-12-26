@@ -54,10 +54,12 @@ const Index = () => {
                 <div className="text-center">Carregando posts...</div>
               ) : error ? (
                 <div className="text-center text-red-500">Erro ao carregar posts</div>
-              ) : (
-                posts?.map((post) => (
+              ) : posts && posts.length > 0 ? (
+                posts.map((post) => (
                   <Post key={post.id} post={post} />
                 ))
+              ) : (
+                <div className="text-center">Nenhum post encontrado</div>
               )}
             </div>
           </ScrollArea>
