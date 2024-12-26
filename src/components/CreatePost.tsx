@@ -50,12 +50,16 @@ const CreatePost = () => {
         </div>
         
         <Select value={visibility} onValueChange={setVisibility}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px] bg-muted border-none text-foreground">
             <SelectValue placeholder="Visibilidade" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-secondary border-muted">
             {visibilityOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem 
+                key={option.value} 
+                value={option.value}
+                className="hover:bg-muted focus:bg-muted"
+              >
                 <div className="flex items-center gap-2">
                   <option.icon className="w-4 h-4" />
                   <span>{option.label}</span>
