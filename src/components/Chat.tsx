@@ -1,7 +1,11 @@
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
-import { Drawer, DrawerContent, DrawerTrigger } from "./ui/drawer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface ChatMessage {
   id: number;
@@ -19,12 +23,12 @@ const messages: ChatMessage[] = [
 
 const Chat = () => {
   return (
-    <Drawer>
-      <DrawerTrigger className="fixed bottom-4 left-24 bg-secondary p-3 rounded-full hover:bg-primary/20 transition-colors">
+    <Popover>
+      <PopoverTrigger className="fixed bottom-4 right-4 bg-secondary p-3 rounded-full hover:bg-primary/20 transition-colors">
         <div className="w-3 h-3 bg-green-500 rounded-full absolute top-0 right-0" />
         <div className="w-10 h-10 rounded-full bg-primary/20" />
-      </DrawerTrigger>
-      <DrawerContent className="h-[80vh]">
+      </PopoverTrigger>
+      <PopoverContent className="w-80 h-[500px] p-0" side="top" align="end">
         <div className="p-4 space-y-4">
           <h2 className="text-lg font-semibold">Conversando</h2>
           <div className="relative">
@@ -34,7 +38,7 @@ const Chat = () => {
               className="pl-10 bg-secondary border-none"
             />
           </div>
-          <ScrollArea className="h-[calc(80vh-120px)]">
+          <ScrollArea className="h-[400px]">
             <div className="space-y-2">
               {messages.map((msg) => (
                 <div
@@ -52,8 +56,8 @@ const Chat = () => {
             </div>
           </ScrollArea>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </PopoverContent>
+    </Popover>
   );
 };
 
