@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft } from "lucide-react";
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [showVerificationCode, setShowVerificationCode] = useState(false);
@@ -37,95 +40,112 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Criar Conta</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+    <div className="min-h-screen flex bg-background">
+      {/* Left side - Branding */}
+      <div className="hidden lg:flex lg:flex-1 flex-col justify-center p-12 bg-secondary">
+        <h1 className="text-4xl font-bold text-white mb-4">ShapeUp</h1>
+        <p className="text-lg text-gray-300">
+          Transforme sua rotina, conecte-se com sua evolução. Nutrição, treinos e
+          amizades em um só lugar.
+        </p>
+      </div>
+
+      {/* Right side - Signup Form */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <Card className="w-full max-w-md bg-transparent border-0 shadow-none">
+          <CardContent className="space-y-6">
+            <div className="flex items-center">
               <Button
-                type="button"
-                onClick={handleSendVerificationCode}
-                className="w-full"
-                disabled={showVerificationCode}
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="absolute top-4 left-4"
               >
-                Enviar código de confirmação
+                <ArrowLeft className="h-6 w-6" />
               </Button>
+              <h2 className="text-2xl font-semibold text-center flex-1">Criar Conta</h2>
             </div>
-
-            {showVerificationCode && (
-              <Input
-                type="text"
-                placeholder="Código de verificação"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-              />
-            )}
-
-            {showVerificationCode && (
-              <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
                 <Input
-                  placeholder="Primeiro Nome"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
-                <Input
-                  placeholder="Sobrenome"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-                <Input
-                  type="password"
-                  placeholder="Senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <Input
-                  type="password"
-                  placeholder="Confirmar Senha"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                <Select value={country} onValueChange={setCountry}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="País" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="brasil">Brasil</SelectItem>
-                    <SelectItem value="portugal">Portugal</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  placeholder="Cidade"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
-                <Select value={state} onValueChange={setState}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sp">São Paulo</SelectItem>
-                    <SelectItem value="rj">Rio de Janeiro</SelectItem>
-                    <SelectItem value="mg">Minas Gerais</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button type="submit" className="w-full">
-                  Criar conta
+                <Button
+                  type="button"
+                  onClick={handleSendVerificationCode}
+                  className="w-full"
+                  disabled={showVerificationCode}
+                >
+                  Enviar código de confirmação
                 </Button>
               </div>
-            )}
-          </form>
-        </CardContent>
-      </Card>
+
+              {showVerificationCode && (
+                <div className="space-y-4">
+                  <Input
+                    type="text"
+                    placeholder="Código de verificação"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                  />
+                  <Input
+                    placeholder="Primeiro Nome"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                  <Input
+                    placeholder="Sobrenome"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Confirmar Senha"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <Select value={country} onValueChange={setCountry}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="País" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="brasil">Brasil</SelectItem>
+                      <SelectItem value="portugal">Portugal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    placeholder="Cidade"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                  <Select value={state} onValueChange={setState}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sp">São Paulo</SelectItem>
+                      <SelectItem value="rj">Rio de Janeiro</SelectItem>
+                      <SelectItem value="mg">Minas Gerais</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button type="submit" className="w-full">
+                    Criar conta
+                  </Button>
+                </div>
+              )}
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
