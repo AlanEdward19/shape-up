@@ -139,10 +139,16 @@ const Login = () => {
               Continuar com Email
             </Button>
           </form>
-          <div className="text-center">
+          <div className="space-y-4 text-center">
             <Button variant="link" onClick={() => navigate("/forgot-password")}>
               Esqueceu sua senha?
             </Button>
+            <div className="space-y-2">
+              <p className="text-muted-foreground">Não possui uma conta?</p>
+              <Button variant="outline" className="w-full" onClick={() => navigate("/signup")}>
+                Criar conta
+              </Button>
+            </div>
           </div>
         </div>
       </div>
