@@ -43,8 +43,9 @@ export const SocialService = {
       });
       if (!response.ok) throw new Error('Failed to fetch activity feed');
       
-      const data: ActivityFeedResponse = await response.json();
-      return data.posts;
+      const data: Post[] = await response.json();
+
+      return data;
     } catch (error) {
       console.error('Error fetching activity feed:', error);
       throw error;

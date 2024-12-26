@@ -20,10 +20,6 @@ export interface Post {
   content: string;
 }
 
-export interface ActivityFeedResponse {
-  posts: Post[];
-}
-
 export interface PostReaction {
   profileId: string;
   createdAt: string;
