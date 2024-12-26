@@ -1,5 +1,5 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { ActivityFeedResponse, Post, FriendRecommendationsResponse, FriendRecommendation, ViewProfileResponse } from '@/types/api';
+import { ActivityFeedResponse, Post, FriendRecommendationsResponse, FriendRecommendation, ViewProfileResponse, FollowUser } from '@/types/api';
 
 export const getTimeDifference = (updatedAt: string): string => {
   const now = new Date();
@@ -79,6 +79,30 @@ export const SocialService = {
       return response.json();
     } catch (error) {
       console.error('Error fetching profile:', error);
+      throw error;
+    }
+  },
+
+  getFollowers: async (id: string): Promise<FollowUser[]> => {
+    try {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/getFollowers/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch followers');
+      
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching followers:', error);
+      throw error;
+    }
+  },
+
+  getFollowing: async (id: string): Promise<FollowUser[]> => {
+    try {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/getFollowing/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch following');
+      
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching following:', error);
       throw error;
     }
   }

@@ -32,6 +32,8 @@ export interface Profile {
   bio: string;
   birthDate: string;
   gender: Gender;
+  followers: number;
+  following: number;
 }
 
 export interface FriendRecommendation {
@@ -48,3 +50,10 @@ export interface CreatePostResponse {
 }
 
 export interface ViewProfileResponse extends Profile {}
+
+export interface FollowUser {
+  firstName: string;
+  lastName: string;
+  profileId: string;
+  imageUrl: string;
+}

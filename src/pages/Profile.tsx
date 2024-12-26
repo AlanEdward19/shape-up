@@ -1,14 +1,20 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
-import { Gender } from "@/types/api";
+import { Gender, FollowUser } from "@/types/api";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 
 const Profile = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
+
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', id],
     queryFn: () => SocialService.viewProfile(id!),
@@ -16,6 +22,30 @@ const Profile = () => {
       onError: (error: Error) => {
         console.error('Failed to fetch profile:', error);
         toast.error("Falha ao carregar perfil. Tente novamente mais tarde.");
+      }
+    }
+  });
+
+  const { data: followers, isLoading: isLoadingFollowers } = useQuery({
+    queryKey: ['followers', id],
+    queryFn: () => SocialService.getFollowers(id!),
+    enabled: showFollowers,
+    meta: {
+      onError: (error: Error) => {
+        console.error('Failed to fetch followers:', error);
+        toast.error("Falha ao carregar seguidores. Tente novamente mais tarde.");
+      }
+    }
+  });
+
+  const { data: following, isLoading: isLoadingFollowing } = useQuery({
+    queryKey: ['following', id],
+    queryFn: () => SocialService.getFollowing(id!),
+    enabled: showFollowing,
+    meta: {
+      onError: (error: Error) => {
+        console.error('Failed to fetch following:', error);
+        toast.error("Falha ao carregar seguindo. Tente novamente mais tarde.");
       }
     }
   });
@@ -28,6 +58,32 @@ const Profile = () => {
     return <div>Perfil não encontrado</div>;
   }
 
+  const FollowList = ({ users, isLoading, title }: { users?: FollowUser[], isLoading: boolean, title: string }) => {
+    if (isLoading) return <div>Carregando...</div>;
+    if (!users) return null;
+
+    return (
+      <div className="space-y-4">
+        {users.map((user) => (
+          <div
+            key={user.profileId}
+            className="flex items-center space-x-4 p-2 hover:bg-secondary/50 rounded-lg cursor-pointer"
+            onClick={() => navigate(`/profile/${user.profileId}`)}
+          >
+            <img
+              src={user.imageUrl}
+              alt={`${user.firstName} ${user.lastName}`}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <span className="font-medium">
+              {user.firstName} {user.lastName}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto p-6">
       <Card>
@@ -37,11 +93,27 @@ const Profile = () => {
             alt={`${profile.firstName} ${profile.lastName}`}
             className="w-24 h-24 rounded-full object-cover"
           />
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold">
               {profile.firstName} {profile.lastName}
             </h1>
             <p className="text-muted-foreground">{profile.email}</p>
+            <div className="flex space-x-6 mt-4">
+              <button
+                onClick={() => setShowFollowers(true)}
+                className="hover:text-primary transition-colors"
+              >
+                <span className="font-bold">{profile.followers}</span>{" "}
+                <span className="text-muted-foreground">seguidores</span>
+              </button>
+              <button
+                onClick={() => setShowFollowing(true)}
+                className="hover:text-primary transition-colors"
+              >
+                <span className="font-bold">{profile.following}</span>{" "}
+                <span className="text-muted-foreground">seguindo</span>
+              </button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -85,6 +157,32 @@ const Profile = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showFollowers} onOpenChange={setShowFollowers}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Seguidores</DialogTitle>
+          </DialogHeader>
+          <FollowList
+            users={followers}
+            isLoading={isLoadingFollowers}
+            title="Seguidores"
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showFollowing} onOpenChange={setShowFollowing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Seguindo</DialogTitle>
+          </DialogHeader>
+          <FollowList
+            users={following}
+            isLoading={isLoadingFollowing}
+            title="Seguindo"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
