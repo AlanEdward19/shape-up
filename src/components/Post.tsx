@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MessageCircle, Share2, X, Edit2 } from "lucide-react";
+import { MessageCircle, Share2, X, Edit2, Image, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Post as PostType, PostReaction, PostComment } from "@/types/api";
@@ -7,6 +7,7 @@ import { SocialService } from "@/services/api";
 import { getUserId } from "@/utils/auth";
 import { toast } from "sonner";
 import PostReactions from "./PostReactions";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Post = ({ post }: { post: PostType }) => {
   const [showComments, setShowComments] = useState(false);
@@ -176,8 +177,19 @@ const Post = ({ post }: { post: PostType }) => {
 
           <div className="space-y-2">
             {comments.map((comment) => (
-              <div key={comment.id} className="flex items-start gap-2 p-2 rounded-lg bg-background">
+              <div key={comment.id} className="flex items-start gap-3 p-3 rounded-lg bg-background">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={comment.profileImageUrl} alt={`${comment.profileFirstName} ${comment.profileLastName}`} />
+                  <AvatarFallback>
+                    <User className="w-4 h-4" />
+                  </AvatarFallback>
+                </Avatar>
+                
                 <div className="flex-1">
+                  <div className="font-medium text-sm mb-1">
+                    {`${comment.profileFirstName} ${comment.profileLastName}`}
+                  </div>
+                  
                   {editingComment === comment.id ? (
                     <div className="flex gap-2">
                       <Input
@@ -197,7 +209,10 @@ const Post = ({ post }: { post: PostType }) => {
                       </Button>
                     </div>
                   ) : (
-                    <p>{comment.content}</p>
+                    <div className="flex items-center gap-2">
+                      <p>{comment.content}</p>
+                      <Image className="w-4 h-4 text-muted-foreground" />
+                    </div>
                   )}
                 </div>
                 
