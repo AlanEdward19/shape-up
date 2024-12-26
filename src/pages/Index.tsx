@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import CreatePost from "@/components/CreatePost";
 import Stories from "@/components/Stories";
 import Suggestions from "@/components/Suggestions";
@@ -10,6 +12,29 @@ import { SocialService, getTimeDifference, getImageUrl } from "@/services/api";
 import { toast } from "sonner";
 
 const Index = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Extrair o ID do usuário da URL após o redirecionamento do Azure AD B2C
+    const params = new URLSearchParams(location.search);
+    const userId = params.get('userId');
+
+    if (userId) {
+      // Salvar o ID do usuário no localStorage ou sessionStorage
+      const rememberMe = localStorage.getItem('rememberMe') === 'true';
+      if (rememberMe) {
+        localStorage.setItem('userId', userId);
+      } else {
+        sessionStorage.setItem('userId', userId);
+      }
+
+      // Limpar a URL após salvar o ID
+      navigate('/index', { replace: true });
+      toast.success('Login realizado com sucesso!');
+    }
+  }, [location, navigate]);
+
   const { data: posts, isLoading, error } = useQuery({
     queryKey: ['activityFeed'],
     queryFn: SocialService.getActivityFeed,
