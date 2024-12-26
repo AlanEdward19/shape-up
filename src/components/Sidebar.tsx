@@ -1,4 +1,4 @@
-import { Home, Search, Bell, MessageCircle, UserCircle, LogOut } from "lucide-react";
+import { Users, Dumbbell, Utensils, UserCircle, ListTodo, Home, Settings, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -25,28 +25,28 @@ const Sidebar = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Search className="h-6 w-6" />
+              <Users className="h-6 w-6" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right">Pesquisar</TooltipContent>
+          <TooltipContent side="right">Amigos</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <Bell className="h-6 w-6" />
+              <Dumbbell className="h-6 w-6" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right">Notificações</TooltipContent>
+          <TooltipContent side="right">Treinos</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon">
-              <MessageCircle className="h-6 w-6" />
+              <Utensils className="h-6 w-6" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right">Mensagens</TooltipContent>
+          <TooltipContent side="right">Nutrição</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -56,6 +56,24 @@ const Sidebar = () => {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Perfil</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <ListTodo className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Planos</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Settings className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Opções</TooltipContent>
         </Tooltip>
       </div>
 
