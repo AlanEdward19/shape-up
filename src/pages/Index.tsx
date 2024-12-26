@@ -3,6 +3,7 @@ import Stories from "@/components/Stories";
 import Suggestions from "@/components/Suggestions";
 import Post from "@/components/Post";
 import Chat from "@/components/Chat";
+import Sidebar from "@/components/Sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const mockPosts = [
