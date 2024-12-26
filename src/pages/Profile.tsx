@@ -95,6 +95,15 @@ const Profile = () => {
     }
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleRowsChange = (rows: string) => {
+    setItemsPerPage(rows);
+    setCurrentPage(1);
+  };
+
   if (isLoading) {
     return (
       <div className="flex">
@@ -148,6 +157,10 @@ const Profile = () => {
                 users={followers}
                 isLoading={isLoadingFollowers}
                 title="Seguidores"
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                onRowsChange={handleRowsChange}
+                totalUsers={profile.followers}
               />
             </DialogContent>
           </Dialog>
@@ -161,6 +174,10 @@ const Profile = () => {
                 users={following}
                 isLoading={isLoadingFollowing}
                 title="Seguindo"
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                onRowsChange={handleRowsChange}
+                totalUsers={profile.following}
               />
             </DialogContent>
           </Dialog>

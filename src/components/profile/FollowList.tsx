@@ -14,17 +14,31 @@ interface FollowListProps {
   users?: FollowUser[];
   isLoading: boolean;
   title: string;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+  onRowsChange: (rows: string) => void;
+  totalUsers: number;
 }
 
-const FollowList = ({ users, isLoading, title }: FollowListProps) => {
+const FollowList = ({ 
+  users, 
+  isLoading, 
+  title,
+  currentPage,
+  onPageChange,
+  onRowsChange,
+  totalUsers 
+}: FollowListProps) => {
   const navigate = useNavigate();
   const [itemsPerPage, setItemsPerPage] = useState("10");
-  const [currentPage, setCurrentPage] = useState(1);
 
   if (isLoading) return <div>Carregando...</div>;
   if (!users) return null;
 
-  const totalUsers = users.length;
+  const handleRowsChange = (value: string) => {
+    setItemsPerPage(value);
+    onRowsChange(value);
+  };
 
   return (
     <div className="space-y-4">
@@ -34,10 +48,7 @@ const FollowList = ({ users, isLoading, title }: FollowListProps) => {
         </div>
         <Select
           value={itemsPerPage}
-          onValueChange={(value) => {
-            setItemsPerPage(value);
-            setCurrentPage(1);
-          }}
+          onValueChange={handleRowsChange}
         >
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Linhas por página" />
