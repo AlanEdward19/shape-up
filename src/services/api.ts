@@ -82,7 +82,7 @@ export const SocialService = {
 
   uploadPostImages: async (postId: string, formData: FormData): Promise<void> => {
     const headers = createHeaders();
-    delete headers['Content-Type']; // Let the browser set the correct content type for FormData
+    delete headers['Content-Type'];
     
     const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.uploadPostImages.replace('id', postId)}`, {
       method: 'PUT',

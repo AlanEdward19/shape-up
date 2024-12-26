@@ -39,3 +39,32 @@ export interface PostComment {
   content: string;
   id: string;
 }
+
+export interface ViewProfileResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  imageUrl: string;
+  followers: number;
+  following: number;
+}
+
+export interface FollowUser {
+  profileId: string;
+  firstName: string;
+  lastName: string;
+  imageUrl: string;
+}
+
+export interface FriendRecommendation {
+  profileId: string;
+  firstName: string;
+  lastName: string;
+  imageUrl: string;
+  mutualFriends: number;
+}
+
+export interface FriendRecommendationsResponse {
+  recommendations: FriendRecommendation[];
+}
