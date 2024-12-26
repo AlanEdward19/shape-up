@@ -13,9 +13,11 @@ const Index = () => {
   const { data: posts, isLoading, error } = useQuery({
     queryKey: ['activityFeed'],
     queryFn: SocialService.getActivityFeed,
-    onError: (error) => {
-      console.error('Failed to fetch posts:', error);
-      toast.error("Falha ao carregar os posts. Tente novamente mais tarde.");
+    meta: {
+      onError: (error: Error) => {
+        console.error('Failed to fetch posts:', error);
+        toast.error("Falha ao carregar os posts. Tente novamente mais tarde.");
+      }
     }
   });
 
