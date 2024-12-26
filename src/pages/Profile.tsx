@@ -1,18 +1,16 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
-import { Gender, FollowUser } from "@/types/api";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfileInfo from "@/components/profile/ProfileInfo";
+import FollowList from "@/components/profile/FollowList";
 
 const Profile = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
@@ -102,114 +100,22 @@ const Profile = () => {
     return <div>Perfil não encontrado</div>;
   }
 
-  const FollowList = ({ users, isLoading, title }: { users?: FollowUser[], isLoading: boolean, title: string }) => {
-    if (isLoading) return <div>Carregando...</div>;
-    if (!users) return null;
-
-    return (
-      <div className="space-y-4">
-        {users.map((user) => (
-          <div
-            key={user.profileId}
-            className="flex items-center space-x-4 p-2 hover:bg-secondary/50 rounded-lg cursor-pointer"
-            onClick={() => navigate(`/profile/${user.profileId}`)}
-          >
-            <img
-              src={user.imageUrl}
-              alt={`${user.firstName} ${user.lastName}`}
-              className="w-12 h-12 rounded-full object-cover"
-            />
-            <span className="font-medium">
-              {user.firstName} {user.lastName}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="container mx-auto p-6">
       <Card>
-        <CardHeader className="flex flex-row items-center gap-4">
-          <img
-            src={profile.imageUrl}
-            alt={`${profile.firstName} ${profile.lastName}`}
-            className="w-24 h-24 rounded-full object-cover"
+        <CardHeader>
+          <ProfileHeader
+            profile={profile}
+            isOwnProfile={isOwnProfile}
+            isFollowing={isFollowing}
+            onFollowAction={handleFollowAction}
+            onShowFollowers={() => setShowFollowers(true)}
+            onShowFollowing={() => setShowFollowing(true)}
+            followActionPending={followMutation.isPending || unfollowMutation.isPending}
           />
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">
-                {profile.firstName} {profile.lastName}
-              </h1>
-              {!isOwnProfile && (
-                <Button
-                  onClick={handleFollowAction}
-                  variant={isFollowing ? "destructive" : "default"}
-                  disabled={followMutation.isPending || unfollowMutation.isPending}
-                >
-                  {isFollowing ? "Deixar de Seguir" : "Seguir"}
-                </Button>
-              )}
-            </div>
-            <p className="text-muted-foreground">{profile.email}</p>
-            <div className="flex space-x-6 mt-4">
-              <button
-                onClick={() => setShowFollowers(true)}
-                className="hover:text-primary transition-colors"
-              >
-                <span className="font-bold">{profile.followers}</span>{" "}
-                <span className="text-muted-foreground">seguidores</span>
-              </button>
-              <button
-                onClick={() => setShowFollowing(true)}
-                className="hover:text-primary transition-colors"
-              >
-                <span className="font-bold">{profile.following}</span>{" "}
-                <span className="text-muted-foreground">seguindo</span>
-              </button>
-            </div>
-          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h2 className="font-semibold mb-2">Sobre</h2>
-            <p>{profile.bio}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h2 className="font-semibold mb-2">Informações Pessoais</h2>
-              <ul className="space-y-2">
-                <li>
-                  <span className="text-muted-foreground">Gênero:</span>{" "}
-                  {profile.gender === Gender.Male ? "Masculino" : "Feminino"}
-                </li>
-                <li>
-                  <span className="text-muted-foreground">Data de Nascimento:</span>{" "}
-                  {format(new Date(profile.birthDate), "dd 'de' MMMM 'de' yyyy", {
-                    locale: ptBR,
-                  })}
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h2 className="font-semibold mb-2">Localização</h2>
-              <ul className="space-y-2">
-                <li>
-                  <span className="text-muted-foreground">Cidade:</span>{" "}
-                  {profile.city}
-                </li>
-                <li>
-                  <span className="text-muted-foreground">Estado:</span>{" "}
-                  {profile.state}
-                </li>
-                <li>
-                  <span className="text-muted-foreground">País:</span>{" "}
-                  {profile.country}
-                </li>
-              </ul>
-            </div>
-          </div>
+        <CardContent>
+          <ProfileInfo profile={profile} />
         </CardContent>
       </Card>
 
