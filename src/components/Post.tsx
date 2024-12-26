@@ -116,7 +116,10 @@ const Post = ({ post }: { post: PostType }) => {
   return (
     <div className="bg-secondary rounded-lg p-4 mb-4">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-primary/20"></div>
+      <Avatar className="w-10 h-10">
+                  <AvatarImage src={post.publisherImageUrl} alt={`${post.publisherFirstName} ${post.publisherLastName}`} />
+                  <AvatarFallback>{post.publisherFirstName[0]}{post.publisherLastName[0]}</AvatarFallback>
+                </Avatar>
         <div className="flex-1">
           <h3 className="font-medium">{`${post.publisherFirstName} ${post.publisherLastName}`}</h3>
         </div>
@@ -180,9 +183,7 @@ const Post = ({ post }: { post: PostType }) => {
               <div key={comment.id} className="flex items-start gap-3 p-3 rounded-lg bg-background">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={comment.profileImageUrl} alt={`${comment.profileFirstName} ${comment.profileLastName}`} />
-                  <AvatarFallback>
-                    <User className="w-4 h-4" />
-                  </AvatarFallback>
+                  <AvatarFallback>{comment.profileFirstName[0]}{comment.profileLastName[0]}</AvatarFallback>
                 </Avatar>
                 
                 <div className="flex-1">

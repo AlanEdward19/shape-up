@@ -148,7 +148,7 @@ export const SocialService = {
   },
 
   followUser: async (id: string): Promise<void> => {
-    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/followUser/${id}`, {
+    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.followUser.replace('id', id)}`, {
       method: 'POST',
       headers: createHeaders(),
     });
@@ -159,7 +159,7 @@ export const SocialService = {
   },
 
   unfollowUser: async (id: string): Promise<void> => {
-    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/unfollowUser/${id}`, {
+    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.unfollowUser.replace('id', id)}`, {
       method: 'DELETE',
       headers: createHeaders(),
     });
