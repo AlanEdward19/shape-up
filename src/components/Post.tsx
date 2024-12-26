@@ -1,32 +1,14 @@
 import { useState, useEffect } from "react";
-import { MessageCircle, Heart, Share2, X, Edit2 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { MessageCircle, Share2, X, Edit2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Post as PostType, PostReaction, PostComment } from "@/types/api";
 import { SocialService } from "@/services/api";
 import { getUserId } from "@/utils/auth";
 import { toast } from "sonner";
+import PostReactions from "./PostReactions";
 
-const reactions = [
-  { name: "Like", emoji: "👍" },
-  { name: "Love", emoji: "❤️" },
-  { name: "Haha", emoji: "😄" },
-  { name: "Wow", emoji: "😮" },
-  { name: "Sad", emoji: "😢" },
-  { name: "Angry", emoji: "😠" },
-];
-
-interface PostProps {
-  post: PostType;
-}
-
-const Post = ({ post }: PostProps) => {
+const Post = ({ post }: { post: PostType }) => {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<PostComment[]>([]);
   const [reactions, setReactions] = useState<PostReaction[]>([]);
@@ -66,18 +48,18 @@ const Post = ({ post }: PostProps) => {
     }
   }, [showComments, post.id]);
 
-  const handleReaction = async (reactionType: string) => {
+  const handleReaction = async (reactionType: number) => {
     try {
       const userReaction = reactions.find(r => r.profileId === userId);
       
       if (userReaction) {
-        if (userReaction.reactionType === reactionType) {
+        if (userReaction.reactionType === reactionType.toString()) {
           await SocialService.deleteReaction(post.id);
         } else {
-          await SocialService.reactToPost(post.id, reactions.indexOf(reactionType));
+          await SocialService.reactToPost(post.id, reactionType);
         }
       } else {
-        await SocialService.reactToPost(post.id, reactions.indexOf(reactionType));
+        await SocialService.reactToPost(post.id, reactionType);
       }
       
       await fetchReactions();
@@ -128,16 +110,6 @@ const Post = ({ post }: PostProps) => {
     }
   };
 
-  const groupedReactions = reactions.reduce((acc, reaction) => {
-    const count = acc[reaction.reactionType] || 0;
-    acc[reaction.reactionType] = count + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const sortedReactions = Object.entries(groupedReactions)
-    .sort(([, a], [, b]) => b - a)
-    .map(([type]) => type);
-
   return (
     <div className="bg-secondary rounded-lg p-4 mb-4">
       <div className="flex items-center gap-3 mb-4">
@@ -163,29 +135,11 @@ const Post = ({ post }: PostProps) => {
       )}
       
       <div className="flex justify-between items-center text-muted-foreground">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 hover:text-primary transition-colors">
-              <span className="text-xl">
-                {reactions.find(r => r.profileId === userId)?.reactionType || "👍"}
-              </span>
-              <span>{reactions.length}</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <div className="grid grid-cols-6 gap-2 p-2">
-              {sortedReactions.map((reactionType) => (
-                <DropdownMenuItem
-                  key={reactionType}
-                  onClick={() => handleReaction(reactionType)}
-                  className="cursor-pointer text-xl text-center hover:bg-primary/20"
-                >
-                  {reactions.find(r => r.reactionType === reactionType)?.reactionType || "👍"}
-                </DropdownMenuItem>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <PostReactions
+          reactions={reactions}
+          userReaction={reactions.find(r => r.profileId === userId)}
+          onReact={handleReaction}
+        />
 
         <button 
           className="flex items-center gap-2 hover:text-primary transition-colors"
