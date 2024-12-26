@@ -8,6 +8,7 @@ import { useState } from "react";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileInfo from "@/components/profile/ProfileInfo";
 import FollowList from "@/components/profile/FollowList";
+import Sidebar from "@/components/Sidebar";
 
 const Profile = () => {
   const { id } = useParams();
@@ -93,57 +94,76 @@ const Profile = () => {
   };
 
   if (isLoading) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 ml-20">
+          <div>Carregando...</div>
+        </div>
+      </div>
+    );
   }
 
   if (!profile) {
-    return <div>Perfil não encontrado</div>;
+    return (
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 ml-20">
+          <div>Perfil não encontrado</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <ProfileHeader
-            profile={profile}
-            isOwnProfile={isOwnProfile}
-            isFollowing={isFollowing}
-            onFollowAction={handleFollowAction}
-            onShowFollowers={() => setShowFollowers(true)}
-            onShowFollowing={() => setShowFollowing(true)}
-            followActionPending={followMutation.isPending || unfollowMutation.isPending}
-          />
-        </CardHeader>
-        <CardContent>
-          <ProfileInfo profile={profile} />
-        </CardContent>
-      </Card>
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1 ml-20">
+        <div className="container mx-auto p-6">
+          <Card>
+            <CardHeader>
+              <ProfileHeader
+                profile={profile}
+                isOwnProfile={isOwnProfile}
+                isFollowing={isFollowing}
+                onFollowAction={handleFollowAction}
+                onShowFollowers={() => setShowFollowers(true)}
+                onShowFollowing={() => setShowFollowing(true)}
+                followActionPending={followMutation.isPending || unfollowMutation.isPending}
+              />
+            </CardHeader>
+            <CardContent>
+              <ProfileInfo profile={profile} />
+            </CardContent>
+          </Card>
 
-      <Dialog open={showFollowers} onOpenChange={setShowFollowers}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Seguidores</DialogTitle>
-          </DialogHeader>
-          <FollowList
-            users={followers}
-            isLoading={isLoadingFollowers}
-            title="Seguidores"
-          />
-        </DialogContent>
-      </Dialog>
+          <Dialog open={showFollowers} onOpenChange={setShowFollowers}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Seguidores</DialogTitle>
+              </DialogHeader>
+              <FollowList
+                users={followers}
+                isLoading={isLoadingFollowers}
+                title="Seguidores"
+              />
+            </DialogContent>
+          </Dialog>
 
-      <Dialog open={showFollowing} onOpenChange={setShowFollowing}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Seguindo</DialogTitle>
-          </DialogHeader>
-          <FollowList
-            users={following}
-            isLoading={isLoadingFollowing}
-            title="Seguindo"
-          />
-        </DialogContent>
-      </Dialog>
+          <Dialog open={showFollowing} onOpenChange={setShowFollowing}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Seguindo</DialogTitle>
+              </DialogHeader>
+              <FollowList
+                users={following}
+                isLoading={isLoadingFollowing}
+                title="Seguindo"
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
     </div>
   );
 };
