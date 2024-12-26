@@ -1,3 +1,4 @@
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { FollowUser } from "@/types/api";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -82,11 +83,10 @@ const FollowList = ({
               className="flex items-center space-x-4 p-2 hover:bg-secondary/50 rounded-lg cursor-pointer"
               onClick={() => navigate(`/profile/${user.profileId}`)}
             >
-              <img
-                src={user.imageUrl}
-                alt={`${user.firstName} ${user.lastName}`}
-                className="w-12 h-12 rounded-full object-cover"
-              />
+              <Avatar className="w-10 h-10">
+                  <AvatarImage src={user.imageUrl} alt={`${user.firstName} ${user.lastName}`} />
+                  <AvatarFallback>{user.firstName[0]}{user.lastName[0]}</AvatarFallback>
+                </Avatar>
               <span className="font-medium">
                 {user.firstName} {user.lastName}
               </span>
