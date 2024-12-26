@@ -12,6 +12,9 @@ export enum Gender {
 export interface Post {
   id: string;
   publisherId: string;
+  publisherFirstName: string;
+  publisherLastName: string;
+  publisherImageUrl: string;
   updatedAt: string;
   images: string[];
   content: string;
