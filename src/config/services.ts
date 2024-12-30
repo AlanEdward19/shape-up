@@ -21,10 +21,16 @@ export const SERVICES = {
     }
   },
   NUTRITION: {
-    baseUrl: 'https://api.nutrition.example.com/v1'
+    baseUrl: import.meta.env.VITE_NUTRITION_API_BASE_URL
   },
   TRAINING: {
-    baseUrl: 'https://api.training.example.com/v1'
+    baseUrl: import.meta.env.VITE_TRAINING_API_BASE_URL
+  },
+  CHAT: {
+    baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL
+  },
+  NOTIFICATION: {
+    baseUrl: import.meta.env.VITE_NOTIFICATION_API_BASE_URL
   }
 };
 
