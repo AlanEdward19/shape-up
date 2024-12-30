@@ -30,7 +30,8 @@ export const SERVICES = {
     baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL
   },
   NOTIFICATION: {
-    baseUrl: import.meta.env.VITE_NOTIFICATION_API_BASE_URL
+    baseUrl: import.meta.env.VITE_NOTIFICATION_API_BASE_URL,
+    hubUrl: '/notifications'
   }
 };
 
