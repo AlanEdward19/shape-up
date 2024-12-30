@@ -1,22 +1,25 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { SERVICES } from "@/config/services";
 import { useNotificationStore } from "@/stores/useNotificationStore";
-import { Notification } from "@/types/notifications";
-import { getUserId } from "@/utils/auth";
+import { Notification, NotificationType } from "@/types/notifications";
+import { getAuthToken } from "@/utils/auth";
+import { SocialService } from "./api";
 
 class NotificationService {
   private connection: HubConnection | null = null;
 
   async startConnection(): Promise<void> {
     try {
-      const userId = getUserId();
+      const token = getAuthToken();
       
-      if (!userId) {
-        throw new Error("No user ID found");
+      if (!token) {
+        throw new Error("No authentication token found");
       }
 
       this.connection = new HubConnectionBuilder()
-        .withUrl(`${SERVICES.NOTIFICATION.baseUrl}${SERVICES.NOTIFICATION.hubUrl}?userId=${userId}`)
+        .withUrl(`${SERVICES.NOTIFICATION.baseUrl}${SERVICES.NOTIFICATION.hubUrl}`, {
+          accessTokenFactory: () => token
+        })
         .withAutomaticReconnect()
         .build();
 
@@ -30,12 +33,69 @@ class NotificationService {
     }
   }
 
+  private async handleNotification(type: string): Promise<void> {
+    const { addNotification } = useNotificationStore.getState();
+    let notification: Notification;
+
+    switch (type) {
+      case NotificationType.Message:
+        // Messages are handled separately in the chat
+        const messageData = await fetch(`${SERVICES.CHAT.baseUrl}/messages/latest`).then(res => res.json());
+        notification = {
+          id: messageData.id,
+          type: NotificationType.Message,
+          message: `Nova mensagem de ${messageData.senderName}`,
+          createdAt: new Date().toISOString(),
+          read: false,
+          data: {
+            senderId: messageData.senderId
+          }
+        };
+        break;
+
+      case NotificationType.NewFollower:
+        const followerData = await SocialService.getLatestFollower();
+        notification = {
+          id: followerData.id,
+          type: NotificationType.NewFollower,
+          message: `${followerData.firstName} ${followerData.lastName} começou a te seguir`,
+          createdAt: new Date().toISOString(),
+          read: false,
+          data: {
+            senderId: followerData.profileId
+          }
+        };
+        break;
+
+      case NotificationType.Comment:
+        const commentData = await SocialService.getLatestComment();
+        notification = {
+          id: commentData.id,
+          type: NotificationType.Comment,
+          message: `${commentData.profileFirstName} comentou em seu post`,
+          createdAt: new Date().toISOString(),
+          read: false,
+          data: {
+            senderId: commentData.profileId,
+            postId: commentData.postId,
+            commentId: commentData.id
+          }
+        };
+        break;
+
+      default:
+        console.warn(`Unhandled notification type: ${type}`);
+        return;
+    }
+
+    addNotification(notification);
+  }
+
   private setupNotificationHandlers(): void {
     if (!this.connection) return;
 
-    this.connection.on("ReceiveNotification", (notification: Notification) => {
-      const { addNotification } = useNotificationStore.getState();
-      addNotification(notification);
+    this.connection.on("ReceiveNotification", (type: string) => {
+      this.handleNotification(type);
     });
   }
 

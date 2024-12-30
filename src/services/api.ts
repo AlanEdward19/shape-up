@@ -255,7 +255,33 @@ export const SocialService = {
       }
     );
     if (!response.ok) throw new Error('Failed to edit comment');
-  }
+  },
+
+  getLatestFollower: async (): Promise<FollowUser> => {
+    try {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/v1/GetLatestFollower`, {
+        headers: createHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to fetch latest follower');
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching latest follower:', error);
+      throw error;
+    }
+  },
+
+  getLatestComment: async (): Promise<PostComment> => {
+    try {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Post/v1/GetLatestComment`, {
+        headers: createHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to fetch latest comment');
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching latest comment:', error);
+      throw error;
+    }
+  },
 };
 
 export const NutritionService = {
