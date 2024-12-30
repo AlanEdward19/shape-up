@@ -3,6 +3,7 @@ export const SERVICES = {
     baseUrl: import.meta.env.VITE_SOCIAL_API_BASE_URL,
     endpoints: {
       viewProfile: '/Profile/v1/ViewProfile/id',
+      viewProfileSimplified: '/Profile/v1/viewProfile/id/simplified',
       activityFeed: '/ActivityFeed/v1/BuildActivityFeed',
       friendRecommendations: '/Recommendation/v1/FriendRecommendations',
       createPost: '/Post/v1/CreatePost',
@@ -29,7 +30,10 @@ export const SERVICES = {
     baseUrl: import.meta.env.VITE_TRAINING_API_BASE_URL
   },
   CHAT: {
-    baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL
+    baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL,
+    endpoints: {
+      getRecentMessages: '/Chat/v1/messages/getRecentMessages'
+    }
   },
   NOTIFICATION: {
     baseUrl: import.meta.env.VITE_NOTIFICATION_API_BASE_URL,

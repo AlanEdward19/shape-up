@@ -8,23 +8,46 @@ import {
 } from "@/components/ui/popover";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { NotificationType } from "@/types/notifications";
-
-interface ChatMessage {
-  id: number;
-  profileName: string;
-  message: string;
-  time: string;
-}
-
-const messages: ChatMessage[] = [
-  { id: 1, profileName: "Perfil 1", message: "Mensagem", time: "Ago 1" },
-  { id: 2, profileName: "Perfil 2", message: "Mensagem", time: "Ago 1" },
-  { id: 3, profileName: "Perfil 3", message: "Mensagem", time: "Ago 1" },
-  { id: 4, profileName: "Perfil 4", message: "Mensagem", time: "Ago 1" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { ChatService, decryptMessage } from "@/services/chatService";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 const Chat = () => {
   const { unreadMessages, markAllAsRead } = useNotificationStore();
+
+  const { data: messages = [] } = useQuery({
+    queryKey: ["recentMessages"],
+    queryFn: ChatService.getRecentMessages,
+    meta: {
+      onError: () => {
+        toast.error("Falha ao carregar mensagens recentes");
+      }
+    }
+  });
+
+  const { data: profiles = {} } = useQuery({
+    queryKey: ["chatProfiles", messages],
+    queryFn: async () => {
+      const uniqueProfileIds = [...new Set(messages.map(m => m.senderId))];
+      const profiles: Record<string, { firstName: string; lastName: string }> = {};
+      
+      await Promise.all(
+        uniqueProfileIds.map(async (id) => {
+          const profile = await ChatService.getProfileSimplified(id);
+          profiles[id] = profile;
+        })
+      );
+      
+      return profiles;
+    },
+    enabled: messages.length > 0,
+    meta: {
+      onError: () => {
+        toast.error("Falha ao carregar informações dos perfis");
+      }
+    }
+  });
 
   const handleOpen = () => {
     markAllAsRead(NotificationType.Message);
@@ -58,19 +81,28 @@ const Chat = () => {
           </div>
           <ScrollArea className="h-[400px]">
             <div className="space-y-2">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="flex items-center gap-3 p-2 hover:bg-secondary rounded-lg cursor-pointer"
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary/20" />
-                  <div className="flex-1">
-                    <h4 className="font-medium">{msg.profileName}</h4>
-                    <p className="text-sm text-muted-foreground">{msg.message}</p>
+              {messages.map((msg) => {
+                const profile = profiles[msg.senderId];
+                return (
+                  <div
+                    key={msg.id}
+                    className="flex items-center gap-3 p-2 hover:bg-secondary rounded-lg cursor-pointer"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/20" />
+                    <div className="flex-1">
+                      <h4 className="font-medium">
+                        {profile ? `${profile.firstName} ${profile.lastName}` : "Carregando..."}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {decryptMessage(msg.encryptedMessage)}
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(msg.timestamp), "HH:mm")}
+                    </span>
                   </div>
-                  <span className="text-xs text-muted-foreground">{msg.time}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </ScrollArea>
         </div>

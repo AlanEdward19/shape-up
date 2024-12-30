@@ -39,24 +39,19 @@ class NotificationService {
 
     switch (type) {
       case NotificationType.Message:
-        // Messages are handled separately in the chat
-        const messageData = await fetch(`${SERVICES.CHAT.baseUrl}/messages/latest`).then(res => res.json());
         notification = {
-          id: messageData.id,
+          id: crypto.randomUUID(),
           type: NotificationType.Message,
-          message: `Nova mensagem de ${messageData.senderName}`,
+          message: "Nova mensagem recebida",
           createdAt: new Date().toISOString(),
-          read: false,
-          data: {
-            senderId: messageData.senderId
-          }
+          read: false
         };
         break;
 
       case NotificationType.NewFollower:
         const followerData = await SocialService.getLatestFollower();
         notification = {
-          id: followerData.profileId, // Fixed: using profileId instead of id
+          id: followerData.profileId,
           type: NotificationType.NewFollower,
           message: `${followerData.firstName} ${followerData.lastName} começou a te seguir`,
           createdAt: new Date().toISOString(),
