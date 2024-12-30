@@ -36,6 +36,7 @@ const Chat = () => {
 
       const profileId = getUserId();
       const uniqueProfileIds = [...new Set(messages.map(m => m.senderId).concat(messages.map(m => m.receiverId)).filter(id => id !== profileId))];
+      
       const profiles: Record<string, { firstName: string; lastName: string }> = {};
       
       await Promise.all(
@@ -95,7 +96,7 @@ const Chat = () => {
           <ScrollArea className="h-[400px]">
             <div className="space-y-2">
               {messages.map((msg) => {
-                const profile = profiles[msg.senderId];
+                const profile = profiles[msg.receiverId || msg.senderId];
                 return (
                   <div
                     key={msg.id}
