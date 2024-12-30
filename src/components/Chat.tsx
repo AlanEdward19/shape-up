@@ -6,6 +6,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useNotificationStore } from "@/stores/useNotificationStore";
+import { NotificationType } from "@/types/notifications";
 
 interface ChatMessage {
   id: number;
@@ -22,13 +24,29 @@ const messages: ChatMessage[] = [
 ];
 
 const Chat = () => {
+  const { unreadMessages, markAllAsRead } = useNotificationStore();
+
+  const handleOpen = () => {
+    markAllAsRead(NotificationType.Message);
+  };
+
   return (
     <Popover>
       <PopoverTrigger className="fixed bottom-4 right-4 bg-secondary p-3 rounded-full hover:bg-primary/20 transition-colors">
         <div className="w-3 h-3 bg-green-500 rounded-full absolute top-0 right-0" />
+        {unreadMessages > 0 && (
+          <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+            {unreadMessages}
+          </div>
+        )}
         <div className="w-10 h-10 rounded-full bg-primary/20" />
       </PopoverTrigger>
-      <PopoverContent className="w-80 h-[500px] p-0 bg-background border border-border" side="top" align="end">
+      <PopoverContent 
+        className="w-80 h-[500px] p-0 bg-background border border-border" 
+        side="top" 
+        align="end"
+        onOpenAutoFocus={handleOpen}
+      >
         <div className="p-4 space-y-4">
           <h2 className="text-lg font-semibold">Conversando</h2>
           <div className="relative">
