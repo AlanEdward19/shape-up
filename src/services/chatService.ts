@@ -15,7 +15,9 @@ export const decryptMessage = (encryptedMessage: string): string => {
     padding: CryptoJS.pad.Pkcs7
   });
 
-  return decrypted.toString(CryptoJS.enc.Utf8);
+  const decryptedString = decrypted.toString(CryptoJS.enc.Utf8).split(' ')[0];
+
+  return decryptedString;
 };
 
 const encryptMessage = (message: string): string => {
