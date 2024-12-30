@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
+import { notificationService } from "@/services/notificationService";
 import { toast } from "sonner";
 import { Facebook, Mail } from "lucide-react";
 
@@ -28,6 +29,9 @@ const Login = () => {
       } else {
         sessionStorage.setItem("userId", userId);
       }
+
+      // Start SignalR connection
+      await notificationService.startConnection();
 
       // Prefetch follow data
       await queryClient.prefetchQuery({
