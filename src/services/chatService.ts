@@ -33,6 +33,20 @@ export const ChatService = {
     }
   },
 
+  getMessages: async (profileId: string, page: number = 1): Promise<ChatMessage[]> => {
+    try {
+      const response = await fetch(
+        `${SERVICES.CHAT.baseUrl}/Chat/v1/messages/getMessages/${profileId}?page=${page}`,
+        { headers: createHeaders() }
+      );
+      if (!response.ok) throw new Error("Failed to fetch messages");
+      return response.json();
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      throw error;
+    }
+  },
+
   getProfileSimplified: async (profileId: string): Promise<SimplifiedProfile> => {
     try {
       const response = await fetch(

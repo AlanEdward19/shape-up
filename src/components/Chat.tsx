@@ -14,10 +14,12 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { getUserId } from "@/utils/auth";
 import { useState } from "react";
+import ChatConversation from "./chat/ChatConversation";
 
 const Chat = () => {
   const { unreadMessages, markAllAsRead } = useNotificationStore();
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<string | null>(null);
 
   const { data: messages = [] } = useQuery({
     queryKey: ["recentMessages"],
@@ -33,7 +35,6 @@ const Chat = () => {
   const { data: profiles = {} } = useQuery({
     queryKey: ["chatProfiles", messages],
     queryFn: async () => {
-
       const profileId = getUserId();
       const uniqueProfileIds = [...new Set(messages.map(m => m.senderId).concat(messages.map(m => m.receiverId)).filter(id => id !== profileId))];
       
@@ -63,6 +64,7 @@ const Chat = () => {
 
   const handleClose = () => {
     setIsOpen(false);
+    setSelectedChat(null);
   };
 
   return (
@@ -84,42 +86,53 @@ const Chat = () => {
         side="top" 
         align="end"
       >
-        <div className="p-4 space-y-4">
-          <h2 className="text-lg font-semibold">Conversando</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Procurar Mensagens"
-              className="pl-10 bg-secondary border-none"
-            />
-          </div>
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-2">
-              {messages.map((msg) => {
-                const profile = profiles[msg.receiverId || msg.senderId];
-                return (
-                  <div
-                    key={msg.id}
-                    className="flex items-center gap-3 p-2 hover:bg-secondary rounded-lg cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-primary/20" />
-                    <div className="flex-1">
-                      <h4 className="font-medium">
-                        {profile ? `${profile.firstName} ${profile.lastName}` : "Carregando..."}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        {decryptMessage(msg.encryptedMessage)}
-                      </p>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {format(new Date(msg.timestamp), "HH:mm")}
-                    </span>
-                  </div>
-                );
-              })}
+        {selectedChat ? (
+          <ChatConversation
+            profileId={selectedChat}
+            firstName={profiles[selectedChat]?.firstName || ""}
+            lastName={profiles[selectedChat]?.lastName || ""}
+          />
+        ) : (
+          <div className="p-4 space-y-4">
+            <h2 className="text-lg font-semibold">Conversando</h2>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Procurar Mensagens"
+                className="pl-10 bg-secondary border-none"
+              />
             </div>
-          </ScrollArea>
-        </div>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-2">
+                {messages.map((msg) => {
+                  const profile = profiles[msg.receiverId || msg.senderId];
+                  const chatId = msg.receiverId === getUserId() ? msg.senderId : msg.receiverId;
+                  
+                  return (
+                    <div
+                      key={msg.id}
+                      className="flex items-center gap-3 p-2 hover:bg-secondary rounded-lg cursor-pointer"
+                      onClick={() => setSelectedChat(chatId)}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-primary/20" />
+                      <div className="flex-1">
+                        <h4 className="font-medium">
+                          {profile ? `${profile.firstName} ${profile.lastName}` : "Carregando..."}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {decryptMessage(msg.encryptedMessage)}
+                        </p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(msg.timestamp), "HH:mm")}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );
