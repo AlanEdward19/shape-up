@@ -56,7 +56,7 @@ class NotificationService {
       case NotificationType.NewFollower:
         const followerData = await SocialService.getLatestFollower();
         notification = {
-          id: followerData.id,
+          id: followerData.profileId, // Fixed: using profileId instead of id
           type: NotificationType.NewFollower,
           message: `${followerData.firstName} ${followerData.lastName} começou a te seguir`,
           createdAt: new Date().toISOString(),

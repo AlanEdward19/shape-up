@@ -18,6 +18,8 @@ export const SERVICES = {
       commentOnPost: '/Post/v1/id/commentOnPost',
       deleteComment: '/Post/v1/id/deleteComment',
       editComment: '/Post/v1/id/editComment',
+      getLatestFollower: '/Follow/v1/GetLatestFollower',
+      getLatestComment: '/Post/v1/GetLatestComment',
     }
   },
   NUTRITION: {

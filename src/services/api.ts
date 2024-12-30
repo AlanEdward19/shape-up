@@ -259,7 +259,7 @@ export const SocialService = {
 
   getLatestFollower: async (): Promise<FollowUser> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Follow/v1/GetLatestFollower`, {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestFollower}`, {
         headers: createHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch latest follower');
@@ -272,7 +272,7 @@ export const SocialService = {
 
   getLatestComment: async (): Promise<PostComment> => {
     try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}/Post/v1/GetLatestComment`, {
+      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestComment}`, {
         headers: createHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch latest comment');
