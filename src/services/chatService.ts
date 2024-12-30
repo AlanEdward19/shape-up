@@ -1,10 +1,21 @@
 import { SERVICES } from "@/config/services";
 import { ChatMessage, SimplifiedProfile } from "@/types/chat";
 import { createHeaders } from "./api";
+import CryptoJS from 'crypto-js';
+
+const _encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || '';
+const InitializationVector = CryptoJS.enc.Hex.parse('00000000000000000000000000000000');
 
 export const decryptMessage = (encryptedMessage: string): string => {
-  // This will be implemented later
-  return encryptedMessage;
+  const key = CryptoJS.SHA256(_encryptionKey);
+
+  const decrypted = CryptoJS.AES.decrypt(encryptedMessage, key, {
+    iv: InitializationVector,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  });
+
+  return decrypted.toString(CryptoJS.enc.Utf8);
 };
 
 export const ChatService = {

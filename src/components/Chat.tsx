@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChatService, decryptMessage } from "@/services/chatService";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { getUserId } from "@/utils/auth";
 
 const Chat = () => {
   const { unreadMessages, markAllAsRead } = useNotificationStore();
@@ -29,7 +30,9 @@ const Chat = () => {
   const { data: profiles = {} } = useQuery({
     queryKey: ["chatProfiles", messages],
     queryFn: async () => {
-      const uniqueProfileIds = [...new Set(messages.map(m => m.senderId))];
+
+      const profileId = getUserId();
+      const uniqueProfileIds = [...new Set(messages.map(m => m.senderId).concat(messages.map(m => m.receiverId)).filter(id => id !== profileId))];
       const profiles: Record<string, { firstName: string; lastName: string }> = {};
       
       await Promise.all(
