@@ -21,6 +21,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
       return lastPage.length === 0 ? undefined : allPages.length + 1;
     },
     initialPageParam: 1,
+    refetchInterval: 3000, // Refetch every 3 seconds
     meta: {
       onError: () => {
         toast.error("Falha ao carregar mensagens");
