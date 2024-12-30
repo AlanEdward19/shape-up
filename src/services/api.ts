@@ -10,7 +10,7 @@ import {
 } from '@/types/api';
 import { getAuthToken } from '@/utils/auth';
 
-const createHeaders = () => {
+export const createHeaders = () => {
   const token = getAuthToken();
   return {
     'Authorization': token ? `Bearer ${token}` : '',
