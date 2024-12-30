@@ -1,3 +1,7 @@
+import ChatHeader from './ChatHeader';
+import ChatMessageList from './ChatMessageList';
+import ChatInput from './ChatInput';
+
 interface ChatConversationProps {
   profileId: string;
   firstName: string;
