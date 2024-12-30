@@ -2,14 +2,23 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { SERVICES } from "@/config/services";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { Notification } from "@/types/notifications";
+import { getAuthToken } from "@/utils/auth";
 
 class NotificationService {
   private connection: HubConnection | null = null;
 
   async startConnection(): Promise<void> {
     try {
+      const token = getAuthToken();
+      
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
       this.connection = new HubConnectionBuilder()
-        .withUrl(`${SERVICES.NOTIFICATION.baseUrl}${SERVICES.NOTIFICATION.hubUrl}`)
+        .withUrl(`${SERVICES.NOTIFICATION.baseUrl}${SERVICES.NOTIFICATION.hubUrl}`, {
+          accessTokenFactory: () => token
+        })
         .withAutomaticReconnect()
         .build();
 
