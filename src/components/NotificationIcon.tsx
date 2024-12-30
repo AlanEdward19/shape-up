@@ -29,7 +29,7 @@ const NotificationIcon = () => {
           )}
         </Button>
       </HoverCardTrigger>
-      <HoverCardContent className="w-80" align="end">
+      <HoverCardContent className="w-80 bg-secondary border-muted" align="end">
         <div className="space-y-2">
           <div className="font-semibold">Notificações</div>
           <ScrollArea className="h-[300px]">
@@ -42,10 +42,10 @@ const NotificationIcon = () => {
                 generalNotifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-3 rounded-lg ${
+                    className={`p-3 rounded-lg cursor-pointer ${
                       !notification.read
-                        ? "bg-primary/10"
-                        : "bg-secondary"
+                        ? "bg-primary/10 hover:bg-primary/20"
+                        : "bg-muted hover:bg-muted/80"
                     }`}
                     onClick={() => markAsRead(notification.id)}
                   >
