@@ -11,10 +11,29 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SocialService } from "@/services/api";
 import { setAuthData } from "@/utils/auth";
 import { toast } from "sonner";
+import { notificationService } from "@/services/notificationService";
 
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const initializeNotifications = async () => {
+      try {
+        await notificationService.startConnection();
+      } catch (error) {
+        console.error("Failed to connect to SignalR:", error);
+        toast.error("Falha ao conectar ao serviço de notificações");
+      }
+    };
+
+    initializeNotifications();
+
+    // Cleanup on component unmount
+    return () => {
+      notificationService.stopConnection();
+    };
+  }, []); // Empty dependency array means this runs once when component mounts
 
   useEffect(() => {
     const hash = location.hash;
