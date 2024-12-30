@@ -18,6 +18,18 @@ export const decryptMessage = (encryptedMessage: string): string => {
   return decrypted.toString(CryptoJS.enc.Utf8);
 };
 
+const encryptMessage = (message: string): string => {
+  const key = CryptoJS.SHA256(_encryptionKey);
+  
+  const encrypted = CryptoJS.AES.encrypt(message, key, {
+    iv: InitializationVector,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+  });
+
+  return encrypted.toString();
+};
+
 export const ChatService = {
   getRecentMessages: async (): Promise<ChatMessage[]> => {
     try {
@@ -58,6 +70,23 @@ export const ChatService = {
     } catch (error) {
       console.error("Error fetching profile:", error);
       throw error;
+    }
+  },
+
+  sendMessage: async (profileId: string, message: string): Promise<void> => {
+    const encryptedMessage = encryptMessage(message);
+    
+    const response = await fetch(
+      `${SERVICES.CHAT.baseUrl}/Chat/v1/messages/sendMessage/${profileId}`,
+      {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({ encryptedMessage })
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error("Failed to send message");
     }
   }
 };

@@ -19,7 +19,7 @@ const ChatConversation = ({ profileId, firstName, lastName, imageUrl }: ChatConv
         imageUrl={imageUrl}
       />
       <ChatMessageList profileId={profileId} />
-      <ChatInput />
+      <ChatInput profileId={profileId} />
     </div>
   );
 };

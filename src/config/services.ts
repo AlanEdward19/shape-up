@@ -32,7 +32,8 @@ export const SERVICES = {
   CHAT: {
     baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL,
     endpoints: {
-      getRecentMessages: '/Chat/v1/messages/getRecentMessages'
+      getRecentMessages: '/Chat/v1/messages/getRecentMessages',
+      sendMessage: '/Chat/v1/messages/sendMessage/id'
     }
   },
   NOTIFICATION: {
@@ -42,5 +43,5 @@ export const SERVICES = {
 };
 
 export const STORAGE = {
-  AZURE_BLOB: 'https://your-storage-account.blob.core.windows.net'
+  baseUrl: 'https://your-storage-account.blob.core.windows.net'
 };
