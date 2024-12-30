@@ -33,7 +33,7 @@ export const SERVICES = {
     baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL,
     endpoints: {
       getRecentMessages: '/Chat/v1/messages/getRecentMessages',
-      sendMessage: '/Chat/v1/messages/sendMessage/id'
+      sendMessage: '/Chat/v1/messages/send'
     }
   },
   NOTIFICATION: {

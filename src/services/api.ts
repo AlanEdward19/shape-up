@@ -31,7 +31,7 @@ export const getTimeDifference = (updatedAt: string): string => {
 };
 
 export const getImageUrl = (imageGuid: string): string => {
-  return `${STORAGE.AZURE_BLOB}/images/${imageGuid}`;
+  return `${STORAGE.baseUrl}/images/${imageGuid}`;
 };
 
 export const SocialService = {
@@ -282,14 +282,4 @@ export const SocialService = {
       throw error;
     }
   },
-};
-
-export const NutritionService = {
-  baseUrl: SERVICES.NUTRITION.baseUrl,
-  // Add nutrition-specific methods here
-};
-
-export const TrainingService = {
-  baseUrl: SERVICES.TRAINING.baseUrl,
-  // Add training-specific methods here
 };

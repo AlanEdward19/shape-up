@@ -73,15 +73,16 @@ export const ChatService = {
     }
   },
 
-  sendMessage: async (profileId: string, message: string): Promise<void> => {
-    const encryptedMessage = encryptMessage(message);
-    
+  sendMessage: async (receiverId: string, message: string): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.CHAT.baseUrl}/Chat/v1/messages/sendMessage/${profileId}`,
+      `${SERVICES.CHAT.baseUrl}${SERVICES.CHAT.endpoints.sendMessage}`,
       {
         method: 'POST',
         headers: createHeaders(),
-        body: JSON.stringify({ encryptedMessage })
+        body: JSON.stringify({
+          receiverId,
+          message
+        })
       }
     );
     
