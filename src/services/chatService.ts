@@ -16,21 +16,21 @@ export const decryptMessage = (encryptedMessage: string): string => {
   });
 
   const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-  const decryptedArray = decryptedString.split(' ').slice(0, -2);;
+  const decryptedArray = decryptedString.split(' ').slice(0, -2);
 
   return decryptedArray.join(' ');
 };
 
-const encryptMessage = (message: string): string => {
+export const encryptMessage = (plainText: string): string => {
   const key = CryptoJS.SHA256(_encryptionKey);
-  
-  const encrypted = CryptoJS.AES.encrypt(message, key, {
+
+  const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(plainText), key, {
     iv: InitializationVector,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7
   });
 
-  return encrypted.toString();
+  return encrypted.toString(CryptoJS.format.Base64);
 };
 
 export const ChatService = {

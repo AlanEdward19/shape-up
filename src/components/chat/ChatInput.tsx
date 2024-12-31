@@ -2,7 +2,7 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { ChatService } from "@/services/chatService";
+import { ChatService, encryptMessage } from "@/services/chatService";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { getUserId } from "@/utils/auth";
@@ -21,7 +21,11 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
     
     setIsSending(true);
     try {
-      const response = await ChatService.sendMessage(profileId, message);
+      const timestamp = new Date().toISOString();
+      const messageWithTimestamp = `${message} ${timestamp}`;
+      const encryptedMessage = encryptMessage(messageWithTimestamp);
+      
+      await ChatService.sendMessage(profileId, message);
       setMessage("");
       toast.success("Mensagem enviada");
 
@@ -35,9 +39,8 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
             id: Date.now().toString(),
             senderId: getUserId(),
             receiverId: profileId,
-            encryptedMessage: message,
-            isLocalMessage: true, // Flag to indicate this is a locally sent message
-            timestamp: new Date().toISOString()
+            encryptedMessage: encryptedMessage,
+            timestamp: timestamp
           };
 
           // Add new message to the end of the last page

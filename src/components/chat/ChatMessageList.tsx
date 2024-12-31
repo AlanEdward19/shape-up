@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { ChatService, decryptMessage } from "@/services/chatService";
+import { ChatService } from "@/services/chatService";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import ChatMessage from "./ChatMessage";
@@ -46,13 +46,9 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         (oldData: any) => {
           if (!oldData) return { pages: [[message]], pageParams: [1] };
           
-          // Add new message to the end of the first page
           const newPages = [...oldData.pages];
           const lastPageIndex = newPages.length - 1;
-          newPages[lastPageIndex] = [...newPages[lastPageIndex], {
-            ...message,
-            encryptedMessage: message.encryptedMessage // Keep encrypted for ChatMessage component to handle
-          }];
+          newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
           
           return {
             ...oldData,
@@ -61,7 +57,6 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         }
       );
 
-      // Scroll to bottom when receiving new message
       if (scrollRef.current) {
         scrollRef.current.scrollIntoView({ behavior: 'smooth' });
       }
@@ -101,7 +96,6 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  // Scroll to bottom on initial load
   useEffect(() => {
     if (scrollRef.current && data?.pages[0]?.length > 0) {
       scrollRef.current.scrollIntoView();
