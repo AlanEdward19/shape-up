@@ -138,7 +138,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         {groupedMessages.map((group) => (
           <div key={format(group.date, 'yyyy-MM-dd')}>
             <ChatDateSeparator date={group.date} />
-            {[...group.messages].reverse().map((message) => (
+            {group.messages.map((message) => (
               <ChatMessage
                 key={message.id}
                 id={message.id}
