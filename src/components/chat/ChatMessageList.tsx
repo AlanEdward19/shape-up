@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ChatService, decryptMessage } from "@/services/chatService";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import ChatMessage from "./ChatMessage";
+import * as signalR from "@microsoft/signalr";
+import { getAuthToken } from "@/utils/auth";
+import { SERVICES } from "@/config/services";
 
 interface ChatMessageListProps {
   profileId: string;
@@ -11,6 +14,7 @@ interface ChatMessageListProps {
 
 const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["messages", profileId],
@@ -21,13 +25,55 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
       return lastPage.length === 0 ? undefined : allPages.length + 1;
     },
     initialPageParam: 1,
-    refetchInterval: 1000, // Refetch every 3 seconds
     meta: {
       onError: () => {
         toast.error("Falha ao carregar mensagens");
       }
     }
   });
+
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl(`${SERVICES.CHAT.baseUrl}/chat`, {
+        accessTokenFactory: () => getAuthToken() || ''
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    connection.on("ReceiveMessage", (message) => {
+      queryClient.setQueryData(
+        ["messages", profileId],
+        (oldData: any) => {
+          if (!oldData) return { pages: [[message]], pageParams: [1] };
+          
+          // Add the new message to the first page
+          const newPages = [...oldData.pages];
+          newPages[0] = [message, ...newPages[0]];
+          
+          return {
+            ...oldData,
+            pages: newPages
+          };
+        }
+      );
+    });
+
+    const startConnection = async () => {
+      try {
+        await connection.start();
+        console.log("SignalR Connected");
+      } catch (err) {
+        console.error("SignalR Connection Error: ", err);
+        toast.error("Falha ao conectar ao serviço de mensagens em tempo real");
+      }
+    };
+
+    startConnection();
+
+    return () => {
+      connection.stop();
+    };
+  }, [profileId, queryClient]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
