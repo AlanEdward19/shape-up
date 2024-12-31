@@ -6,28 +6,31 @@ import CryptoJS from 'crypto-js';
 const _encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || '';
 const InitializationVector = CryptoJS.enc.Hex.parse('00000000000000000000000000000000');
 
+const getKey = (): CryptoJS.lib.WordArray => {
+  return CryptoJS.SHA256(CryptoJS.enc.Utf8.parse(_encryptionKey));
+}
+
 export const decryptMessage = (encryptedMessage: string): string => {
-  const key = CryptoJS.SHA256(_encryptionKey);
+  const key = getKey();
 
   const decrypted = CryptoJS.AES.decrypt(encryptedMessage, key, {
     iv: InitializationVector,
     mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7
+    padding: CryptoJS.pad.Pkcs7,
   });
 
-  const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-  const decryptedArray = decryptedString.split(' ').slice(0, -2);
+  const decryptedArray = decrypted.toString(CryptoJS.enc.Utf8).split(' ').slice(0, -2);
 
   return decryptedArray.join(' ');
 };
 
 export const encryptMessage = (plainText: string): string => {
-  const key = CryptoJS.SHA256(_encryptionKey);
+  const key = getKey();
 
   const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(plainText), key, {
     iv: InitializationVector,
     mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7
+    padding: CryptoJS.pad.Pkcs7,
   });
 
   return encrypted.toString(CryptoJS.format.Base64);

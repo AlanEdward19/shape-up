@@ -2,7 +2,8 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { ChatService, encryptMessage } from "@/services/chatService";
+import { format } from 'date-fns';
+import { ChatService, decryptMessage, encryptMessage } from "@/services/chatService";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { getUserId } from "@/utils/auth";
@@ -21,7 +22,7 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
     
     setIsSending(true);
     try {
-      const timestamp = new Date().toISOString();
+      const timestamp = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
       const messageWithTimestamp = `${message} ${timestamp}`;
       const encryptedMessage = encryptMessage(messageWithTimestamp);
       

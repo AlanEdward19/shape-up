@@ -28,7 +28,7 @@ const ChatMessage = ({ senderId, message, timestamp, isLocalMessage }: ChatMessa
       >
         <p className="break-words">{displayMessage}</p>
         <span className="text-xs opacity-70 mt-1 block">
-          {format(new Date(timestamp), "HH:mm")}
+          {timestamp}
         </span>
       </div>
     </div>
