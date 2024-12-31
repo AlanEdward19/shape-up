@@ -22,8 +22,9 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
     
     setIsSending(true);
     try {
-      const timestamp = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
-      const messageWithTimestamp = `${message} ${timestamp}`;
+      const date = new Date();
+      const timestamp = date.toISOString();
+      const messageWithTimestamp = `${message} ${format(date, 'dd/MM/yyyy HH:mm:ss')}`;
       const encryptedMessage = encryptMessage(messageWithTimestamp);
       
       await ChatService.sendMessage(profileId, message);

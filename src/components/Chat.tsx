@@ -105,8 +105,8 @@ const Chat = () => {
             <ScrollArea className="h-[400px]">
               <div className="space-y-2">
                 {messages.map((msg) => {
-                  const profile = profiles[msg.receiverId || msg.senderId];
                   const chatId = msg.receiverId === getUserId() ? msg.senderId : msg.receiverId;
+                  const profile = profiles[chatId];
                   
                   return (
                     <div

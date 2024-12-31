@@ -123,10 +123,13 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
       groups[dateKey].push(message);
     });
     
-    return Object.entries(groups).map(([dateStr, messages]) => ({
+    const groupedMessages = Object.entries(groups).map(([dateStr, messages]) => ({
       date: parseISO(dateStr),
-      messages
+      messages: messages.sort((a, b) => parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime())
     }));
+
+    // Ordena os grupos de mensagens por data, com a data mais recente no final
+    return groupedMessages.sort((a, b) => a.date.getTime() - b.date.getTime());
   };
 
   const allMessages = data?.pages.flatMap(page => page) || [];
