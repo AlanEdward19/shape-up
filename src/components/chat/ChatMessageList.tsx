@@ -95,12 +95,19 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  // Scroll to bottom on initial load
+  useEffect(() => {
+    if (scrollRef.current && data?.pages[0]?.length > 0) {
+      scrollRef.current.scrollIntoView();
+    }
+  }, [data?.pages]);
+
   return (
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-4">
         {data?.pages.map((page, i) => (
           <div key={i}>
-            {page.map((message) => (
+            {[...page].reverse().map((message) => (
               <ChatMessage
                 key={message.id}
                 id={message.id}
