@@ -4,12 +4,19 @@ import { ChatService } from "@/services/chatService";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import ChatMessage from "./ChatMessage";
+import ChatDateSeparator from "./ChatDateSeparator";
 import * as signalR from "@microsoft/signalr";
-import { getAuthToken, getUserId } from "@/utils/auth";
+import { getAuthToken } from "@/utils/auth";
 import { SERVICES } from "@/config/services";
+import { format, isSameDay, parseISO } from "date-fns";
 
 interface ChatMessageListProps {
   profileId: string;
+}
+
+interface GroupedMessages {
+  date: Date;
+  messages: any[];
 }
 
 const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
@@ -102,18 +109,42 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
     }
   }, [data?.pages]);
 
+  const groupMessagesByDate = (messages: any[]): GroupedMessages[] => {
+    const groups: { [key: string]: any[] } = {};
+    
+    messages.forEach(message => {
+      const date = parseISO(message.timestamp);
+      const dateKey = format(date, 'yyyy-MM-dd');
+      
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      
+      groups[dateKey].push(message);
+    });
+    
+    return Object.entries(groups).map(([dateStr, messages]) => ({
+      date: parseISO(dateStr),
+      messages
+    }));
+  };
+
+  const allMessages = data?.pages.flatMap(page => page) || [];
+  const groupedMessages = groupMessagesByDate(allMessages);
+
   return (
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-4">
-        {data?.pages.map((page, i) => (
-          <div key={i}>
-            {[...page].reverse().map((message) => (
+        {groupedMessages.map((group) => (
+          <div key={format(group.date, 'yyyy-MM-dd')}>
+            <ChatDateSeparator date={group.date} />
+            {[...group.messages].reverse().map((message) => (
               <ChatMessage
                 key={message.id}
                 id={message.id}
                 senderId={message.senderId}
                 message={message.encryptedMessage}
-                timestamp={message.timestamp}
+                timestamp={format(parseISO(message.timestamp), 'HH:mm')}
               />
             ))}
           </div>
