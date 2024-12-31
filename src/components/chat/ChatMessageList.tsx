@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import ChatMessage from "./ChatMessage";
 import * as signalR from "@microsoft/signalr";
-import { getAuthToken } from "@/utils/auth";
+import { getAuthToken, getUserId } from "@/utils/auth";
 import { SERVICES } from "@/config/services";
 
 interface ChatMessageListProps {
@@ -34,7 +34,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${SERVICES.CHAT.baseUrl}/chat`, {
+      .withUrl(`${SERVICES.CHAT.baseUrl}/chat?userId=${getUserId()}`, {
         accessTokenFactory: () => getAuthToken() || ''
       })
       .withAutomaticReconnect()

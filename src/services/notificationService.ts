@@ -2,7 +2,7 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { SERVICES } from "@/config/services";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { Notification, NotificationType } from "@/types/notifications";
-import { getAuthToken } from "@/utils/auth";
+import { getAuthToken, getUserId } from "@/utils/auth";
 import { SocialService } from "./api";
 
 class NotificationService {
@@ -17,7 +17,7 @@ class NotificationService {
       }
 
       this.connection = new HubConnectionBuilder()
-        .withUrl(`${SERVICES.NOTIFICATION.baseUrl}${SERVICES.NOTIFICATION.hubUrl}`, {
+        .withUrl(`${SERVICES.NOTIFICATION.baseUrl}${SERVICES.NOTIFICATION.hubUrl}?userId=${getUserId()}`, {
           accessTokenFactory: () => token
         })
         .withAutomaticReconnect()
