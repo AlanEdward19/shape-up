@@ -1,16 +1,21 @@
 import { format } from "date-fns";
 import { getUserId } from "@/utils/auth";
+import { decryptMessage } from "@/services/chatService";
 
 interface ChatMessageProps {
   id: string;
   senderId: string;
   message: string;
   timestamp: string;
+  isLocalMessage?: boolean;
 }
 
-const ChatMessage = ({ senderId, message, timestamp }: ChatMessageProps) => {
+const ChatMessage = ({ senderId, message, timestamp, isLocalMessage }: ChatMessageProps) => {
   const currentUserId = getUserId();
   const isSender = senderId === currentUserId;
+  
+  // Only decrypt messages from API, not locally sent messages
+  const displayMessage = isLocalMessage ? message : decryptMessage(message);
 
   return (
     <div className={`flex ${isSender ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -21,7 +26,7 @@ const ChatMessage = ({ senderId, message, timestamp }: ChatMessageProps) => {
             : 'bg-secondary'
         }`}
       >
-        <p className="break-words">{message}</p>
+        <p className="break-words">{displayMessage}</p>
         <span className="text-xs opacity-70 mt-1 block">
           {format(new Date(timestamp), "HH:mm")}
         </span>

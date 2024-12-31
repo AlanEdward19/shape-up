@@ -35,7 +35,8 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
             id: Date.now().toString(),
             senderId: getUserId(),
             receiverId: profileId,
-            encryptedMessage: message, // This will be decrypted by ChatMessage component
+            encryptedMessage: message,
+            isLocalMessage: true, // Flag to indicate this is a locally sent message
             timestamp: new Date().toISOString()
           };
 
