@@ -32,14 +32,14 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
           if (!oldData) return { pages: [[]], pageParams: [1] };
           
           const newMessage = {
-            id: Date.now().toString(), // Temporary ID until we receive the real one from SignalR
+            id: Date.now().toString(),
             senderId: getUserId(),
             receiverId: profileId,
-            encryptedMessage: message,
+            encryptedMessage: message, // The actual message text for immediate display
             timestamp: new Date().toISOString()
           };
 
-          // Add the new message to the first page at the end
+          // Add the new message to the end of the first page
           const newPages = [...oldData.pages];
           newPages[0] = [...newPages[0], newMessage];
           

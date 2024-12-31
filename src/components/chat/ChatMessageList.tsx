@@ -46,6 +46,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         (oldData: any) => {
           if (!oldData) return { pages: [[message]], pageParams: [1] };
           
+          // Add new message to the end of the first page
           const newPages = [...oldData.pages];
           newPages[0] = [...newPages[0], message];
           
