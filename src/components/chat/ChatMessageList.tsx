@@ -41,17 +41,18 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
       .build();
 
     connection.on("ReceiveMessage", (message) => {
-
       queryClient.setQueryData(
         ["messages", profileId],
         (oldData: any) => {
-
           if (!oldData) return { pages: [[message]], pageParams: [1] };
           
           // Add new message to the end of the first page
           const newPages = [...oldData.pages];
           const lastPageIndex = newPages.length - 1;
-          newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
+          newPages[lastPageIndex] = [...newPages[lastPageIndex], {
+            ...message,
+            encryptedMessage: message.encryptedMessage // Keep encrypted for ChatMessage component to handle
+          }];
           
           return {
             ...oldData,
@@ -117,7 +118,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
                 key={message.id}
                 id={message.id}
                 senderId={message.senderId}
-                message={decryptMessage(message.encryptedMessage)}
+                message={message.encryptedMessage}
                 timestamp={message.timestamp}
               />
             ))}
