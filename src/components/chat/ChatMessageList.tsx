@@ -34,7 +34,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${SERVICES.CHAT.baseUrl}/chat?userId=${getUserId()}`, {
+      .withUrl(`${SERVICES.CHAT.baseUrl}/chat`, {
         accessTokenFactory: () => getAuthToken() || ''
       })
       .withAutomaticReconnect()
