@@ -46,7 +46,6 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         (oldData: any) => {
           if (!oldData) return { pages: [[message]], pageParams: [1] };
           
-          // Add the new message to the first page at the end
           const newPages = [...oldData.pages];
           newPages[0] = [...newPages[0], message];
           
@@ -57,7 +56,6 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         }
       );
 
-      // Scroll to bottom when new message arrives
       if (scrollRef.current) {
         scrollRef.current.scrollIntoView({ behavior: 'smooth' });
       }
@@ -102,7 +100,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
       <div className="space-y-4">
         {data?.pages.map((page, i) => (
           <div key={i}>
-            {[...page].reverse().map((message) => (
+            {page.map((message) => (
               <ChatMessage
                 key={message.id}
                 id={message.id}
