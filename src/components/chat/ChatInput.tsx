@@ -35,11 +35,9 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
             id: Date.now().toString(),
             senderId: getUserId(),
             receiverId: profileId,
-            encryptedMessage: message,
+            encryptedMessage: message, // This will be decrypted by ChatMessage component
             timestamp: new Date().toISOString()
           };
-
-          console.log(newMessage);
 
           // Add new message to the end of the last page
           const newPages = [...oldData.pages];
