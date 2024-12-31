@@ -39,9 +39,12 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
             timestamp: new Date().toISOString()
           };
 
-          // Add the new message to the end of the first page
+          console.log(newMessage);
+
+          // Add new message to the end of the last page
           const newPages = [...oldData.pages];
-          newPages[0] = [...newPages[0], newMessage];
+          const lastPageIndex = newPages.length - 1;
+          newPages[lastPageIndex] = [...newPages[lastPageIndex], newMessage];
           
           return {
             ...oldData,

@@ -41,14 +41,17 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
       .build();
 
     connection.on("ReceiveMessage", (message) => {
+
       queryClient.setQueryData(
         ["messages", profileId],
         (oldData: any) => {
+
           if (!oldData) return { pages: [[message]], pageParams: [1] };
           
           // Add new message to the end of the first page
           const newPages = [...oldData.pages];
-          newPages[0] = [...newPages[0], message];
+          const lastPageIndex = newPages.length - 1;
+          newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
           
           return {
             ...oldData,
