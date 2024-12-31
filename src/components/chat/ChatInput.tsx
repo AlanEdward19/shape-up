@@ -35,7 +35,7 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
             id: Date.now().toString(),
             senderId: getUserId(),
             receiverId: profileId,
-            encryptedMessage: message, // The actual message text for immediate display
+            encryptedMessage: message,
             timestamp: new Date().toISOString()
           };
 

@@ -57,6 +57,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         }
       );
 
+      // Scroll to bottom when receiving new message
       if (scrollRef.current) {
         scrollRef.current.scrollIntoView({ behavior: 'smooth' });
       }
