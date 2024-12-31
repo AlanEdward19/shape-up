@@ -39,9 +39,9 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
             timestamp: new Date().toISOString()
           };
 
-          // Add the new message to the first page
+          // Add the new message to the first page at the end
           const newPages = [...oldData.pages];
-          newPages[0] = [newMessage, ...newPages[0]];
+          newPages[0] = [...newPages[0], newMessage];
           
           return {
             ...oldData,
