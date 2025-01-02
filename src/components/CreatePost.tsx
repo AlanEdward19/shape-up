@@ -2,6 +2,7 @@ import { Camera, Video, Apple, Dumbbell, Star, Globe2, Users, Lock } from "lucid
 import { Input } from "@/components/ui/input";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -10,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SocialService } from "@/services/api";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const actions = [
   { icon: Camera, label: "Foto", accept: "image/*" },
@@ -32,6 +34,14 @@ const CreatePost = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [currentAction, setCurrentAction] = useState<string>("");
+  
+  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+
+  const { data: profile } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: () => userId ? SocialService.viewProfile(userId) : null,
+    enabled: !!userId,
+  });
 
   const handleFileSelect = (actionType: string, accept: string) => {
     setCurrentAction(actionType);
@@ -57,13 +67,11 @@ const CreatePost = () => {
 
     setIsSubmitting(true);
     try {
-      // Create post
       const postResponse = await SocialService.createPost({
         content,
         visibility: parseInt(visibility)
       });
 
-      // Upload files if any were selected
       if (selectedFiles && selectedFiles.length > 0) {
         const formData = new FormData();
         Array.from(selectedFiles).forEach(file => {
@@ -73,7 +81,6 @@ const CreatePost = () => {
         await SocialService.uploadPostImages(postResponse.id, formData);
       }
 
-      // Reset form
       setContent("");
       setSelectedFiles(null);
       if (fileInputRef.current) {
@@ -91,7 +98,12 @@ const CreatePost = () => {
   return (
     <div className="bg-secondary rounded-lg p-4 mb-6">
       <div className="flex gap-4 items-center mb-4">
-        <div className="w-10 h-10 rounded-full bg-primary/20"></div>
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={profile?.profilePictureUrl} alt="Profile picture" />
+          <AvatarFallback className="bg-primary/20">
+            {profile?.name?.charAt(0)?.toUpperCase() || 'U'}
+          </AvatarFallback>
+        </Avatar>
         <Input
           placeholder="No que está pensando?"
           className="flex-1 bg-muted border-none text-foreground"
