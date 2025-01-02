@@ -38,14 +38,20 @@ const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps)
     }
   };
 
+  // Group reactions by type and count them
   const groupedReactions = reactions.reduce((acc, reaction) => {
     const count = acc[reaction.reactionType] || 0;
     acc[reaction.reactionType] = count + 1;
     return acc;
   }, {} as Record<string, number>);
 
+  // Sort reactions by count (descending)
   const sortedReactions = Object.entries(groupedReactions)
-    .sort(([, a], [, b]) => b - a);
+    .sort(([, a], [, b]) => b - a)
+    .map(([type]) => type);
+
+  // Get total reactions count
+  const totalReactions = reactions.length;
 
   return (
     <HoverCard openDelay={0} closeDelay={200}>
@@ -54,10 +60,14 @@ const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps)
           className="flex items-center gap-2 hover:text-primary transition-colors"
           onClick={handleMainReactionClick}
         >
-          <span className="text-xl">
-            {userReaction ? getReactionEmoji(userReaction.reactionType) : "👍"}
-          </span>
-          <span>{reactions.length}</span>
+          <div className="flex -space-x-1">
+            {sortedReactions.map((type, index) => (
+              <span key={type} className="text-xl" style={{ zIndex: sortedReactions.length - index }}>
+                {getReactionEmoji(type)}
+              </span>
+            ))}
+          </div>
+          <span>{totalReactions}</span>
         </button>
       </HoverCardTrigger>
       <HoverCardContent className="w-auto p-2 bg-secondary border border-muted">
