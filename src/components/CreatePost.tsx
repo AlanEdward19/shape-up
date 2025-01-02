@@ -99,10 +99,8 @@ const CreatePost = () => {
     <div className="bg-secondary rounded-lg p-4 mb-6">
       <div className="flex gap-4 items-center mb-4">
         <Avatar className="w-10 h-10">
-          <AvatarImage src={profile?.profilePictureUrl} alt="Profile picture" />
-          <AvatarFallback className="bg-primary/20">
-            {profile?.name?.charAt(0)?.toUpperCase() || 'U'}
-          </AvatarFallback>
+          <AvatarImage src={profile?.imageUrl} alt="Profile picture" />
+          <AvatarFallback>{(profile?.firstName[0] + profile?.lastName[0]) || 'U'}</AvatarFallback>
         </Avatar>
         <Input
           placeholder="No que está pensando?"
