@@ -60,9 +60,16 @@ const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps)
           className="flex items-center gap-2 hover:text-primary transition-colors"
           onClick={handleMainReactionClick}
         >
-          <div className="flex -space-x-1">
+          <div className="flex -space-x-3">
             {sortedReactions.map((type, index) => (
-              <span key={type} className="text-xl" style={{ zIndex: sortedReactions.length - index }}>
+              <span 
+                key={type} 
+                className="text-xl relative hover:z-10 transition-transform hover:scale-110" 
+                style={{ 
+                  zIndex: sortedReactions.length - index,
+                  transform: `translateX(${index * 2}px)`
+                }}
+              >
                 {getReactionEmoji(type)}
               </span>
             ))}
