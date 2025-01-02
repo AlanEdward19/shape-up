@@ -134,12 +134,11 @@ const Chat = () => {
                     >
                       <Avatar className="w-10 h-10">
                         <AvatarImage
-                          src={profile.imageUrl}
-                          alt={`${profile.firstName} ${profile.lastName}`}
+                          src={profile?.imageUrl || "U"}
+                          alt={profile ? `${profile.firstName} ${profile.lastName}` : ""}
                         />
                         <AvatarFallback>
-                          {profile.firstName[0]}
-                          {profile.lastName[0]}
+                          { profile ? profile.firstName[0] + profile.lastName[0] : ""}
                         </AvatarFallback>
                       </Avatar>
 
