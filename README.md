@@ -1,69 +1,33 @@
-# Welcome to your Lovable project
+# **ShapeUp Web - Rede Social para Praticantes de Atividades Físicas [Em Desenvolvimento]**
 
-## Project info
+**ShapeUp** é uma plataforma inovadora que conecta entusiastas de fitness a profissionais de saúde, como personal trainers e nutricionistas. Através de uma interface intuitiva, os usuários podem criar perfis personalizados, compartilhar suas experiências de treino e alimentação, e receber orientações de especialistas na área.
 
-**URL**: https://lovable.dev/projects/8276413c-84d4-4037-a4a8-e247680dc2c5
+## **Visão Geral do Projeto**
 
-## How can I edit this code?
+ShapeUp foi desenvolvido com a missão de promover um estilo de vida saudável, oferecendo um ambiente colaborativo onde os usuários podem interagir, motivar-se mutuamente e alcançar seus objetivos de fitness. A plataforma oferece funcionalidades como:
 
-There are several ways of editing your application.
+*   **Criação de Perfis**: Os usuários podem criar e gerenciar seus perfis, adicionar amigos, e seguir outros usuários para acompanhar suas jornadas.
+*   **Gerenciamento de Treinos**: Com a capacidade de registrar e compartilhar treinos, os usuários podem visualizar e seguir rotinas prescritas por seus treinadores.
+*   **Gestão Nutricional**: Os usuários podem registrar refeições, contar macros e receber planos alimentares personalizados de nutricionistas.
+*   **Marketplace de Serviços Profissionais**: Personal trainers e nutricionistas podem se cadastrar na plataforma para oferecer seus serviços, após validação de suas certificações.
+*   **Avaliações e Recomendações**: Após a contratação de um profissional, os usuários podem deixar avaliações, ajudando a construir um ranking de recomendações baseado em feedbacks reais.
 
-**Use Lovable**
+## **Arquitetura do Sistema**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8276413c-84d4-4037-a4a8-e247680dc2c5) and start prompting.
+A arquitetura do ShapeUp é baseada em microserviços, divididos em componentes que atendem a funcionalidades específicas:
 
-Changes made via Lovable will be committed automatically to this repo.
+*   [x] **Serviço Social**: Gerencia a criação de perfis, lista de amigos, seguidores e publicações.
+*   [ ] **Serviço de Treinamento**: Responsável pela elaboração e execução de treinos, permitindo a interação entre usuários e treinadores.
+*   [ ] **Serviço de Nutrição**: Focado na criação de receitas e acompanhamento nutricional.
+*   [ ] **Serviço de Profissionais**: Gerencia a validação de profissionais e a oferta de seus serviços.
+*   [ ] **Serviço de Assinaturas**: Controla recursos premium e pagamentos.
+*   [ ] **Serviço de Mensagens**: Facilita a comunicação entre usuários e profissionais.
+*   [ ] **Serviço de Autenticação e Autorização**: Controla fluxo de permissão para usuário.
 
-**Use your preferred IDE**
+## **Objetivos Futuros**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+ShapeUp busca constantemente expandir suas funcionalidades, incluindo:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/8276413c-84d4-4037-a4a8-e247680dc2c5) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+*   Integração com dispositivos vestíveis.
+*   Recursos de gamificação para engajar usuários em desafios de fitness.
+*   Melhoria contínua da experiência do usuário com base em feedbacks.
