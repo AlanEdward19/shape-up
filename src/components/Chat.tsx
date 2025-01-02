@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { getUserId } from "@/utils/auth";
 import { useState } from "react";
 import ChatConversation from "./chat/ChatConversation";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Chat = () => {
   const { unreadMessages, markAllAsRead } = useNotificationStore();
@@ -28,33 +29,43 @@ const Chat = () => {
     meta: {
       onError: () => {
         toast.error("Falha ao carregar mensagens recentes");
-      }
-    }
+      },
+    },
   });
 
   const { data: profiles = {} } = useQuery({
     queryKey: ["chatProfiles", messages],
     queryFn: async () => {
       const profileId = getUserId();
-      const uniqueProfileIds = [...new Set(messages.map(m => m.senderId).concat(messages.map(m => m.receiverId)).filter(id => id !== profileId))];
-      
-      const profiles: Record<string, { firstName: string; lastName: string }> = {};
-      
+      const uniqueProfileIds = [
+        ...new Set(
+          messages
+            .map((m) => m.senderId)
+            .concat(messages.map((m) => m.receiverId))
+            .filter((id) => id !== profileId)
+        ),
+      ];
+
+      const profiles: Record<
+        string,
+        { firstName: string; lastName: string; imageUrl: string }
+      > = {};
+
       await Promise.all(
         uniqueProfileIds.map(async (id) => {
           const profile = await ChatService.getProfileSimplified(id);
           profiles[id] = profile;
         })
       );
-      
+
       return profiles;
     },
     enabled: isOpen && messages.length > 0,
     meta: {
       onError: () => {
         toast.error("Falha ao carregar informações dos perfis");
-      }
-    }
+      },
+    },
   });
 
   const handleOpen = () => {
@@ -68,10 +79,13 @@ const Chat = () => {
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={(open) => {
-      if (open) handleOpen();
-      else handleClose();
-    }}>
+    <Popover
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (open) handleOpen();
+        else handleClose();
+      }}
+    >
       <PopoverTrigger className="fixed bottom-4 right-4 bg-secondary p-3 rounded-full hover:bg-primary/20 transition-colors">
         <div className="w-3 h-3 bg-green-500 rounded-full absolute top-0 right-0" />
         {unreadMessages > 0 && (
@@ -81,9 +95,9 @@ const Chat = () => {
         )}
         <div className="w-10 h-10 rounded-full bg-primary/20" />
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-80 h-[500px] p-0 bg-background border border-border" 
-        side="top" 
+      <PopoverContent
+        className="w-80 h-[500px] p-0 bg-background border border-border"
+        side="top"
         align="end"
       >
         {selectedChat ? (
@@ -91,6 +105,7 @@ const Chat = () => {
             profileId={selectedChat}
             firstName={profiles[selectedChat]?.firstName || ""}
             lastName={profiles[selectedChat]?.lastName || ""}
+            imageUrl={profiles[selectedChat]?.imageUrl || ""}
           />
         ) : (
           <div className="p-4 space-y-4">
@@ -105,19 +120,34 @@ const Chat = () => {
             <ScrollArea className="h-[400px]">
               <div className="space-y-2">
                 {messages.map((msg) => {
-                  const chatId = msg.receiverId === getUserId() ? msg.senderId : msg.receiverId;
+                  const chatId =
+                    msg.receiverId === getUserId()
+                      ? msg.senderId
+                      : msg.receiverId;
                   const profile = profiles[chatId];
-                  
+
                   return (
                     <div
                       key={msg.id}
                       className="flex items-center gap-3 p-2 hover:bg-secondary rounded-lg cursor-pointer"
                       onClick={() => setSelectedChat(chatId)}
                     >
-                      <div className="w-10 h-10 rounded-full bg-primary/20" />
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage
+                          src={profile.imageUrl}
+                          alt={`${profile.firstName} ${profile.lastName}`}
+                        />
+                        <AvatarFallback>
+                          {profile.firstName[0]}
+                          {profile.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+
                       <div className="flex-1">
                         <h4 className="font-medium">
-                          {profile ? `${profile.firstName} ${profile.lastName}` : "Carregando..."}
+                          {profile
+                            ? `${profile.firstName} ${profile.lastName}`
+                            : "Carregando..."}
                         </h4>
                         <p className="text-sm text-muted-foreground">
                           {decryptMessage(msg.encryptedMessage)}
