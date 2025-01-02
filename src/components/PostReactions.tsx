@@ -57,14 +57,16 @@ const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps)
     <HoverCard openDelay={0} closeDelay={200}>
       <HoverCardTrigger asChild>
         <button 
-          className="flex items-center gap-2 hover:text-primary transition-colors"
+          className={`flex items-center gap-2 transition-colors ${userReaction ? 'text-primary font-medium' : 'hover:text-primary'}`}
           onClick={handleMainReactionClick}
         >
           <div className="flex -space-x-3">
             {sortedReactions.map((type, index) => (
               <span 
                 key={type} 
-                className="text-xl relative hover:z-10 transition-transform hover:scale-110" 
+                className={`text-xl relative hover:z-10 transition-all hover:scale-110 ${
+                  userReaction?.reactionType === type ? 'scale-105 text-primary' : ''
+                }`}
                 style={{ 
                   zIndex: sortedReactions.length - index,
                   transform: `translateX(${index * 2}px)`
@@ -83,7 +85,11 @@ const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps)
             <button
               key={type}
               onClick={() => handleReactionClick(Number(type))}
-              className="text-xl p-2 hover:bg-primary/20 rounded cursor-pointer transition-colors"
+              className={`text-xl p-2 rounded cursor-pointer transition-colors ${
+                userReaction?.reactionType === type 
+                  ? 'bg-primary/20 text-primary' 
+                  : 'hover:bg-primary/20'
+              }`}
             >
               {emoji}
             </button>
