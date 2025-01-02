@@ -7,6 +7,7 @@ import { SocialService } from "@/services/api";
 import { getUserId } from "@/utils/auth";
 import { toast } from "sonner";
 import PostReactions from "./PostReactions";
+import PostMedia from "./PostMedia";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Post = ({ post }: { post: PostType }) => {
@@ -116,10 +117,10 @@ const Post = ({ post }: { post: PostType }) => {
   return (
     <div className="bg-secondary rounded-lg p-4 mb-4">
       <div className="flex items-center gap-3 mb-4">
-      <Avatar className="w-10 h-10">
-                  <AvatarImage src={post.publisherImageUrl} alt={`${post.publisherFirstName} ${post.publisherLastName}`} />
-                  <AvatarFallback>{post.publisherFirstName[0]}{post.publisherLastName[0]}</AvatarFallback>
-                </Avatar>
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={post.publisherImageUrl} alt={`${post.publisherFirstName} ${post.publisherLastName}`} />
+          <AvatarFallback>{post.publisherFirstName[0]}{post.publisherLastName[0]}</AvatarFallback>
+        </Avatar>
         <div className="flex-1">
           <h3 className="font-medium">{`${post.publisherFirstName} ${post.publisherLastName}`}</h3>
         </div>
@@ -127,17 +128,8 @@ const Post = ({ post }: { post: PostType }) => {
       
       <p className="text-left mb-4">{post.content}</p>
       
-      {post.images?.length > 0 && (
-        <div className="mb-4 rounded-lg overflow-hidden">
-          <img 
-            src={post.images[0]} 
-            alt="Post content" 
-            className="w-full h-auto" 
-            onError={(e) => {
-              e.currentTarget.src = '/placeholder.svg';
-            }}
-          />
-        </div>
+      {post.images && post.images.length > 0 && (
+        <PostMedia media={post.images} />
       )}
       
       <div className="flex justify-between items-center text-muted-foreground">
