@@ -91,7 +91,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
           <PostMedia media={post.images} />
         </div>
         
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full max-w-[400px]">
           <div className="p-4 border-b">
             <div className="flex items-center gap-3">
               <Avatar className="w-8 h-8">
@@ -144,8 +144,9 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                     handleComment();
                   }
                 }}
+                className="flex-1"
               />
-              <Button onClick={handleComment}>Publicar</Button>
+              <Button onClick={handleComment} className="shrink-0">Publicar</Button>
             </div>
           </div>
         </div>

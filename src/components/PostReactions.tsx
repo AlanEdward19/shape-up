@@ -10,8 +10,8 @@ interface PostReactionsProps {
   defaultOpen?: boolean;
 }
 
-const PostReactions = ({ reactions, userReaction, onReact, defaultOpen = true }: PostReactionsProps) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+const PostReactions = ({ reactions, userReaction, onReact, defaultOpen = false }: PostReactionsProps) => {
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleReactionClick = (reactionType: number) => {
     if (userReaction) {
@@ -55,7 +55,7 @@ const PostReactions = ({ reactions, userReaction, onReact, defaultOpen = true }:
   const totalReactions = reactions.length;
 
   return (
-    <HoverCard open={isOpen} onOpenChange={setIsOpen} openDelay={0} closeDelay={200}>
+    <HoverCard open={isOpen} onOpenChange={setIsOpen}>
       <HoverCardTrigger asChild>
         <button 
           className={`flex items-center gap-2 transition-colors ${userReaction ? 'text-primary font-medium' : 'hover:text-primary'}`}
