@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import PostReactions from "./PostReactions";
 import PostMedia from "./PostMedia";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 
 const Post = ({ post }: { post: PostType }) => {
   const [showComments, setShowComments] = useState(false);
@@ -18,6 +19,11 @@ const Post = ({ post }: { post: PostType }) => {
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const userId = getUserId();
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    navigate(`/profile/${post.publisherId}`);
+  };
 
   const fetchReactions = async () => {
     try {
@@ -117,12 +123,17 @@ const Post = ({ post }: { post: PostType }) => {
   return (
     <div className="bg-secondary rounded-lg p-4 mb-4">
       <div className="flex items-center gap-3 mb-4">
-        <Avatar className="w-10 h-10">
+        <Avatar className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity" onClick={handleProfileClick}>
           <AvatarImage src={post.publisherImageUrl} alt={`${post.publisherFirstName} ${post.publisherLastName}`} />
           <AvatarFallback>{post.publisherFirstName[0]}{post.publisherLastName[0]}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h3 className="font-medium">{`${post.publisherFirstName} ${post.publisherLastName}`}</h3>
+          <h3 
+            className="font-medium cursor-pointer hover:underline"
+            onClick={handleProfileClick}
+          >
+            {`${post.publisherFirstName} ${post.publisherLastName}`}
+          </h3>
         </div>
       </div>
       
