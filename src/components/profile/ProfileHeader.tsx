@@ -124,7 +124,7 @@ const ProfileHeader = ({
                                   <SelectValue placeholder="Selecione seu gênero" />
                                 </SelectTrigger>
                               </FormControl>
-                              <SelectContent>
+                              <SelectContent className="bg-background border border-border">
                                 <SelectItem value="0">Homem</SelectItem>
                                 <SelectItem value="1">Mulher</SelectItem>
                               </SelectContent>
