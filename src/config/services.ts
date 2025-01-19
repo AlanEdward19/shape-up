@@ -21,7 +21,7 @@ export const SERVICES = {
       editComment: '/Post/v1/id/editComment',
       getLatestFollower: '/Follow/v1/GetLatestFollower',
       getLatestComment: '/Post/v1/GetLatestComment',
-      getProfilePosts: '/Profile/id/getPosts?page={page}&rows={rows}',
+      getProfilePosts: '/Profile/id/getPosts?Page={page}',
     }
   },
   CHAT: {

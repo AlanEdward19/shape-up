@@ -21,7 +21,7 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
   } = useInfiniteQuery({
     queryKey: ['profilePosts', profileId],
     queryFn: async ({ pageParam = 1 }) => {
-      const posts = await ProfileService.getPosts(profileId, pageParam, 10);
+      const posts = await ProfileService.getPosts(profileId, pageParam);
       return posts;
     },
     getNextPageParam: (lastPage, allPages) => {

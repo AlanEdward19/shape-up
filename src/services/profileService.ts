@@ -12,9 +12,9 @@ export const ProfileService = {
     return response.json();
   },
 
-  getPosts: async (profileId: string, page: number = 1, rows: number = 10): Promise<Post[]> => {
+  getPosts: async (profileId: string, page: number = 1): Promise<Post[]> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getProfilePosts.replace('id', profileId)}?page=${page}&rows=${rows}`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getProfilePosts.replace('id', profileId).replace('{page}', page.toString())}`,
       { headers: createHeaders() }
     );
     if (!response.ok) throw new Error('Failed to fetch profile posts');
