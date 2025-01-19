@@ -13,8 +13,19 @@ interface PostMediaProps {
 const PostMedia = ({ media }: PostMediaProps) => {
   if (!media || media.length === 0) return null;
 
+  const handleCarouselClick = (e: React.MouseEvent) => {
+    // Stop event propagation if clicking on carousel controls
+    if (
+      e.target instanceof Element && 
+      (e.target.closest('button') || 
+       e.target.closest('[data-carousel-button]'))
+    ) {
+      e.stopPropagation();
+    }
+  };
+
   return (
-    <div className="mb-4 rounded-lg overflow-hidden relative">
+    <div className="mb-4 rounded-lg overflow-hidden relative" onClick={handleCarouselClick}>
       <Carousel className="w-full">
         <CarouselContent>
           {media.map((url, index) => (
@@ -43,8 +54,8 @@ const PostMedia = ({ media }: PostMediaProps) => {
         </CarouselContent>
         {media.length > 1 && (
           <>
-            <CarouselPrevious className="left-2" />
-            <CarouselNext className="right-2" />
+            <CarouselPrevious className="left-2" data-carousel-button />
+            <CarouselNext className="right-2" data-carousel-button />
           </>
         )}
       </Carousel>

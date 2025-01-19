@@ -54,7 +54,7 @@ const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps)
   const totalReactions = reactions.length;
 
   return (
-    <HoverCard openDelay={0} closeDelay={200}>
+    <HoverCard open={isOpen} onOpenChange={setIsOpen} openDelay={0} closeDelay={200}>
       <HoverCardTrigger asChild>
         <button 
           className={`flex items-center gap-2 transition-colors ${userReaction ? 'text-primary font-medium' : 'hover:text-primary'}`}
