@@ -118,7 +118,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
             ))}
           </div>
 
-          <div className="p-4 border-t mt-auto">
+          <div className="p-4 border-t">
             <div className="flex justify-between items-center mb-4">
               <div className="flex gap-4">
                 <PostReactions
