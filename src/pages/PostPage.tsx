@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
 import Post from "@/components/Post";
 import { toast } from "sonner";
@@ -10,25 +10,24 @@ const PostPage = () => {
   const location = useLocation();
   const postFromState = location.state?.post as PostType;
 
-  const { data: post, isLoading, error } = useQuery({
+  const { data: post, isLoading } = useQuery({
     queryKey: ['post', id],
     queryFn: () => SocialService.getPost(id!),
+    enabled: !postFromState && !!id,
     initialData: postFromState,
-    enabled: !postFromState,
-    meta: {
-      onError: (error: Error) => {
-        console.error('Failed to fetch post:', error);
-        toast.error("Falha ao carregar o post. Tente novamente mais tarde.");
-      }
-    }
   });
 
-  if (isLoading) return <div className="p-4">Carregando post...</div>;
-  if (error || !post) return <div className="p-4">Post não encontrado</div>;
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (!post) {
+    return <div>Post não encontrado</div>;
+  }
 
   return (
-    <div className="container max-w-2xl mx-auto py-6">
-      <Post post={post} expandComments />
+    <div className="container mx-auto py-8">
+      <Post post={post} />
     </div>
   );
 };
