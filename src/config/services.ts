@@ -1,42 +1,43 @@
 export const SERVICES = {
   SOCIAL: {
-    baseUrl: import.meta.env.VITE_SOCIAL_API_BASE_URL,
+    baseUrl: import.meta.env.VITE_SOCIAL_API_URL,
     endpoints: {
-      viewProfile: '/Profile/v1/ViewProfile/id',
-      viewProfileSimplified: '/Profile/v1/viewProfile/id/simplified',
-      activityFeed: '/ActivityFeed/v1/BuildActivityFeed',
-      friendRecommendations: '/Recommendation/v1/FriendRecommendations',
-      createPost: '/Post/v1/CreatePost',
-      uploadPostImages: '/Post/v1/id/UploadPostImages',
-      followUser: '/Follow/v1/FollowUser/id',
-      unfollowUser: '/Follow/v1/UnfollowUser/id',
-      getFollowers: '/Follow/v1/GetFollowers/id?Page={page}&Rows={rows}',
-      getFollowing: '/Follow/v1/GetFollowing/id?Page={page}&Rows={rows}',
-      getPostReactions: '/Post/v1/id/getReactions',
-      reactToPost: '/Post/v1/id/react',
-      deleteReaction: '/Post/v1/id/deleteReaction',
-      getComments: '/Post/v1/id/getComments',
-      commentOnPost: '/Post/v1/id/commentOnPost',
-      deleteComment: '/Post/v1/id/deleteComment',
-      editComment: '/Post/v1/id/editComment',
-      getLatestFollower: '/Follow/v1/GetLatestFollower',
-      getLatestComment: '/Post/v1/GetLatestComment',
-      getProfilePosts: '/Profile/id/getPosts?Page={page}',
+      viewProfile: '/api/profiles/id',
+      viewProfileSimplified: '/api/profiles/id/simplified',
+      activityFeed: '/api/posts/feed',
+      friendRecommendations: '/api/profiles/recommendations',
+      createPost: '/api/posts',
+      uploadPostImages: '/api/posts/id/images',
+      followUser: '/api/profiles/id/follow',
+      unfollowUser: '/api/profiles/id/unfollow',
+      getFollowing: '/api/profiles/id/following?page={page}&rows={rows}',
+      getFollowers: '/api/profiles/id/followers?page={page}&rows={rows}',
+      getLatestFollower: '/api/profiles/followers/latest',
+      getLatestComment: '/api/posts/comments/latest',
+      getPostReactions: '/api/posts/id/reactions',
+      reactToPost: '/api/posts/id/react',
+      deleteReaction: '/api/posts/id/react',
+      getComments: '/api/posts/id/comments',
+      commentOnPost: '/api/posts/id/comments',
+      deleteComment: '/api/posts/comments/id',
+      editComment: '/api/posts/comments/id',
+      getPost: '/api/posts/id',
+      getProfilePosts: '/api/profiles/id/posts?page={page}&rows={rows}',
     }
   },
-  CHAT: {
-    baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL,
+  AUTH: {
+    baseUrl: import.meta.env.VITE_AUTH_API_URL,
     endpoints: {
-      getRecentMessages: '/Chat/v1/messages/getRecentMessages',
-      sendMessage: '/Chat/v1/messages/send'
+      login: '/api/auth/login',
+      register: '/api/auth/register',
+      refreshToken: '/api/auth/refresh-token',
+      forgotPassword: '/api/auth/forgot-password',
+      resetPassword: '/api/auth/reset-password',
+      validateResetToken: '/api/auth/validate-reset-token',
     }
-  },
-  NOTIFICATION: {
-    baseUrl: import.meta.env.VITE_NOTIFICATION_API_BASE_URL,
-    hubUrl: '/notifications'
   }
 };
 
 export const STORAGE = {
-  baseUrl: 'https://your-storage-account.blob.core.windows.net'
+  baseUrl: import.meta.env.VITE_STORAGE_URL,
 };
