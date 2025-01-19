@@ -257,6 +257,21 @@ export const SocialService = {
     if (!response.ok) throw new Error('Failed to edit comment');
   },
 
+  getProfilePosts: async (profileId: string): Promise<Post[]> => {
+    try {
+      const response = await fetch(
+        `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getProfilePosts.replace('id', profileId)}`,
+        { headers: createHeaders() }
+      );
+      
+      if (!response.ok) throw new Error('Failed to fetch profile posts');
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching profile posts:', error);
+      throw error;
+    }
+  },
+
   getLatestFollower: async (): Promise<FollowUser> => {
     try {
       const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestFollower}`, {
