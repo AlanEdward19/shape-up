@@ -7,10 +7,11 @@ interface PostReactionsProps {
   reactions: PostReaction[];
   userReaction?: PostReaction;
   onReact: (reactionType: number) => void;
+  defaultOpen?: boolean;
 }
 
-const PostReactions = ({ reactions, userReaction, onReact }: PostReactionsProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+const PostReactions = ({ reactions, userReaction, onReact, defaultOpen = true }: PostReactionsProps) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const handleReactionClick = (reactionType: number) => {
     if (userReaction) {

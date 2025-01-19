@@ -118,13 +118,14 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
             ))}
           </div>
 
-          <div className="p-4 border-t shrink-0">
+          <div className="p-4 border-t shrink-0 w-full">
             <div className="flex justify-between items-center mb-4">
               <div className="flex gap-4">
                 <PostReactions
                   reactions={reactions}
                   userReaction={reactions.find(r => r.profileId === userId)}
                   onReact={handleReaction}
+                  defaultOpen={false}
                 />
                 <button className="hover:text-primary transition-colors">
                   <Share2 className="w-6 h-6" />
@@ -132,7 +133,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full">
               <Input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
