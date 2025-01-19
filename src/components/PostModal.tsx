@@ -91,7 +91,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
           <PostMedia media={post.images} />
         </div>
         
-        <div className="flex flex-col h-full max-w-[400px]">
+        <div className="flex flex-col h-full w-[400px]">
           <div className="p-4 border-b">
             <div className="flex items-center gap-3">
               <Avatar className="w-8 h-8">
@@ -118,7 +118,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
             ))}
           </div>
 
-          <div className="p-4 border-t shrink-0 w-full">
+          <div className="p-4 border-t mt-auto">
             <div className="flex justify-between items-center mb-4">
               <div className="flex gap-4">
                 <PostReactions
@@ -133,7 +133,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
               </div>
             </div>
 
-            <div className="flex gap-2 w-full">
+            <div className="flex gap-2">
               <Input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
@@ -144,9 +144,11 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                     handleComment();
                   }
                 }}
-                className="flex-1"
+                className="flex-1 min-w-0"
               />
-              <Button onClick={handleComment} className="shrink-0">Publicar</Button>
+              <Button onClick={handleComment} className="shrink-0">
+                Publicar
+              </Button>
             </div>
           </div>
         </div>
