@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CreatePost from "@/components/CreatePost";
 import Stories from "@/components/Stories";
@@ -12,10 +12,14 @@ import { SocialService } from "@/services/api";
 import { setAuthData } from "@/utils/auth";
 import { toast } from "sonner";
 import { notificationService } from "@/services/notificationService";
+import PostModal from "@/components/PostModal";
+import { Post as PostType } from "@/types/api";
 
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [selectedPost, setSelectedPost] = useState<PostType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const initializeNotifications = async () => {
@@ -29,11 +33,10 @@ const Index = () => {
 
     initializeNotifications();
 
-    // Cleanup on component unmount
     return () => {
       notificationService.stopConnection();
     };
-  }, []); // Empty dependency array means this runs once when component mounts
+  }, []);
 
   useEffect(() => {
     const hash = location.hash;
@@ -59,6 +62,11 @@ const Index = () => {
     }
   });
 
+  const handlePostClick = (post: PostType) => {
+    setSelectedPost(post);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Sidebar />
@@ -75,7 +83,9 @@ const Index = () => {
                 <div className="text-center text-red-500">Erro ao carregar posts</div>
               ) : posts && posts.length > 0 ? (
                 posts.map((post) => (
-                  <Post key={post.id} post={post} />
+                  <div key={post.id} onClick={() => handlePostClick(post)} className="cursor-pointer">
+                    <Post post={post} />
+                  </div>
                 ))
               ) : (
                 <div className="text-center">Nenhum post encontrado</div>
@@ -90,6 +100,15 @@ const Index = () => {
       </main>
 
       <Chat />
+
+      <PostModal 
+        post={selectedPost}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPost(null);
+        }}
+      />
     </div>
   );
 };

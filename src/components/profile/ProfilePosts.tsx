@@ -4,9 +4,9 @@ import { useInView } from "react-intersection-observer";
 import { ProfileService } from "@/services/profileService";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { MessageCircle, Heart } from "lucide-react";
 import { Post, PostReaction, PostComment } from "@/types/api";
+import PostModal from "@/components/PostModal";
 
 interface ProfilePostsProps {
   profileId: string;
@@ -14,10 +14,11 @@ interface ProfilePostsProps {
 
 const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
   const { ref, inView } = useInView();
-  const navigate = useNavigate();
   const [hoveredPostId, setHoveredPostId] = useState<string | null>(null);
   const [reactions, setReactions] = useState<Record<string, PostReaction[]>>({});
   const [comments, setComments] = useState<Record<string, PostComment[]>>({});
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     data,
@@ -64,7 +65,8 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
   };
 
   const handlePostClick = (post: Post) => {
-    navigate(`/post/${post.id}`, { state: { post } });
+    setSelectedPost(post);
+    setIsModalOpen(true);
   };
 
   if (status === "pending") return <div>Carregando posts...</div>;
@@ -125,6 +127,15 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
           Nenhum post encontrado
         </div>
       )}
+
+      <PostModal 
+        post={selectedPost}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPost(null);
+        }}
+      />
     </div>
   );
 };
