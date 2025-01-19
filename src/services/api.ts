@@ -1,13 +1,5 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import {  
-  Post, 
-  PostReaction, 
-  PostComment,
-  FriendRecommendationsResponse, 
-  FriendRecommendation, 
-  ViewProfileResponse, 
-  FollowUser 
-} from '@/types/api';
+import { Post, PostReaction, PostComment } from '@/types/api';
 import { getAuthToken } from '@/utils/auth';
 
 export const createHeaders = () => {
@@ -36,47 +28,24 @@ export const getImageUrl = (imageGuid: string): string => {
 
 export const SocialService = {
   getActivityFeed: async (): Promise<Post[]> => {
-    try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.activityFeed}`, {
-        headers: createHeaders(),
-      });
-      if (!response.ok) throw new Error('Failed to fetch activity feed');
-      
-      const data: Post[] = await response.json();
-
-      return data;
-    } catch (error) {
-      console.error('Error fetching activity feed:', error);
-      throw error;
-    }
-  },
-
-  getFriendRecommendations: async (): Promise<FriendRecommendation[]> => {
-    try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.friendRecommendations}`, {
-        headers: createHeaders(),
-      });
-      if (!response.ok) throw new Error('Failed to fetch friend recommendations');
-      
-      const data: FriendRecommendationsResponse = await response.json();
-      return data.recommendations;
-    } catch (error) {
-      console.error('Error fetching friend recommendations:', error);
-      throw error;
-    }
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.activityFeed}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch activity feed');
+    return response.json();
   },
 
   createPost: async (data: { content: string; visibility: number }): Promise<{ id: string }> => {
-    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.createPost}`, {
-      method: 'POST',
-      headers: createHeaders(),
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create post');
-    }
-
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.createPost}`,
+      {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify(data),
+      }
+    );
+    if (!response.ok) throw new Error('Failed to create post');
     return response.json();
   },
 
@@ -84,101 +53,15 @@ export const SocialService = {
     const headers = createHeaders();
     delete headers['Content-Type'];
     
-    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.uploadPostImages.replace('id', postId)}`, {
-      method: 'PUT',
-      headers: headers,
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload post images');
-    }
-  },
-
-  viewProfile: async (id: string): Promise<ViewProfileResponse> => {
-    try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfile.replace('id', id)}`, {
-        headers: createHeaders(),
-      });
-      if (!response.ok) throw new Error('Failed to fetch profile');
-      
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      throw error;
-    }
-  },
-
-  getFollowers: async (id: string, page: number = 1, rows: number = 10): Promise<FollowUser[]> => {
-    try {
-      const endpoint = SERVICES.SOCIAL.endpoints.getFollowers
-        .replace('id', id)
-        .replace('{page}', page.toString())
-        .replace('{rows}', rows.toString());
-      
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${endpoint}`, {
-        headers: createHeaders(),
-      });
-      if (!response.ok) throw new Error('Failed to fetch followers');
-      
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching followers:', error);
-      throw error;
-    }
-  },
-
-  getFollowing: async (id: string, page: number = 1, rows: number = 10): Promise<FollowUser[]> => {
-    try {
-      const endpoint = SERVICES.SOCIAL.endpoints.getFollowing
-        .replace('id', id)
-        .replace('{page}', page.toString())
-        .replace('{rows}', rows.toString());
-      
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${endpoint}`, {
-        headers: createHeaders(),
-      });
-      if (!response.ok) throw new Error('Failed to fetch following');
-      
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching following:', error);
-      throw error;
-    }
-  },
-
-  followUser: async (id: string): Promise<void> => {
-    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.followUser.replace('id', id)}`, {
-      method: 'POST',
-      headers: createHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to follow user');
-    }
-  },
-
-  unfollowUser: async (id: string): Promise<void> => {
-    const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.unfollowUser.replace('id', id)}`, {
-      method: 'DELETE',
-      headers: createHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to unfollow user');
-    }
-  },
-
-  getCurrentUserFollowData: async (id: string): Promise<{
-    followers: FollowUser[];
-    following: FollowUser[];
-  }> => {
-    const [followers, following] = await Promise.all([
-      SocialService.getFollowers(id),
-      SocialService.getFollowing(id)
-    ]);
-
-    return { followers, following };
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.uploadPostImages.replace('id', postId)}`,
+      {
+        method: 'PUT',
+        headers: headers,
+        body: formData,
+      }
+    );
+    if (!response.ok) throw new Error('Failed to upload post images');
   },
 
   getPostReactions: async (postId: string): Promise<PostReaction[]> => {
@@ -255,46 +138,5 @@ export const SocialService = {
       }
     );
     if (!response.ok) throw new Error('Failed to edit comment');
-  },
-
-  getProfilePosts: async (profileId: string): Promise<Post[]> => {
-    try {
-      const response = await fetch(
-        `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getProfilePosts.replace('id', profileId)}`,
-        { headers: createHeaders() }
-      );
-      
-      if (!response.ok) throw new Error('Failed to fetch profile posts');
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching profile posts:', error);
-      throw error;
-    }
-  },
-
-  getLatestFollower: async (): Promise<FollowUser> => {
-    try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestFollower}`, {
-        headers: createHeaders(),
-      });
-      if (!response.ok) throw new Error('Failed to fetch latest follower');
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching latest follower:', error);
-      throw error;
-    }
-  },
-
-  getLatestComment: async (): Promise<PostComment> => {
-    try {
-      const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestComment}`, {
-        headers: createHeaders(),
-      });
-      if (!response.ok) throw new Error('Failed to fetch latest comment');
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching latest comment:', error);
-      throw error;
-    }
   },
 };

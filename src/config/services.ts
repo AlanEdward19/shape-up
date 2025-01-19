@@ -21,9 +21,20 @@ export const SERVICES = {
       editComment: '/Post/v1/id/editComment',
       getLatestFollower: '/Follow/v1/GetLatestFollower',
       getLatestComment: '/Post/v1/GetLatestComment',
-      getProfilePosts: '/Profile/id/getPosts',
+      getProfilePosts: '/Profile/id/getPosts?page={page}&rows={rows}',
     }
   },
+  CHAT: {
+    baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL,
+    endpoints: {
+      getRecentMessages: '/Chat/v1/messages/getRecentMessages',
+      sendMessage: '/Chat/v1/messages/send'
+    }
+  },
+  NOTIFICATION: {
+    baseUrl: import.meta.env.VITE_NOTIFICATION_API_BASE_URL,
+    hubUrl: '/notifications'
+  }
 };
 
 export const STORAGE = {

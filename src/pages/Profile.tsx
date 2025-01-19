@@ -1,15 +1,16 @@
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
+import { ProfileService } from "@/services/profileService";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileInfo from "@/components/profile/ProfileInfo";
+import ProfilePosts from "@/components/profile/ProfilePosts";
 import FollowList from "@/components/profile/FollowList";
 import Sidebar from "@/components/Sidebar";
-import Post from "@/components/Post";
 
 const Profile = () => {
   const { id } = useParams();
@@ -19,7 +20,6 @@ const Profile = () => {
   const currentUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
   const isOwnProfile = currentUserId === id;
 
-  // Separate pagination states for followers and following
   const [followersPage, setFollowersPage] = useState(1);
   const [followersPerPage, setFollowersPerPage] = useState("10");
   const [followingPage, setFollowingPage] = useState(1);
@@ -27,7 +27,7 @@ const Profile = () => {
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['profile', id],
-    queryFn: () => SocialService.viewProfile(id!),
+    queryFn: () => ProfileService.viewProfile(id!),
     meta: {
       onError: (error: Error) => {
         console.error('Failed to fetch profile:', error);
@@ -36,20 +36,9 @@ const Profile = () => {
     }
   });
 
-  const { data: posts, isLoading: isLoadingPosts } = useQuery({
-    queryKey: ['profilePosts', id],
-    queryFn: () => SocialService.getProfilePosts(id!),
-    meta: {
-      onError: (error: Error) => {
-        console.error('Failed to fetch profile posts:', error);
-        toast.error("Falha ao carregar posts. Tente novamente mais tarde.");
-      }
-    }
-  });
-
   const { data: followers, isLoading: isLoadingFollowers } = useQuery({
     queryKey: ['followers', id, followersPage, followersPerPage],
-    queryFn: () => SocialService.getFollowers(id!, followersPage, Number(followersPerPage)),
+    queryFn: () => ProfileService.getFollowers(id!, followersPage, Number(followersPerPage)),
     enabled: showFollowers,
     meta: {
       onError: (error: Error) => {
@@ -129,7 +118,7 @@ const Profile = () => {
     setFollowingPage(1);
   };
 
-  if (isLoadingProfile || isLoadingPosts) {
+  if (isLoadingProfile) {
     return (
       <div className="flex">
         <Sidebar />
@@ -173,16 +162,7 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          <div className="space-y-4">
-            {posts?.map((post) => (
-              <Post key={post.id} post={post} />
-            ))}
-            {posts?.length === 0 && (
-              <div className="text-center text-muted-foreground">
-                Nenhum post encontrado
-              </div>
-            )}
-          </div>
+          <ProfilePosts profileId={id!} />
 
           <Dialog open={showFollowers} onOpenChange={setShowFollowers}>
             <DialogContent>
