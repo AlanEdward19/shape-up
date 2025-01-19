@@ -1,15 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { SocialService } from "@/services/api";
 import Post from "@/components/Post";
 import { toast } from "sonner";
 
 const PostPage = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const postFromState = location.state?.post;
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['post', id],
     queryFn: () => SocialService.getPost(id!),
+    initialData: postFromState,
+    enabled: !postFromState,
     meta: {
       onError: (error: Error) => {
         console.error('Failed to fetch post:', error);
