@@ -242,4 +242,16 @@ export const SocialService = {
     if (!response.ok) throw new Error('Failed to fetch post');
     return response.json();
   },
+
+  editProfile: async (data: { gender?: number; birthDate?: string; bio?: string }): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}/Profile/v1/editProfile`,
+      {
+        method: 'PATCH',
+        headers: createHeaders(),
+        body: JSON.stringify(data),
+      }
+    );
+    if (!response.ok) throw new Error('Failed to update profile');
+  },
 };
