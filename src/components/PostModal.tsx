@@ -86,9 +86,9 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] p-0 bg-background border-none grid grid-cols-[2fr,400px] overflow-hidden">
-        <div className="h-full flex items-center justify-center">
-          <div className="h-full w-full flex items-center">
+      <DialogContent className="max-w-6xl p-0 bg-background border-none grid grid-cols-[2fr,400px] overflow-hidden">
+        <div className="flex items-center justify-center">
+          <div className="w-full">
             <PostMedia media={post.images} />
           </div>
         </div>
