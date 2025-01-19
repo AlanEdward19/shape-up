@@ -27,7 +27,7 @@ const PostPage = () => {
 
   return (
     <div className="container mx-auto py-8">
-      <Post post={post} />
+      <Post post={post} expandComments={true} />
     </div>
   );
 };
