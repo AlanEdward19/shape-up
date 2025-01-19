@@ -68,8 +68,6 @@ const ProfileHeader = ({
             <span className="text-muted-foreground">seguindo</span>
           </button>
         </div>
-
-        <p className="text-muted-foreground">{profile.email}</p>
       </div>
     </div>
   );
