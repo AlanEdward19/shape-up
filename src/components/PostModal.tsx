@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Post as PostType } from "@/types/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageCircle, Share2 } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -80,12 +80,12 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl p-0 bg-background border-none grid grid-cols-[1fr,400px] overflow-hidden">
+      <DialogContent className="max-w-6xl h-[90vh] p-0 bg-background border-none grid grid-cols-[1fr,400px] overflow-hidden">
         <div className="aspect-square bg-black flex items-center justify-center">
           <PostMedia media={post.images} />
         </div>
         
-        <div className="flex flex-col h-[80vh]">
+        <div className="flex flex-col h-full">
           <div className="p-4 border-b">
             <div className="flex items-center gap-3">
               <Avatar className="w-8 h-8">
@@ -94,11 +94,10 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
               </Avatar>
               <span className="font-medium">{post.publisherFirstName} {post.publisherLastName}</span>
             </div>
+            <p className="mt-3 text-sm text-muted-foreground">{post.content}</p>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            <p>{post.content}</p>
-            
             {comments.map((comment) => (
               <div key={comment.id} className="flex items-start gap-3">
                 <Avatar className="w-8 h-8">
@@ -107,7 +106,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                 </Avatar>
                 <div>
                   <span className="font-medium">{comment.profileFirstName} {comment.profileLastName}</span>
-                  <p>{comment.content}</p>
+                  <p className="text-sm">{comment.content}</p>
                 </div>
               </div>
             ))}
@@ -121,9 +120,6 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                   userReaction={reactions.find(r => r.profileId === userId)}
                   onReact={handleReaction}
                 />
-                <button className="hover:text-primary transition-colors">
-                  <MessageCircle className="w-6 h-6" />
-                </button>
                 <button className="hover:text-primary transition-colors">
                   <Share2 className="w-6 h-6" />
                 </button>
