@@ -27,6 +27,7 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.length === 0 ? undefined : allPages.length + 1;
     },
+    initialPageParam: 1,
     meta: {
       onError: (error: Error) => {
         console.error('Failed to fetch profile posts:', error);

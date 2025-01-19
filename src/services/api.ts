@@ -139,4 +139,89 @@ export const SocialService = {
     );
     if (!response.ok) throw new Error('Failed to edit comment');
   },
+
+  getFriendRecommendations: async () => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.friendRecommendations}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch friend recommendations');
+    return response.json();
+  },
+
+  followUser: async (userId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.followUser.replace('id', userId)}`,
+      {
+        method: 'POST',
+        headers: createHeaders(),
+      }
+    );
+    if (!response.ok) throw new Error('Failed to follow user');
+  },
+
+  unfollowUser: async (userId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.unfollowUser.replace('id', userId)}`,
+      {
+        method: 'POST',
+        headers: createHeaders(),
+      }
+    );
+    if (!response.ok) throw new Error('Failed to unfollow user');
+  },
+
+  getFollowing: async (userId: string, page: number = 1, rows: number = 10) => {
+    const endpoint = SERVICES.SOCIAL.endpoints.getFollowing
+      .replace('id', userId)
+      .replace('{page}', page.toString())
+      .replace('{rows}', rows.toString());
+    
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${endpoint}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch following');
+    return response.json();
+  },
+
+  getCurrentUserFollowData: async (userId: string) => {
+    const [following, followers] = await Promise.all([
+      SocialService.getFollowing(userId),
+      SocialService.getFollowers(userId)
+    ]);
+    return { following, followers };
+  },
+
+  getFollowers: async (userId: string, page: number = 1, rows: number = 10) => {
+    const endpoint = SERVICES.SOCIAL.endpoints.getFollowers
+      .replace('id', userId)
+      .replace('{page}', page.toString())
+      .replace('{rows}', rows.toString());
+    
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${endpoint}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch followers');
+    return response.json();
+  },
+
+  getLatestFollower: async () => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestFollower}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch latest follower');
+    return response.json();
+  },
+
+  getLatestComment: async () => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestComment}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch latest comment');
+    return response.json();
+  },
 };
