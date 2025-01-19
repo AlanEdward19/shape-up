@@ -53,6 +53,7 @@ export interface ViewProfileResponse {
   imageUrl: string;
   followers: number;
   following: number;
+  posts: number;
 }
 
 export interface FollowUser {
