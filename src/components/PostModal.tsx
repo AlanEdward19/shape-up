@@ -118,7 +118,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
             ))}
           </div>
 
-          <div className="p-4 border-t mt-auto">
+          <div className="p-4 border-t bg-background">
             <div className="flex justify-between items-center mb-4">
               <div className="flex gap-4">
                 <PostReactions
@@ -133,7 +133,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
@@ -144,9 +144,9 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                     handleComment();
                   }
                 }}
-                className="flex-1 min-w-0"
+                className="min-w-0"
               />
-              <Button onClick={handleComment} className="shrink-0">
+              <Button onClick={handleComment} className="whitespace-nowrap">
                 Publicar
               </Button>
             </div>
