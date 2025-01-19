@@ -1,5 +1,5 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { Post, PostReaction, PostComment } from '@/types/api';
+import { Post, PostReaction, PostComment, ViewProfileResponse } from '@/types/api';
 import { getAuthToken } from '@/utils/auth';
 
 export const createHeaders = () => {
@@ -27,6 +27,15 @@ export const getImageUrl = (imageGuid: string): string => {
 };
 
 export const SocialService = {
+  viewProfile: async (id: string): Promise<ViewProfileResponse> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfile.replace('id', id)}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch profile');
+    return response.json();
+  },
+
   getActivityFeed: async (): Promise<Post[]> => {
     const response = await fetch(
       `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.activityFeed}`,
