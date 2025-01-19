@@ -1,7 +1,7 @@
 import { ViewProfileResponse, Gender } from "@/types/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Briefcase, GraduationCap, Heart, Calendar } from "lucide-react";
+import { MapPin, Calendar, Heart } from "lucide-react";
 
 interface ProfileInfoProps {
   profile: ViewProfileResponse;
@@ -11,10 +11,7 @@ const ProfileInfo = ({ profile }: ProfileInfoProps) => {
   return (
     <div className="space-y-6">
       {profile.bio && (
-        <div>
-          <h2 className="font-semibold mb-4 text-lg">Sobre</h2>
-          <p className="text-muted-foreground">{profile.bio}</p>
-        </div>
+        <p className="text-muted-foreground mb-6">{profile.bio}</p>
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
