@@ -4,7 +4,7 @@ import { useInView } from "react-intersection-observer";
 import { ProfileService } from "@/services/profileService";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MessageCircle, Heart } from "lucide-react";
 import { PostReaction, PostComment } from "@/types/api";
 
@@ -21,16 +21,20 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
 
   const {
     data,
-    status,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    status,
   } = useInfiniteQuery({
     queryKey: ['profilePosts', profileId],
-    queryFn: ({ pageParam = 1 }) => ProfileService.getPosts(profileId, pageParam),
+    queryFn: async ({ pageParam = 1 }) => {
+      const posts = await ProfileService.getPosts(profileId, pageParam);
+      return posts;
+    },
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.length === 0 ? undefined : allPages.length + 1;
     },
+    initialPageParam: 1,
     meta: {
       onError: (error: Error) => {
         console.error('Failed to fetch profile posts:', error);
@@ -62,16 +66,16 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
     setHoveredPostId(postId);
   };
 
-  const handlePostClick = (post: any) => {
-    navigate(`/post/${post.id}`, { state: { post } });
+  const handlePostClick = (postId: string) => {
+    navigate(`/post/${postId}`);
   };
 
   if (status === 'pending') return <div>Carregando posts...</div>;
   if (status === 'error') return null;
 
   return (
-    <div className="grid grid-cols-3 gap-1 mt-6">
-      <div className="col-span-3">
+    <div>
+      <div className="grid grid-cols-3 gap-1">
         {data.pages.map((group, i) => (
           <div key={i} className="contents">
             {group.map((post) => (
@@ -80,7 +84,7 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
                 className="aspect-square relative group overflow-hidden bg-secondary cursor-pointer"
                 onMouseEnter={() => handlePostHover(post.id)}
                 onMouseLeave={() => setHoveredPostId(null)}
-                onClick={() => handlePostClick(post)}
+                onClick={() => handlePostClick(post.id)}
               >
                 {post.images && post.images.length > 0 ? (
                   <>
@@ -114,9 +118,16 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
           </div>
         ))}
       </div>
-      <div ref={ref} className="col-span-3 h-20 flex items-center justify-center">
+      
+      <div ref={ref} className="h-10">
         {isFetchingNextPage && <div>Carregando mais posts...</div>}
       </div>
+
+      {data.pages[0].length === 0 && (
+        <div className="text-center text-muted-foreground">
+          Nenhum post encontrado
+        </div>
+      )}
     </div>
   );
 };

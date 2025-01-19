@@ -22,7 +22,7 @@ export const SERVICES = {
       getLatestFollower: '/Follow/v1/GetLatestFollower',
       getLatestComment: '/Post/v1/GetLatestComment',
       getPost: '/Post/v1/id',
-      getProfilePosts: '/Profile/v1/id/getPosts?Page={page}&Rows={rows}',
+      getProfilePosts: '/Profile/v1/id/getPosts?Page={page}',
     }
   },
   CHAT: {
