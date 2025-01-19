@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Share2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
 import { getUserId } from "@/utils/auth";
@@ -37,6 +37,12 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
       toast.error("Erro ao carregar dados do post");
     }
   };
+
+  useEffect(() => {
+    if (isOpen && post) {
+      fetchPostData();
+    }
+  }, [isOpen, post]);
 
   const handleComment = async () => {
     if (!post || !newComment.trim()) return;
