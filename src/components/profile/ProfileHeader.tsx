@@ -22,13 +22,14 @@ const ProfileHeader = ({
   followActionPending,
 }: ProfileHeaderProps) => {
   return (
-    <div className="flex flex-row items-center gap-4">
-      <Avatar className="w-24 h-24">
+    <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
+      <Avatar className="w-32 h-32 md:w-40 md:h-40">
         <AvatarImage src={profile.imageUrl} alt={`${profile.firstName} ${profile.lastName}`} />
         <AvatarFallback>{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
       </Avatar>
-      <div className="flex-1">
-        <div className="flex items-center justify-between">
+      
+      <div className="flex-1 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
           <h1 className="text-2xl font-bold">
             {profile.firstName} {profile.lastName}
           </h1>
@@ -37,13 +38,21 @@ const ProfileHeader = ({
               onClick={onFollowAction}
               variant={isFollowing ? "destructive" : "default"}
               disabled={followActionPending}
+              className="w-full md:w-auto"
             >
               {isFollowing ? "Deixar de Seguir" : "Seguir"}
             </Button>
           )}
         </div>
-        <p className="text-muted-foreground">{profile.email}</p>
-        <div className="flex space-x-6 mt-4">
+
+        <div className="flex space-x-6">
+          <button
+            onClick={() => {}}
+            className="hover:text-primary transition-colors"
+          >
+            <span className="font-bold">{profile.posts}</span>{" "}
+            <span className="text-muted-foreground">publicações</span>
+          </button>
           <button
             onClick={onShowFollowers}
             className="hover:text-primary transition-colors"
@@ -59,6 +68,8 @@ const ProfileHeader = ({
             <span className="text-muted-foreground">seguindo</span>
           </button>
         </div>
+
+        <p className="text-muted-foreground">{profile.email}</p>
       </div>
     </div>
   );

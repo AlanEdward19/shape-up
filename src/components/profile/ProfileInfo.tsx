@@ -1,6 +1,7 @@
 import { ViewProfileResponse, Gender } from "@/types/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { MapPin, Briefcase, GraduationCap, Heart } from "lucide-react";
 
 interface ProfileInfoProps {
   profile: ViewProfileResponse;
@@ -8,43 +9,42 @@ interface ProfileInfoProps {
 
 const ProfileInfo = ({ profile }: ProfileInfoProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
-        <h2 className="font-semibold mb-2">Sobre</h2>
-        <p>{profile.bio}</p>
+        <h2 className="font-semibold mb-4 text-lg">Sobre</h2>
+        <p className="text-muted-foreground">{profile.bio}</p>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h2 className="font-semibold mb-2">Informações Pessoais</h2>
-          <ul className="space-y-2">
-            <li>
-              <span className="text-muted-foreground">Gênero:</span>{" "}
-              {profile.gender === Gender.Male ? "Masculino" : "Feminino"}
-            </li>
-            <li>
-              <span className="text-muted-foreground">Data de Nascimento:</span>{" "}
+      
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-muted-foreground" />
+          <span>
+            Mora em <span className="font-medium">{profile.city}, {profile.state}, {profile.country}</span>
+          </span>
+        </div>
+
+        {profile.gender === Gender.Male ? (
+          <div className="flex items-center gap-2">
+            <Heart className="w-5 h-5 text-muted-foreground" />
+            <span>Homem</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Heart className="w-5 h-5 text-muted-foreground" />
+            <span>Mulher</span>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          <GraduationCap className="w-5 h-5 text-muted-foreground" />
+          <span>
+            Nascido em{" "}
+            <span className="font-medium">
               {format(new Date(profile.birthDate), "dd 'de' MMMM 'de' yyyy", {
                 locale: ptBR,
               })}
-            </li>
-          </ul>
-        </div>
-        <div>
-          <h2 className="font-semibold mb-2">Localização</h2>
-          <ul className="space-y-2">
-            <li>
-              <span className="text-muted-foreground">Cidade:</span>{" "}
-              {profile.city}
-            </li>
-            <li>
-              <span className="text-muted-foreground">Estado:</span>{" "}
-              {profile.state}
-            </li>
-            <li>
-              <span className="text-muted-foreground">País:</span>{" "}
-              {profile.country}
-            </li>
-          </ul>
+            </span>
+          </span>
         </div>
       </div>
     </div>

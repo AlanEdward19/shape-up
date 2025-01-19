@@ -1,9 +1,9 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import Post from "@/components/Post";
 import { ProfileService } from "@/services/profileService";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 interface ProfilePostsProps {
   profileId: string;
@@ -46,14 +46,32 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
   if (status === 'error') return null;
 
   return (
-    <div className="space-y-4">
-      {data.pages.map((group, i) => (
-        <div key={i}>
-          {group.map((post) => (
-            <Post key={post.id} post={post} />
-          ))}
-        </div>
-      ))}
+    <div>
+      <div className="grid grid-cols-3 gap-1">
+        {data.pages.map((group, i) => (
+          <div key={i} className="contents">
+            {group.map((post) => (
+              <Link 
+                to={`/post/${post.id}`} 
+                key={post.id} 
+                className="aspect-square relative group overflow-hidden bg-secondary"
+              >
+                {post.images && post.images.length > 0 ? (
+                  <img
+                    src={post.images[0]}
+                    alt="Post thumbnail"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-secondary text-muted-foreground p-4 text-sm">
+                    {post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}
+                  </div>
+                )}
+              </Link>
+            ))}
+          </div>
+        ))}
+      </div>
       
       <div ref={ref} className="h-10">
         {isFetchingNextPage && <div>Carregando mais posts...</div>}
