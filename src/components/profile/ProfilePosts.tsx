@@ -4,6 +4,7 @@ import { useInView } from "react-intersection-observer";
 import { ProfileService } from "@/services/profileService";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { MessageCircle, Heart } from "lucide-react";
 
 interface ProfilePostsProps {
   profileId: string;
@@ -54,16 +55,30 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
               <Link 
                 to={`/post/${post.id}`} 
                 key={post.id} 
-                className="aspect-square relative group overflow-hidden bg-secondary"
+                className="aspect-square relative group overflow-hidden bg-secondary cursor-pointer"
               >
                 {post.images && post.images.length > 0 ? (
-                  <img
-                    src={post.images[0]}
-                    alt="Post thumbnail"
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  />
+                  <>
+                    <img
+                      src={post.images[0]}
+                      alt="Post thumbnail"
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105 group-hover:opacity-50"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                      <div className="flex gap-6 text-white">
+                        <div className="flex items-center gap-2">
+                          <Heart className="w-6 h-6 fill-white" />
+                          <span className="font-semibold">0</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="w-6 h-6" />
+                          <span className="font-semibold">0</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-secondary text-muted-foreground p-4 text-sm">
+                  <div className="w-full h-full flex items-center justify-center bg-secondary text-muted-foreground p-4 text-sm group-hover:bg-secondary/80">
                     {post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}
                   </div>
                 )}

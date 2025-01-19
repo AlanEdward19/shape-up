@@ -233,4 +233,13 @@ export const SocialService = {
     if (!response.ok) throw new Error('Failed to fetch latest comment');
     return response.json();
   },
+
+  getPost: async (id: string): Promise<Post> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getPost.replace('id', id)}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch post');
+    return response.json();
+  },
 };

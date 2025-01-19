@@ -11,8 +11,13 @@ import PostMedia from "./PostMedia";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 
-const Post = ({ post }: { post: PostType }) => {
-  const [showComments, setShowComments] = useState(false);
+interface PostProps {
+  post: PostType;
+  expandComments?: boolean;
+}
+
+const Post = ({ post, expandComments = false }: PostProps) => {
+  const [showComments, setShowComments] = useState(expandComments);
   const [comments, setComments] = useState<PostComment[]>([]);
   const [reactions, setReactions] = useState<PostReaction[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -119,6 +124,12 @@ const Post = ({ post }: { post: PostType }) => {
       toast.error("Erro ao remover comentário");
     }
   };
+
+  useEffect(() => {
+    if (expandComments) {
+      fetchComments();
+    }
+  }, [expandComments]);
 
   return (
     <div className="bg-secondary rounded-lg p-4 mb-4">
