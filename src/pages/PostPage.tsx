@@ -3,11 +3,12 @@ import { useParams, useLocation } from "react-router-dom";
 import { SocialService } from "@/services/api";
 import Post from "@/components/Post";
 import { toast } from "sonner";
+import { Post as PostType } from "@/types/api";
 
 const PostPage = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
-  const postFromState = location.state?.post;
+  const postFromState = location.state?.post as PostType;
 
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['post', id],
