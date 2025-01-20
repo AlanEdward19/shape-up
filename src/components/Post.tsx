@@ -143,6 +143,7 @@ const Post = ({ post, expandComments = false, onImageClick }: PostProps) => {
                                  target.closest('.reactions-section') !== null ||
                                  target.closest('.hover-card-content') !== null ||
                                  target.closest('.hover-card-trigger') !== null ||
+                                 target.closest('.hover-card') !== null ||
                                  target.closest('.comments-section') !== null;
     
     // Only open modal if clicking directly on an image and not on interactive elements
