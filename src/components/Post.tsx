@@ -64,8 +64,6 @@ const Post = ({ post, expandComments = false }: PostProps) => {
   const handleReaction = async (reactionType: number) => {
     try {
       const userReaction = reactions.find(r => r.profileId === userId);
-
-      console.log("userReaction", userReaction);
       
       if (userReaction) {
         if (reactionType.toString() === 'NaN') {
@@ -137,7 +135,9 @@ const Post = ({ post, expandComments = false }: PostProps) => {
     const isClickingImage = target.tagName === 'IMG' || 
                            target.closest('.post-image-container') !== null;
     const isClickingButton = target.tagName === 'BUTTON' || 
-                           target.closest('button') !== null;
+                           target.closest('button') !== null ||
+                           target.closest('.reactions-section') !== null ||
+                           target.closest('.comments-section') !== null;
     
     if (!isClickingButton && (isClickingImage || target.classList.contains('post-container'))) {
       navigate(`/post/${post.id}`);
@@ -169,7 +169,7 @@ const Post = ({ post, expandComments = false }: PostProps) => {
         </div>
       )}
       
-      <div className="flex justify-between items-center text-muted-foreground">
+      <div className="flex justify-between items-center text-muted-foreground reactions-section">
         <PostReactions
           reactions={reactions}
           userReaction={reactions.find(r => r.profileId === userId)}
@@ -177,7 +177,7 @@ const Post = ({ post, expandComments = false }: PostProps) => {
         />
 
         <button 
-          className="flex items-center gap-2 hover:text-primary transition-colors"
+          className="flex items-center gap-2 hover:text-primary transition-colors comments-section"
           onClick={() => setShowComments(!showComments)}
         >
           <MessageCircle className="w-5 h-5" />
