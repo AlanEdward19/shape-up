@@ -131,8 +131,21 @@ const Post = ({ post, expandComments = false }: PostProps) => {
     }
   }, [expandComments]);
 
+  const handlePostClick = (e: React.MouseEvent) => {
+    // Only open modal if clicking directly on the post container or image
+    const target = e.target as HTMLElement;
+    const isClickingImage = target.tagName === 'IMG' || 
+                           target.closest('.post-image-container') !== null;
+    const isClickingButton = target.tagName === 'BUTTON' || 
+                           target.closest('button') !== null;
+    
+    if (!isClickingButton && (isClickingImage || target.classList.contains('post-container'))) {
+      navigate(`/post/${post.id}`);
+    }
+  };
+
   return (
-    <div className="bg-secondary rounded-lg p-4 mb-4">
+    <div className="bg-secondary rounded-lg p-4 mb-4 post-container" onClick={handlePostClick}>
       <div className="flex items-center gap-3 mb-4">
         <Avatar className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity" onClick={handleProfileClick}>
           <AvatarImage src={post.publisherImageUrl} alt={`${post.publisherFirstName} ${post.publisherLastName}`} />
@@ -151,7 +164,9 @@ const Post = ({ post, expandComments = false }: PostProps) => {
       <p className="text-left mb-4">{post.content}</p>
       
       {post.images && post.images.length > 0 && (
-        <PostMedia media={post.images} />
+        <div className="post-image-container">
+          <PostMedia media={post.images} />
+        </div>
       )}
       
       <div className="flex justify-between items-center text-muted-foreground">

@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Post as PostType } from "@/types/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Share2 } from "lucide-react";
+import { Share2, X, Edit2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -21,6 +21,8 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([]);
   const [reactions, setReactions] = useState([]);
+  const [editingComment, setEditingComment] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
   const userId = getUserId();
 
   const fetchPostData = async () => {
@@ -55,6 +57,32 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
     } catch (error) {
       console.error("Error adding comment:", error);
       toast.error("Erro ao adicionar comentário");
+    }
+  };
+
+  const handleEditComment = async (commentId: string) => {
+    if (!editContent.trim()) return;
+
+    try {
+      await SocialService.editComment(commentId, editContent);
+      setEditingComment(null);
+      setEditContent("");
+      await fetchPostData();
+      toast.success("Comentário editado");
+    } catch (error) {
+      console.error("Error editing comment:", error);
+      toast.error("Erro ao editar comentário");
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await SocialService.deleteComment(commentId);
+      await fetchPostData();
+      toast.success("Comentário removido");
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      toast.error("Erro ao remover comentário");
     }
   };
 
@@ -112,10 +140,55 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                   <AvatarImage src={comment.profileImageUrl} />
                   <AvatarFallback>{comment.profileFirstName[0]}{comment.profileLastName[0]}</AvatarFallback>
                 </Avatar>
-                <div>
+                <div className="flex-1">
                   <span className="font-medium">{comment.profileFirstName} {comment.profileLastName}</span>
-                  <p className="text-sm">{comment.content}</p>
+                  {editingComment === comment.id ? (
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        placeholder="Edite seu comentário..."
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleEditComment(comment.id);
+                          }
+                        }}
+                      />
+                      <Button onClick={() => handleEditComment(comment.id)}>Salvar</Button>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => {
+                          setEditingComment(null);
+                          setEditContent("");
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="text-sm">{comment.content}</p>
+                  )}
                 </div>
+                {comment.profileId === userId && !editingComment && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setEditingComment(comment.id);
+                        setEditContent(comment.content);
+                      }}
+                      className="text-muted-foreground hover:text-primary"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
