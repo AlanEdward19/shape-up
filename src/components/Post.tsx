@@ -14,9 +14,10 @@ import { useNavigate } from "react-router-dom";
 interface PostProps {
   post: PostType;
   expandComments?: boolean;
+  onImageClick?: (post: PostType) => void;
 }
 
-const Post = ({ post, expandComments = false }: PostProps) => {
+const Post = ({ post, expandComments = false, onImageClick }: PostProps) => {
   const [showComments, setShowComments] = useState(expandComments);
   const [comments, setComments] = useState<PostComment[]>([]);
   const [reactions, setReactions] = useState<PostReaction[]>([]);
@@ -26,7 +27,8 @@ const Post = ({ post, expandComments = false }: PostProps) => {
   const userId = getUserId();
   const navigate = useNavigate();
 
-  const handleProfileClick = () => {
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     navigate(`/profile/${post.publisherId}`);
   };
 
@@ -144,7 +146,7 @@ const Post = ({ post, expandComments = false }: PostProps) => {
     
     // Only open modal if clicking directly on an image and not on interactive elements
     if (!isClickingInteractive && isClickingImage) {
-      navigate(`/post/${post.id}`);
+      onImageClick?.(post);
     }
   };
 
@@ -182,13 +184,19 @@ const Post = ({ post, expandComments = false }: PostProps) => {
 
         <button 
           className="flex items-center gap-2 hover:text-primary transition-colors comments-section"
-          onClick={() => setShowComments(!showComments)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowComments(!showComments);
+          }}
         >
           <MessageCircle className="w-5 h-5" />
           <span>Comentar ({comments.length})</span>
         </button>
 
-        <button className="flex items-center gap-2 hover:text-primary transition-colors">
+        <button 
+          className="flex items-center gap-2 hover:text-primary transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Share2 className="w-5 h-5" />
           <span>Compartilhar</span>
         </button>
