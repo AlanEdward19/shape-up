@@ -141,8 +141,9 @@ const Post = ({ post, expandComments = false, onImageClick }: PostProps) => {
     const isClickingInteractive = target.tagName === 'BUTTON' || 
                                  target.closest('button') !== null ||
                                  target.closest('.reactions-section') !== null ||
-                                 target.closest('.comments-section') !== null ||
-                                 target.closest('.hover-card-content') !== null;
+                                 target.closest('.hover-card-content') !== null ||
+                                 target.closest('.hover-card-trigger') !== null ||
+                                 target.closest('.comments-section') !== null;
     
     // Only open modal if clicking directly on an image and not on interactive elements
     if (!isClickingInteractive && isClickingImage) {
