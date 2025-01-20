@@ -9,6 +9,7 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import PostPage from "./pages/PostPage";
+import Chat from "./components/Chat";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/post/:id" element={<PostPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
+        <Chat />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
