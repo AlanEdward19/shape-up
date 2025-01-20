@@ -62,9 +62,25 @@ const Index = () => {
     }
   });
 
-  const handlePostClick = (post: PostType) => {
-    setSelectedPost(post);
-    setIsModalOpen(true);
+  const handlePostClick = (post: PostType, event: React.MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement;
+    
+    // Only open modal if clicking directly on an image
+    const isClickingImage = target.tagName === 'IMG';
+    
+    // Check if clicking on interactive elements that shouldn't trigger modal
+    const isClickingInteractive = target.closest('button') !== null ||
+                                 target.closest('.reactions-section') !== null ||
+                                 target.closest('.hover-card-content') !== null ||
+                                 target.closest('.hover-card-trigger') !== null ||
+                                 target.closest('.hover-card') !== null ||
+                                 target.closest('.comments-section') !== null;
+    
+    // Only open modal if clicking directly on an image and not on interactive elements
+    if (!isClickingInteractive && isClickingImage) {
+      setSelectedPost(post);
+      setIsModalOpen(true);
+    }
   };
 
   return (
@@ -83,8 +99,11 @@ const Index = () => {
                 <div className="text-center text-red-500">Erro ao carregar posts</div>
               ) : posts && posts.length > 0 ? (
                 posts.map((post) => (
-                  <div key={post.id} onClick={() => handlePostClick(post)} className="cursor-pointer">
-                    <Post post={post} />
+                  <div key={post.id}>
+                    <Post 
+                      post={post} 
+                      onImageClick={(post) => handlePostClick(post, event as React.MouseEvent<HTMLElement>)}
+                    />
                   </div>
                 ))
               ) : (
