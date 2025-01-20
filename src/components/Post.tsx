@@ -130,16 +130,21 @@ const Post = ({ post, expandComments = false }: PostProps) => {
   }, [expandComments]);
 
   const handlePostClick = (e: React.MouseEvent) => {
-    // Only open modal if clicking directly on the post container or image
     const target = e.target as HTMLElement;
+    
+    // Check if clicking on image or post container directly
     const isClickingImage = target.tagName === 'IMG' || 
                            target.closest('.post-image-container') !== null;
-    const isClickingButton = target.tagName === 'BUTTON' || 
-                           target.closest('button') !== null ||
-                           target.closest('.reactions-section') !== null ||
-                           target.closest('.comments-section') !== null;
     
-    if (!isClickingButton && (isClickingImage || target.classList.contains('post-container'))) {
+    // Check if clicking on interactive elements that shouldn't trigger modal
+    const isClickingInteractive = target.tagName === 'BUTTON' || 
+                                 target.closest('button') !== null ||
+                                 target.closest('.reactions-section') !== null ||
+                                 target.closest('.comments-section') !== null ||
+                                 target.closest('.hover-card-content') !== null;
+    
+    // Only open modal if clicking directly on post container or image, and not on interactive elements
+    if (!isClickingInteractive && (isClickingImage || target.classList.contains('post-container'))) {
       navigate(`/post/${post.id}`);
     }
   };
