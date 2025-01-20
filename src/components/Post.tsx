@@ -132,9 +132,8 @@ const Post = ({ post, expandComments = false }: PostProps) => {
   const handlePostClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     
-    // Check if clicking on image or post container directly
-    const isClickingImage = target.tagName === 'IMG' || 
-                           target.closest('.post-image-container') !== null;
+    // Only open modal if clicking directly on an image
+    const isClickingImage = target.tagName === 'IMG';
     
     // Check if clicking on interactive elements that shouldn't trigger modal
     const isClickingInteractive = target.tagName === 'BUTTON' || 
@@ -143,14 +142,14 @@ const Post = ({ post, expandComments = false }: PostProps) => {
                                  target.closest('.comments-section') !== null ||
                                  target.closest('.hover-card-content') !== null;
     
-    // Only open modal if clicking directly on post container or image, and not on interactive elements
-    if (!isClickingInteractive && (isClickingImage || target.classList.contains('post-container'))) {
+    // Only open modal if clicking directly on an image and not on interactive elements
+    if (!isClickingInteractive && isClickingImage) {
       navigate(`/post/${post.id}`);
     }
   };
 
   return (
-    <div className="bg-secondary rounded-lg p-4 mb-4 post-container" onClick={handlePostClick}>
+    <div className="bg-secondary rounded-lg p-4 mb-4" onClick={handlePostClick}>
       <div className="flex items-center gap-3 mb-4">
         <Avatar className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity" onClick={handleProfileClick}>
           <AvatarImage src={post.publisherImageUrl} alt={`${post.publisherFirstName} ${post.publisherLastName}`} />
