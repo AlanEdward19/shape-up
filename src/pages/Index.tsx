@@ -5,7 +5,6 @@ import CreatePost from "@/components/CreatePost";
 import Stories from "@/components/Stories";
 import Suggestions from "@/components/Suggestions";
 import Post from "@/components/Post";
-import Chat from "@/components/Chat";
 import Sidebar from "@/components/Sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SocialService } from "@/services/api";
@@ -62,25 +61,9 @@ const Index = () => {
     }
   });
 
-  const handlePostClick = (post: PostType, event: React.MouseEvent<HTMLElement>) => {
-    const target = event.target as HTMLElement;
-    
-    // Only open modal if clicking directly on an image
-    const isClickingImage = target.tagName === 'IMG';
-    
-    // Check if clicking on interactive elements that shouldn't trigger modal
-    const isClickingInteractive = target.closest('button') !== null ||
-                                 target.closest('.reactions-section') !== null ||
-                                 target.closest('.hover-card-content') !== null ||
-                                 target.closest('.hover-card-trigger') !== null ||
-                                 target.closest('.hover-card') !== null ||
-                                 target.closest('.comments-section') !== null;
-    
-    // Only open modal if clicking directly on an image and not on interactive elements
-    if (!isClickingInteractive && isClickingImage) {
-      setSelectedPost(post);
-      setIsModalOpen(true);
-    }
+  const handlePostClick = (post: PostType) => {
+    setSelectedPost(post);
+    setIsModalOpen(true);
   };
 
   return (
@@ -102,7 +85,7 @@ const Index = () => {
                   <div key={post.id}>
                     <Post 
                       post={post} 
-                      onImageClick={(post) => handlePostClick(post, event as React.MouseEvent<HTMLElement>)}
+                      onImageClick={handlePostClick}
                     />
                   </div>
                 ))
@@ -117,8 +100,6 @@ const Index = () => {
           <Suggestions />
         </div>
       </main>
-
-      <Chat />
 
       <PostModal 
         post={selectedPost}
