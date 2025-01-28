@@ -6,10 +6,6 @@
     <title>ShapeUp - Login</title>
     <meta name="description" content="Rede social para praticantes de musculação e intusiastas de nutrição" />
     <style>
-      @tailwind base;
-      @tailwind components;
-      @tailwind utilities;
-
       :root {
         --background: #1A1F2C;
         --foreground: #FFFFFF;
@@ -33,6 +29,7 @@
       .min-h-screen { min-height: 100vh; }
       .p-8 { padding: 2rem; }
       .p-12 { padding: 3rem; }
+      .mb-4 { margin-bottom: 1rem; }
       .space-y-4 > * + * { margin-top: 1rem; }
       .space-y-6 > * + * { margin-top: 1.5rem; }
       .w-full { width: 100%; }
@@ -44,6 +41,7 @@
       .text-lg { font-size: 1.125rem; }
       .text-gray-300 { color: #D1D5DB; }
       .bg-secondary { background-color: var(--secondary); }
+      .text-white { color: var(--foreground); }
       .hidden { display: none; }
       
       @media (min-width: 1024px) {
@@ -58,47 +56,109 @@
         max-width: 24rem;
       }
 
+      .entry {
+        margin-bottom: 1rem;
+      }
+
       .entry-item {
         margin-bottom: 1rem;
       }
 
-      .entry-item label {
+      .entry-item label, 
+      label {
         display: block;
         margin-bottom: 0.5rem;
         color: var(--foreground);
+        font-size: 0.875rem;
       }
 
-      .entry-item input {
+      .entry-item input,
+      input[type="email"],
+      input[type="password"],
+      input[type="text"] {
         width: 100%;
-        padding: 0.5rem;
+        padding: 0.75rem;
         border: 1px solid var(--muted);
         background-color: var(--secondary);
         color: var(--foreground);
         border-radius: 0.375rem;
+        box-sizing: border-box;
+        font-size: 0.875rem;
+      }
+
+      .entry-item input:focus,
+      input[type="email"]:focus,
+      input[type="password"]:focus,
+      input[type="text"]:focus {
+        outline: 2px solid var(--primary);
+        outline-offset: -1px;
       }
 
       .buttons {
         margin-top: 1.5rem;
       }
 
-      #next {
+      #next,
+      button[type="submit"] {
         width: 100%;
-        padding: 0.5rem 1rem;
+        padding: 0.75rem 1rem;
         background-color: var(--primary);
         color: var(--foreground);
         border: none;
         border-radius: 0.375rem;
         cursor: pointer;
         font-weight: 500;
+        font-size: 0.875rem;
+        transition: opacity 0.2s;
       }
 
-      #next:hover {
+      #next:hover,
+      button[type="submit"]:hover {
         opacity: 0.9;
       }
 
       .error {
         color: #EF4444;
         margin-top: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .create {
+        margin-top: 1rem;
+        text-align: center;
+      }
+
+      .create a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      .create a:hover {
+        text-decoration: underline;
+      }
+
+      .divider {
+        margin: 1.5rem 0;
+        text-align: center;
+        position: relative;
+      }
+
+      .divider::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 1px;
+        background: var(--muted);
+      }
+
+      .divider span {
+        position: relative;
+        background: var(--background);
+        padding: 0 0.5rem;
+        color: var(--foreground);
+        font-size: 0.875rem;
       }
     </style>
   </head>
@@ -115,10 +175,10 @@
 
       <!-- Right side - Login Form -->
       <div class="flex-1 flex items-center justify-center p-8">
-        <div id="api" class="space-y-6"></div>
+        <div id="api" class="space-y-6">
+          <!-- Azure AD B2C will inject the login form here -->
+        </div>
       </div>
     </div>
-
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
   </body>
 </html>
