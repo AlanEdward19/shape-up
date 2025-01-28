@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShapeUp - Login</title>
+    <meta name="description" content="Rede social para praticantes de musculação e intusiastas de nutrição" />
+    <style>
+      @tailwind base;
+      @tailwind components;
+      @tailwind utilities;
+
+      :root {
+        --background: #1A1F2C;
+        --foreground: #FFFFFF;
+        --primary: #0FA0CE;
+        --secondary: #2A2F3C;
+        --muted: #374151;
+      }
+
+      body {
+        background-color: var(--background);
+        color: var(--foreground);
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      .flex { display: flex; }
+      .flex-1 { flex: 1; }
+      .flex-col { flex-direction: column; }
+      .items-center { align-items: center; }
+      .justify-center { justify-content: center; }
+      .min-h-screen { min-height: 100vh; }
+      .p-8 { padding: 2rem; }
+      .p-12 { padding: 3rem; }
+      .space-y-4 > * + * { margin-top: 1rem; }
+      .space-y-6 > * + * { margin-top: 1.5rem; }
+      .w-full { width: 100%; }
+      .max-w-sm { max-width: 24rem; }
+      .text-center { text-align: center; }
+      .text-3xl { font-size: 1.875rem; }
+      .text-4xl { font-size: 2.25rem; }
+      .font-bold { font-weight: 700; }
+      .text-lg { font-size: 1.125rem; }
+      .text-gray-300 { color: #D1D5DB; }
+      .bg-secondary { background-color: var(--secondary); }
+      .hidden { display: none; }
+      
+      @media (min-width: 1024px) {
+        .lg\:flex { display: flex; }
+        .lg\:flex-1 { flex: 1; }
+        .lg\:flex-col { flex-direction: column; }
+      }
+
+      /* Azure AD B2C specific styles */
+      #api {
+        width: 100%;
+        max-width: 24rem;
+      }
+
+      .entry-item {
+        margin-bottom: 1rem;
+      }
+
+      .entry-item label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--foreground);
+      }
+
+      .entry-item input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--muted);
+        background-color: var(--secondary);
+        color: var(--foreground);
+        border-radius: 0.375rem;
+      }
+
+      .buttons {
+        margin-top: 1.5rem;
+      }
+
+      #next {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        background-color: var(--primary);
+        color: var(--foreground);
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-weight: 500;
+      }
+
+      #next:hover {
+        opacity: 0.9;
+      }
+
+      .error {
+        color: #EF4444;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flex min-h-screen">
+      <!-- Left side - Branding -->
+      <div class="hidden lg:flex lg:flex-1 lg:flex-col justify-center p-12 bg-secondary">
+        <h1 class="text-4xl font-bold text-white mb-4">ShapeUp</h1>
+        <p class="text-lg text-gray-300">
+          Transforme sua rotina, conecte-se com sua evolução. Nutrição, treinos e
+          amizades em um só lugar.
+        </p>
+      </div>
+
+      <!-- Right side - Login Form -->
+      <div class="flex-1 flex items-center justify-center p-8">
+        <div id="api" class="space-y-6"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+  </body>
+</html>
