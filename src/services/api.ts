@@ -173,7 +173,7 @@ export const SocialService = {
     const response = await fetch(
       `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.unfollowUser.replace('id', userId)}`,
       {
-        method: 'POST',
+        method: 'DELETE',
         headers: createHeaders(),
       }
     );
