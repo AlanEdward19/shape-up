@@ -29,7 +29,6 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
       
       await ChatService.sendMessage(profileId, message);
       setMessage("");
-      toast.success("Mensagem enviada");
 
       // Add the sent message to the messages cache
       queryClient.setQueryData(
@@ -38,12 +37,22 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
           if (!oldData) return { pages: [[]], pageParams: [1] };
           
           const newMessage = {
-            id: Date.now().toString(),
+            id: `temp-${Date.now()}`,
             senderId: getUserId(),
             receiverId: profileId,
             encryptedMessage: encryptedMessage,
             timestamp: timestamp
           };
+
+          // Check if message already exists
+          const messageExists = oldData.pages.some((page: any[]) => 
+            page.some((msg: any) => 
+              msg.encryptedMessage === encryptedMessage && 
+              msg.timestamp === timestamp
+            )
+          );
+          
+          if (messageExists) return oldData;
 
           const newPages = [...oldData.pages];
           const lastPageIndex = newPages.length - 1;
