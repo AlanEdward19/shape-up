@@ -18,7 +18,7 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
   const queryClient = useQueryClient();
 
   const handleSend = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || isSending) return;
     
     setIsSending(true);
     try {
@@ -45,7 +45,6 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
             timestamp: timestamp
           };
 
-          // Add new message to the end of the last page
           const newPages = [...oldData.pages];
           const lastPageIndex = newPages.length - 1;
           newPages[lastPageIndex] = [...newPages[lastPageIndex], newMessage];
