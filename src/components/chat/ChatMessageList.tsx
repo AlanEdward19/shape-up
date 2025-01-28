@@ -43,10 +43,8 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
   useEffect(() => {
     const startConnection = async () => {
       try {
-        // Clean up existing connection
         if (connectionRef.current) {
           await connectionRef.current.stop();
-          // Remove all handlers
           connectionRef.current.off("ReceiveMessage");
           connectionRef.current = null;
         }
@@ -60,20 +58,24 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
 
         connectionRef.current = connection;
 
-        // Add new message handler
         connection.on("ReceiveMessage", (message) => {
           queryClient.setQueryData(
             ["messages", profileId],
             (oldData: any) => {
               if (!oldData) return { pages: [[message]], pageParams: [1] };
               
-              // Check if message already exists
+              // Verifica se a mensagem já existe em qualquer página
               const messageExists = oldData.pages.some((page: any[]) => 
-                page.some((msg: any) => msg.id === message.id)
+                page.some((msg: any) => 
+                  msg.id === message.id || 
+                  (msg.encryptedMessage === message.encryptedMessage && 
+                   msg.timestamp === message.timestamp)
+                )
               );
               
               if (messageExists) return oldData;
-              
+
+              // Adiciona a nova mensagem apenas se ela não existir
               const newPages = [...oldData.pages];
               const lastPageIndex = newPages.length - 1;
               newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
@@ -143,15 +145,26 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         groups[dateKey] = [];
       }
       
-      groups[dateKey].push(message);
+      // Verifica se a mensagem já existe no grupo antes de adicionar
+      const messageExists = groups[dateKey].some(
+        msg => msg.id === message.id || 
+        (msg.encryptedMessage === message.encryptedMessage && 
+         msg.timestamp === message.timestamp)
+      );
+      
+      if (!messageExists) {
+        groups[dateKey].push(message);
+      }
     });
     
-    const groupedMessages = Object.entries(groups).map(([dateStr, messages]) => ({
-      date: parseISO(dateStr),
-      messages: messages.sort((a, b) => parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime())
-    }));
-
-    return groupedMessages.sort((a, b) => a.date.getTime() - b.date.getTime());
+    return Object.entries(groups)
+      .map(([dateStr, messages]) => ({
+        date: parseISO(dateStr),
+        messages: messages.sort((a, b) => 
+          parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime()
+        )
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
   };
 
   const allMessages = data?.pages.flatMap(page => page) || [];
@@ -165,7 +178,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
             <ChatDateSeparator date={group.date} />
             {group.messages.map((message) => (
               <ChatMessage
-                key={message.id}
+                key={`${message.id}-${message.timestamp}`}
                 id={message.id}
                 senderId={message.senderId}
                 message={message.encryptedMessage}
