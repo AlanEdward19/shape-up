@@ -8,7 +8,7 @@ import ChatDateSeparator from "./ChatDateSeparator";
 import * as signalR from "@microsoft/signalr";
 import { getAuthToken } from "@/utils/auth";
 import { SERVICES } from "@/config/services";
-import { format, isSameDay, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface ChatMessageListProps {
   profileId: string;
@@ -21,6 +21,7 @@ interface GroupedMessages {
 
 const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
   const queryClient = useQueryClient();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
@@ -40,36 +41,44 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
   });
 
   useEffect(() => {
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${SERVICES.CHAT.baseUrl}/chat?ProfileId=${profileId}`, {
-        accessTokenFactory: () => getAuthToken() || ''
-      })
-      .withAutomaticReconnect()
-      .build();
-
-    connection.on("ReceiveMessage", (message) => {
-      queryClient.setQueryData(
-        ["messages", profileId],
-        (oldData: any) => {
-          if (!oldData) return { pages: [[message]], pageParams: [1] };
-          
-          const newPages = [...oldData.pages];
-          const lastPageIndex = newPages.length - 1;
-          newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
-          
-          return {
-            ...oldData,
-            pages: newPages
-          };
-        }
-      );
-
-      if (scrollRef.current) {
-        scrollRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-
     const startConnection = async () => {
+      // Limpa conexão anterior se existir
+      if (connectionRef.current) {
+        await connectionRef.current.stop();
+        connectionRef.current = null;
+      }
+
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl(`${SERVICES.CHAT.baseUrl}/chat?ProfileId=${profileId}`, {
+          accessTokenFactory: () => getAuthToken() || ''
+        })
+        .withAutomaticReconnect()
+        .build();
+
+      connectionRef.current = connection;
+
+      connection.on("ReceiveMessage", (message) => {
+        queryClient.setQueryData(
+          ["messages", profileId],
+          (oldData: any) => {
+            if (!oldData) return { pages: [[message]], pageParams: [1] };
+            
+            const newPages = [...oldData.pages];
+            const lastPageIndex = newPages.length - 1;
+            newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
+            
+            return {
+              ...oldData,
+              pages: newPages
+            };
+          }
+        );
+
+        if (scrollRef.current) {
+          scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+
       try {
         await connection.start();
         console.log("SignalR Connected");
@@ -82,8 +91,9 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
     startConnection();
 
     return () => {
-      if (connection.state === signalR.HubConnectionState.Connected) {
-        connection.stop();
+      if (connectionRef.current) {
+        connectionRef.current.stop();
+        connectionRef.current = null;
       }
     };
   }, [profileId, queryClient]);
