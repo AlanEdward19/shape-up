@@ -216,24 +216,6 @@ export const SocialService = {
     return response.json();
   },
 
-  getLatestFollower: async () => {
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestFollower}`,
-      { headers: createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch latest follower');
-    return response.json();
-  },
-
-  getLatestComment: async () => {
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getLatestComment}`,
-      { headers: createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch latest comment');
-    return response.json();
-  },
-
   getPost: async (id: string): Promise<Post> => {
     const response = await fetch(
       `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getPost.replace('id', id)}`,

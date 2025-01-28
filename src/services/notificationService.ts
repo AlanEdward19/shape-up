@@ -33,50 +33,51 @@ class NotificationService {
     }
   }
 
-  private async handleNotification(type: string): Promise<void> {
+  private async handleNotification(type: string, message: string): Promise<void> {
     console.log("Received notification:", type);
     const { addNotification } = useNotificationStore.getState();
     let notification: Notification | null = null;
 
     try {
+
       switch (type) {
         case NotificationType.Message:
           notification = {
             id: crypto.randomUUID(),
             type: NotificationType.Message,
-            message: "Nova mensagem recebida",
+            message: message,
             createdAt: new Date().toISOString(),
             read: false
           };
           break;
 
         case NotificationType.NewFollower:
-          const followerData = await SocialService.getLatestFollower();
           notification = {
             id: crypto.randomUUID(),
             type: NotificationType.NewFollower,
-            message: `${followerData.firstName} ${followerData.lastName} começou a te seguir`,
+            message: message,
             createdAt: new Date().toISOString(),
-            read: false,
-            data: {
-              senderId: followerData.profileId
-            }
+            read: false
           };
           break;
 
         case NotificationType.Comment:
-          const commentData = await SocialService.getLatestComment();
           notification = {
             id: crypto.randomUUID(),
             type: NotificationType.Comment,
-            message: `${commentData.profileFirstName} comentou em seu post`,
+            message: message,
             createdAt: new Date().toISOString(),
-            read: false,
-            data: {
-              senderId: commentData.profileId,
-              postId: commentData.postId,
-              commentId: commentData.id
-            }
+            read: false
+          };
+          break;
+
+          case NotificationType.Reaction:
+          notification = {
+            id: crypto.randomUUID(),
+            type: NotificationType.Reaction,
+            message: message,
+            createdAt: new Date().toISOString(),
+            read: false
           };
           break;
 
@@ -97,8 +98,15 @@ class NotificationService {
   private setupNotificationHandlers(): void {
     if (!this.connection) return;
 
-    this.connection.on("ReceiveNotification", (type: string) => {
-      this.handleNotification(type);
+    this.connection.on("ReceiveNotification", (content: string) => {
+
+      const typeMatch = content.match(/Topic:\s*(.*)/);
+  const messageMatch = content.match(/Message:\s*(.*)/);
+
+  const type = typeMatch ? typeMatch[1].trim() : '';
+  const message = messageMatch ? messageMatch[1].trim() : '';
+
+  this.handleNotification(type, message);
     });
   }
 

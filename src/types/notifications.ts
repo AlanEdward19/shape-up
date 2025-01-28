@@ -2,7 +2,8 @@ export enum NotificationType {
   Message = "Message",
   FriendRequest = "FriendRequest",
   NewFollower = "NewFollower",
-  Comment = "Comment"
+  Comment = "Comment",
+  Reaction = "Reaction",
 }
 
 export interface Notification {
