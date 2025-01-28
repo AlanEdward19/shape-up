@@ -82,7 +82,9 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
     startConnection();
 
     return () => {
-      connection.stop();
+      if (connection.state === signalR.HubConnectionState.Connected) {
+        connection.stop();
+      }
     };
   }, [profileId, queryClient]);
 
@@ -128,7 +130,6 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
       messages: messages.sort((a, b) => parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime())
     }));
 
-    // Ordena os grupos de mensagens por data, com a data mais recente no final
     return groupedMessages.sort((a, b) => a.date.getTime() - b.date.getTime());
   };
 
