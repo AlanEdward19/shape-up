@@ -29,7 +29,12 @@ const NotificationIcon = () => {
           )}
         </Button>
       </HoverCardTrigger>
-      <HoverCardContent className="w-80 bg-secondary border-muted" align="end">
+      <HoverCardContent 
+        className="w-80 bg-secondary border-muted shadow-lg" 
+        align="end"
+        sideOffset={5}
+        style={{ zIndex: 1000 }}
+      >
         <div className="space-y-2">
           <div className="font-semibold">Notificações</div>
           <ScrollArea className="h-[300px]">

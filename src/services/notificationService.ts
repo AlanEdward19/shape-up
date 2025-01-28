@@ -34,56 +34,64 @@ class NotificationService {
   }
 
   private async handleNotification(type: string): Promise<void> {
+    console.log("Received notification:", type);
     const { addNotification } = useNotificationStore.getState();
-    let notification: Notification;
+    let notification: Notification | null = null;
 
-    switch (type) {
-      case NotificationType.Message:
-        notification = {
-          id: crypto.randomUUID(),
-          type: NotificationType.Message,
-          message: "Nova mensagem recebida",
-          createdAt: new Date().toISOString(),
-          read: false
-        };
-        break;
+    try {
+      switch (type) {
+        case NotificationType.Message:
+          notification = {
+            id: crypto.randomUUID(),
+            type: NotificationType.Message,
+            message: "Nova mensagem recebida",
+            createdAt: new Date().toISOString(),
+            read: false
+          };
+          break;
 
-      case NotificationType.NewFollower:
-        const followerData = await SocialService.getLatestFollower();
-        notification = {
-          id: followerData.profileId,
-          type: NotificationType.NewFollower,
-          message: `${followerData.firstName} ${followerData.lastName} começou a te seguir`,
-          createdAt: new Date().toISOString(),
-          read: false,
-          data: {
-            senderId: followerData.profileId
-          }
-        };
-        break;
+        case NotificationType.NewFollower:
+          const followerData = await SocialService.getLatestFollower();
+          notification = {
+            id: crypto.randomUUID(),
+            type: NotificationType.NewFollower,
+            message: `${followerData.firstName} ${followerData.lastName} começou a te seguir`,
+            createdAt: new Date().toISOString(),
+            read: false,
+            data: {
+              senderId: followerData.profileId
+            }
+          };
+          break;
 
-      case NotificationType.Comment:
-        const commentData = await SocialService.getLatestComment();
-        notification = {
-          id: commentData.id,
-          type: NotificationType.Comment,
-          message: `${commentData.profileFirstName} comentou em seu post`,
-          createdAt: new Date().toISOString(),
-          read: false,
-          data: {
-            senderId: commentData.profileId,
-            postId: commentData.postId,
-            commentId: commentData.id
-          }
-        };
-        break;
+        case NotificationType.Comment:
+          const commentData = await SocialService.getLatestComment();
+          notification = {
+            id: crypto.randomUUID(),
+            type: NotificationType.Comment,
+            message: `${commentData.profileFirstName} comentou em seu post`,
+            createdAt: new Date().toISOString(),
+            read: false,
+            data: {
+              senderId: commentData.profileId,
+              postId: commentData.postId,
+              commentId: commentData.id
+            }
+          };
+          break;
 
-      default:
-        console.warn(`Unhandled notification type: ${type}`);
-        return;
+        default:
+          console.warn(`Unhandled notification type: ${type}`);
+          return;
+      }
+
+      if (notification) {
+        console.log("Adding notification:", notification);
+        addNotification(notification);
+      }
+    } catch (error) {
+      console.error("Error handling notification:", error);
     }
-
-    addNotification(notification);
   }
 
   private setupNotificationHandlers(): void {
