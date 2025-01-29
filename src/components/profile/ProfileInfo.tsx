@@ -8,6 +8,9 @@ interface ProfileInfoProps {
 }
 
 const ProfileInfo = ({ profile }: ProfileInfoProps) => {
+
+console.log(profile)
+
   return (
     <div className="space-y-6">
       {profile.bio && (
@@ -18,28 +21,32 @@ const ProfileInfo = ({ profile }: ProfileInfoProps) => {
         <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-muted-foreground" />
           <span>
-            Mora em <span className="font-medium">{profile.city}, {profile.state}, {profile.country}</span>
+            Mora em <span className="font-medium">{profile.postalCode}</span>
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-muted-foreground" />
-          <span>
-            Nascido em{" "}
-            <span className="font-medium">
-              {format(new Date(profile.birthDate), "dd 'de' MMMM 'de' yyyy", {
-                locale: ptBR,
-              })}
+        {profile.birthDate != null && (
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-muted-foreground" />
+            <span>
+              Nascido em{" "}
+              <span className="font-medium">
+                {format(new Date(profile.birthDate), "dd 'de' MMMM 'de' yyyy", {
+                  locale: ptBR,
+                })}
+              </span>
             </span>
-          </span>
-        </div>
+          </div>
+        )}
 
-        <div className="flex items-center gap-2">
+{profile.gender != null && (
+          <div className="flex items-center gap-2">
           <Heart className="w-5 h-5 text-muted-foreground" />
           <span className="font-medium">
             {profile.gender === Gender.Male ? "Homem" : "Mulher"}
           </span>
         </div>
+        )}
       </div>
     </div>
   );

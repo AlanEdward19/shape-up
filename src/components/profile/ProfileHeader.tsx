@@ -40,23 +40,26 @@ const ProfileHeader = ({
 }: ProfileHeaderProps) => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  
+
   const form = useForm<EditProfileForm>({
     defaultValues: {
-      gender: profile.gender.toString(),
-      birthDate: profile.birthDate.split('T')[0],
+      gender: profile.gender?.toString() ?? "",
+      birthDate: profile.birthDate?.split('T')[0] ?? "",
       bio: profile.bio || "",
     },
   });
 
   const editProfileMutation = useMutation({
     mutationFn: async (data: Partial<EditProfileForm>) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = {};
+
+      console.log(data);
       
-      if (data.gender !== profile.gender.toString()) {
+      if (profile.gender == null || data.gender !== profile.gender.toString()) {
         payload.gender = parseInt(data.gender);
       }
-      if (data.birthDate !== profile.birthDate.split('T')[0]) {
+      if (profile.birthDate == null || data.birthDate !== profile.birthDate.split('T')[0]) {
         payload.birthDate = data.birthDate;
       }
       if (data.bio !== profile.bio) {
