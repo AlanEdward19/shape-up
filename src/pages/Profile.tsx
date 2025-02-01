@@ -167,9 +167,6 @@ const Profile = () => {
               <ProfileInfo 
                 profile={profile}
                 hasReceivedRequest={hasReceivedRequest}
-                onAcceptRequest={() => SocialService.manageFriendRequest(profile.id, true)}
-                onRejectRequest={() => SocialService.manageFriendRequest(profile.id, false)}
-                isRequestPending={false}
               />
             </CardContent>
           </Card>
