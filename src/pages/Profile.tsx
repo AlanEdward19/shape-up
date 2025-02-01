@@ -60,14 +60,23 @@ const Profile = () => {
     }
   });
 
-  const { data: currentUserFollowData } = useQuery({
-    queryKey: ['currentUserFollowData', currentUserId],
-    queryFn: () => SocialService.getCurrentUserFollowData(currentUserId!),
+  const { data: followData } = useQuery({
+    queryKey: ['followData', id],
+    queryFn: async () => {
+      const [followers, following] = await Promise.all([
+        SocialService.getFollowers(id!),
+        SocialService.getFollowing(id!)
+      ]);
+      return {
+        following: following,
+        friendRequests: [] // This will be handled by a separate endpoint for friend requests
+      };
+    },
     enabled: !!currentUserId && !isOwnProfile,
   });
 
-  const isFollowing = currentUserFollowData?.following?.some(f => f.profileId === id);
-  const hasReceivedRequest = currentUserFollowData?.friendRequests?.some(
+  const isFollowing = followData?.following?.some(f => f.profileId === id);
+  const hasReceivedRequest = followData?.friendRequests?.some(
     request => request.profileId === id && request.status === 1
   );
 
@@ -159,7 +168,6 @@ const Profile = () => {
                 onShowFollowing={() => setShowFollowing(true)}
                 followActionPending={followMutation.isPending || unfollowMutation.isPending}
                 onOpenChat={(profileId) => {
-                  // Implement chat opening logic here
                   console.log('Opening chat with:', profileId);
                 }}
                 hasReceivedRequest={hasReceivedRequest}
