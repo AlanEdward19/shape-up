@@ -140,6 +140,8 @@ const Profile = () => {
     );
   }
 
+  const hasReceivedRequest = currentUserFollowData?.friendRequests?.some(request => request.profileId === profile.id && request.status === 1);
+
   return (
     <div className="flex">
       <Sidebar />
@@ -162,7 +164,13 @@ const Profile = () => {
               />
             </CardHeader>
             <CardContent>
-              <ProfileInfo profile={profile} />
+              <ProfileInfo 
+                profile={profile}
+                hasReceivedRequest={hasReceivedRequest}
+                onAcceptRequest={() => SocialService.manageFriendRequest(profile.id, true)}
+                onRejectRequest={() => SocialService.manageFriendRequest(profile.id, false)}
+                isRequestPending={false}
+              />
             </CardContent>
           </Card>
 

@@ -1,16 +1,24 @@
-import { ViewProfileResponse, Gender } from "@/types/api";
+import { ViewProfileResponse, Gender, FriendRequestStatus } from "@/types/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MapPin, Calendar, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ProfileInfoProps {
   profile: ViewProfileResponse;
+  hasReceivedRequest?: boolean;
+  onAcceptRequest?: () => void;
+  onRejectRequest?: () => void;
+  isRequestPending?: boolean;
 }
 
-const ProfileInfo = ({ profile }: ProfileInfoProps) => {
-
-console.log(profile)
-
+const ProfileInfo = ({ 
+  profile,
+  hasReceivedRequest,
+  onAcceptRequest,
+  onRejectRequest,
+  isRequestPending
+}: ProfileInfoProps) => {
   return (
     <div className="space-y-6">
       {profile.bio && (
@@ -39,15 +47,38 @@ console.log(profile)
           </div>
         )}
 
-{profile.gender != null && (
+        {profile.gender != null && (
           <div className="flex items-center gap-2">
-          <Heart className="w-5 h-5 text-muted-foreground" />
-          <span className="font-medium">
-            {profile.gender === Gender.Male ? "Homem" : "Mulher"}
-          </span>
-        </div>
+            <Heart className="w-5 h-5 text-muted-foreground" />
+            <span className="font-medium">
+              {profile.gender === Gender.Male ? "Homem" : "Mulher"}
+            </span>
+          </div>
         )}
       </div>
+
+      {hasReceivedRequest && (
+        <div className="mt-6 p-4 bg-secondary rounded-lg">
+          <p className="text-sm text-muted-foreground mb-3">
+            Você possui uma solicitação de amizade pendente deste perfil
+          </p>
+          <div className="flex gap-2">
+            <Button
+              onClick={onAcceptRequest}
+              disabled={isRequestPending}
+            >
+              Aceitar
+            </Button>
+            <Button
+              variant="outline"
+              onClick={onRejectRequest}
+              disabled={isRequestPending}
+            >
+              Recusar
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
