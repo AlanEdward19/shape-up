@@ -1,6 +1,6 @@
-import ChatHeader from '@/components/molecules/chat/ChatHeader';
-import ChatMessageList from '@/components/molecules/chat/ChatMessageList';
-import ChatInput from '@/components/molecules/chat/ChatInput';
+import ChatHeader from './ChatHeader';
+import ChatMessageList from './ChatMessageList';
+import ChatInput from './ChatInput';
 
 interface ChatConversationProps {
   profileId: string;
