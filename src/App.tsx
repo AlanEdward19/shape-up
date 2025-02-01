@@ -9,7 +9,7 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import PostPage from "./pages/PostPage";
-import Chat from "./components/Chat";
+import MainLayout from "./components/templates/MainLayout";
 
 const queryClient = new QueryClient();
 
@@ -23,12 +23,11 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/index" element={<Index />} />
-          <Route path="/profile/:id" element={<Profile />} />
-          <Route path="/post/:id" element={<PostPage />} />
+          <Route path="/index" element={<MainLayout><Index /></MainLayout>} />
+          <Route path="/profile/:id" element={<MainLayout><Profile /></MainLayout>} />
+          <Route path="/post/:id" element={<MainLayout><PostPage /></MainLayout>} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
-        <Chat />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
