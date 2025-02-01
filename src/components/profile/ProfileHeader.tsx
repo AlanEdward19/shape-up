@@ -65,6 +65,9 @@ const ProfileHeader = ({
   const hasSentRequest = friendRequests.some(request => 
     request.profileId === profile.id && request.status === 0
   );
+  const hasReceivedRequest = friendRequests.some(request => 
+    request.profileId === profile.id && request.status === 1
+  );
 
   const form = useForm<EditProfileForm>({
     defaultValues: {
@@ -142,6 +145,18 @@ const ProfileHeader = ({
     },
     onError: () => {
       toast.error("Erro ao cancelar solicitação de amizade");
+    },
+  });
+
+  const manageFriendRequestMutation = useMutation({
+    mutationFn: (accept: boolean) => SocialService.manageFriendRequest(profile.id, accept),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['friends'] });
+      toast.success("Solicitação de amizade atualizada!");
+    },
+    onError: () => {
+      toast.error("Erro ao processar solicitação de amizade");
     },
   });
 
@@ -264,6 +279,22 @@ const ProfileHeader = ({
                     <UserMinus className="w-4 h-4 mr-2" />
                     Desfazer Amizade
                   </Button>
+                ) : hasReceivedRequest ? (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => manageFriendRequestMutation.mutate(true)}
+                      disabled={manageFriendRequestMutation.isPending}
+                    >
+                      Aceitar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => manageFriendRequestMutation.mutate(false)}
+                      disabled={manageFriendRequestMutation.isPending}
+                    >
+                      Recusar
+                    </Button>
+                  </div>
                 ) : hasSentRequest ? (
                   <Button
                     variant="destructive"
