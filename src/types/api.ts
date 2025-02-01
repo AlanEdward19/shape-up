@@ -1,92 +1,28 @@
-export enum Visibility {
-  Public = 0,
-  FriendsOnly = 1,
-  Private = 2
+export interface ViewProfileResponse {
+  id: string;
+  name: string;
+  bio?: string;
+  country: string;
+  city: string;
+  state: string;
+  birthDate?: string;
+  gender: Gender;
+  followers: number;
+  following: number;
 }
 
 export enum Gender {
-  Male = 0,
-  Female = 1
+  Male = "male",
+  Female = "female",
 }
 
-export interface Post {
-  id: string;
-  publisherId: string;
-  publisherFirstName: string;
-  publisherLastName: string;
-  publisherImageUrl: string;
-  visibility: Visibility;
-  images: string[];
-  content: string;
-}
-
-export interface PostReaction {
+export interface FriendRequestStatus {
   profileId: string;
-  createdAt: string;
-  reactionType: string;
-  postId: string;
-  id: string;
-}
-
-export interface PostComment {
-  profileId: string;
-  profileFirstName: string;
-  profileLastName: string;
-  profileImageUrl: string;
-  postId: string;
-  createdAt: string;
-  content: string;
-  id: string;
-}
-
-export interface ViewProfileResponse {
-  id: string;
-  firstName: string;
-  lastName: string;
-  city: string;
-  state: string;
-  country: string;
-  birthDate: string;
-  bio: string;
-  gender: number;
-  email: string;
-  imageUrl: string;
-  followers: number;
-  following: number;
-  posts: number;
+  status: number;
 }
 
 export interface FollowUser {
   profileId: string;
-  firstName: string;
-  lastName: string;
-  imageUrl: string;
-}
-
-export interface FriendRecommendation {
-  profile: ViewProfileResponse;
-  mutualFriends: number;
-}
-
-export interface FriendRecommendationsResponse {
-  recommendations: FriendRecommendation[];
-}
-
-export enum FriendRequestStatus {
-  Sent = 0,
-  Received = 1
-}
-
-export interface Friend {
-  firstName: string;
-  lastName: string;
-  profileId: string;
-  imageUrl: string;
-}
-
-export interface FriendRequest {
-  firstName: string;
-  lastName: string;
-  status: FriendRequestStatus;
-  profileId: string;
+  name: string;
+  avatarUrl?: string;
 }
