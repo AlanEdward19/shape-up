@@ -155,6 +155,10 @@ const Profile = () => {
                 onShowFollowers={() => setShowFollowers(true)}
                 onShowFollowing={() => setShowFollowing(true)}
                 followActionPending={followMutation.isPending || unfollowMutation.isPending}
+                onOpenChat={(profileId) => {
+                  // Implement chat opening logic here
+                  console.log('Opening chat with:', profileId);
+                }}
               />
             </CardHeader>
             <CardContent>

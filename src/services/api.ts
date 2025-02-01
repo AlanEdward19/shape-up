@@ -36,6 +36,70 @@ export const SocialService = {
     return response.json();
   },
 
+  editProfile: async (data: { gender?: number; birthDate?: string; bio?: string }): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}/Profile/v1/EditProfile`,
+      {
+        method: 'PUT',
+        headers: createHeaders(),
+        body: JSON.stringify(data)
+      }
+    );
+    if (!response.ok) throw new Error('Failed to edit profile');
+  },
+
+  getCurrentUserFollowData: async (userId: string) => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}/Follow/v1/GetUserFollowData/${userId}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch user follow data');
+    return response.json();
+  },
+
+  followUser: async (userId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.followUser.replace('id', userId)}`,
+      {
+        method: 'POST',
+        headers: createHeaders()
+      }
+    );
+    if (!response.ok) throw new Error('Failed to follow user');
+  },
+
+  unfollowUser: async (userId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.unfollowUser.replace('id', userId)}`,
+      {
+        method: 'POST',
+        headers: createHeaders()
+      }
+    );
+    if (!response.ok) throw new Error('Failed to unfollow user');
+  },
+
+  getPost: async (postId: string): Promise<Post> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getPost.replace('id', postId)}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch post');
+    return response.json();
+  },
+
+  getFollowing: async (userId: string, page: number, rows: number): Promise<FollowUser[]> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowing
+        .replace('id', userId)
+        .replace('{page}', page.toString())
+        .replace('{rows}', rows.toString())}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to fetch following list');
+    return response.json();
+  },
+
   getActivityFeed: async (): Promise<Post[]> => {
     const response = await fetch(
       `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.activityFeed}`,
@@ -221,8 +285,4 @@ export const SocialService = {
     );
     if (!response.ok) throw new Error('Failed to remove friend request');
   },
-};
-
-export const STORAGE = {
-  baseUrl: import.meta.env.VITE_STORAGE_URL,
 };
