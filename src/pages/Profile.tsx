@@ -50,7 +50,7 @@ const Profile = () => {
 
   const { data: following, isLoading: isLoadingFollowing } = useQuery({
     queryKey: ['following', id, followingPage, followingPerPage],
-    queryFn: () => SocialService.getFollowing(id!, followingPage, Number(followingPerPage)),
+    queryFn: () => SocialService.getFollowing(id!, followingPage.toString(), followingPerPage),
     enabled: showFollowing,
     meta: {
       onError: (error: Error) => {

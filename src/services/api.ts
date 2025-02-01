@@ -48,30 +48,21 @@ export const SocialService = {
     if (!response.ok) throw new Error('Failed to edit profile');
   },
 
-  getFollowers: async (userId: string): Promise<FollowUser[]> => {
+  getFollowers: async (userId: string, page: string = '1', rows: string = '10'): Promise<FollowUser[]> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowers.replace('id', userId).replace('{page}', '1').replace('{rows}', '10')}`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowers.replace('id', userId).replace('{page}', page).replace('{rows}', rows)}`,
       { headers: createHeaders() }
     );
     if (!response.ok) throw new Error('Failed to fetch followers list');
     return response.json();
   },
 
-  getFollowing: async (userId: string): Promise<FollowUser[]> => {
+  getFollowing: async (userId: string, page: string = '1', rows: string = '10'): Promise<FollowUser[]> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowing.replace('id', userId).replace('{page}', '1').replace('{rows}', '10')}`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowing.replace('id', userId).replace('{page}', page).replace('{rows}', rows)}`,
       { headers: createHeaders() }
     );
     if (!response.ok) throw new Error('Failed to fetch following list');
-    return response.json();
-  },
-
-  getCurrentUserFollowData: async (userId: string) => {
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Follow/v1/GetUserFollowData/${userId}`,
-      { headers: createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch user follow data');
     return response.json();
   },
 
