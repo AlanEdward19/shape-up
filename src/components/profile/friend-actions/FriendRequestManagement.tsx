@@ -19,6 +19,7 @@ const FriendRequestManagement = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
       queryClient.invalidateQueries({ queryKey: ['friends'] });
+      queryClient.invalidateQueries({ queryKey: ['followData'] });
       toast.success("Solicitação de amizade atualizada!");
     },
     onError: () => {
