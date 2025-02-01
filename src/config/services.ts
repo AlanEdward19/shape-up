@@ -2,6 +2,13 @@ export const SERVICES = {
   SOCIAL: {
     baseUrl: import.meta.env.VITE_SOCIAL_API_BASE_URL,
     endpoints: {
+      sendFriendRequest: '/Friend/v1/sendFriendRequest',
+      listFriends: '/Friend/v1/listFriends/id?page=pageNumber&rows=rowsNumber',
+      removeFriendRequest: '/Friend/v1/removeFriendRequest/id',
+      removeFriend: '/Friend/v1/removeFriend/id',
+      manageFriendRequests: '/Friend/v1/manageFriendRequests',
+      checkRequestStatus: '/Friend/v1/checkRequestStatus',
+      editProfile: '/Profile/v1/EditProfile',
       viewProfile: '/Profile/v1/ViewProfile/id',
       viewProfileSimplified: '/Profile/v1/viewProfile/id/simplified',
       activityFeed: '/ActivityFeed/v1/BuildActivityFeed',

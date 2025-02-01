@@ -61,6 +61,16 @@ class NotificationService {
           };
           break;
 
+        case NotificationType.FriendRequest:
+          notification = {
+            id: crypto.randomUUID(),
+            type: NotificationType.FriendRequest,
+            message: message,
+            createdAt: new Date().toISOString(),
+            read: false
+          };
+          break;
+
         case NotificationType.Comment:
           notification = {
             id: crypto.randomUUID(),

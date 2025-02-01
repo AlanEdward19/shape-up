@@ -1,5 +1,5 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { Post, PostReaction, PostComment, ViewProfileResponse, Friend, FriendRequest } from '@/types/api';
+import { Post, PostReaction, PostComment, ViewProfileResponse, Friend, FriendRequest, FollowUser } from '@/types/api';
 import { getAuthToken } from '@/utils/auth';
 
 export const createHeaders = () => {
@@ -38,9 +38,9 @@ export const SocialService = {
 
   editProfile: async (data: { gender?: number; birthDate?: string; bio?: string }): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Profile/v1/EditProfile`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.editProfile}`,
       {
-        method: 'PUT',
+        method: 'PATCH',
         headers: createHeaders(),
         body: JSON.stringify(data)
       }
@@ -236,7 +236,7 @@ export const SocialService = {
 
   listFriends: async (profileId: string, page: number = 1, rows: number = 10): Promise<Friend[]> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/listFriends/${profileId}?page=${page}&rows=${rows}`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.listFriends.replace('id', profileId).replace('pageNumber', page.toString()).replace('rowsNumber', rows.toString())}`,
       { headers: createHeaders() }
     );
     if (!response.ok) throw new Error('Failed to list friends');
@@ -245,7 +245,7 @@ export const SocialService = {
 
   checkFriendRequestStatus: async (): Promise<FriendRequest[]> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/checkRequestStatus`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.checkRequestStatus}`,
       { headers: createHeaders() }
     );
     if (!response.ok) throw new Error('Failed to check friend request status');
@@ -254,7 +254,7 @@ export const SocialService = {
 
   manageFriendRequest: async (profileId: string, accept: boolean): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/manageFriendRequests`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.manageFriendRequests}`,
       {
         method: 'PUT',
         headers: createHeaders(),
@@ -266,7 +266,7 @@ export const SocialService = {
 
   removeFriend: async (profileId: string): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/removeFriend/${profileId}`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.removeFriend.replace('id', profileId)}`,
       {
         method: 'DELETE',
         headers: createHeaders()
@@ -277,7 +277,7 @@ export const SocialService = {
 
   removeFriendRequest: async (profileId: string): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/removeFriendRequest/${profileId}`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.removeFriendRequest.replace('id', profileId)}`,
       {
         method: 'DELETE',
         headers: createHeaders()
