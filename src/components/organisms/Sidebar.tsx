@@ -1,5 +1,5 @@
-import NavigationItems from "./NavigationItems";
-import BottomItems from "./BottomItems";
+import NavigationItems from "@/components/molecules/sidebar/NavigationItems";
+import BottomItems from "@/components/molecules/sidebar/BottomItems";
 
 const Sidebar = () => {
   return (

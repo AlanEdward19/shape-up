@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
-import { Input } from "./ui/input";
-import { ScrollArea } from "./ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Popover,
   PopoverContent,
@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { getUserId } from "@/utils/auth";
 import { useState } from "react";
-import ChatConversation from "./chat/ChatConversation";
+import ChatConversation from "@/components/molecules/chat/ChatConversation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Chat = () => {

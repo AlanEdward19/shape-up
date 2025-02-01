@@ -1,3 +1,6 @@
+import Sidebar from "@/components/organisms/Sidebar";
+import Chat from "@/components/organisms/Chat";
+
 interface MainLayoutProps {
   children: React.ReactNode;
 }
