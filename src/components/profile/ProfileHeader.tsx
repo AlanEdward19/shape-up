@@ -280,20 +280,25 @@ const ProfileHeader = ({
                     Desfazer Amizade
                   </Button>
                 ) : hasReceivedRequest ? (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => manageFriendRequestMutation.mutate(true)}
-                      disabled={manageFriendRequestMutation.isPending}
-                    >
-                      Aceitar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => manageFriendRequestMutation.mutate(false)}
-                      disabled={manageFriendRequestMutation.isPending}
-                    >
-                      Recusar
-                    </Button>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-muted-foreground">
+                      Você possui uma solicitação de amizade pendente deste perfil
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => manageFriendRequestMutation.mutate(true)}
+                        disabled={manageFriendRequestMutation.isPending}
+                      >
+                        Aceitar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => manageFriendRequestMutation.mutate(false)}
+                        disabled={manageFriendRequestMutation.isPending}
+                      >
+                        Recusar
+                      </Button>
+                    </div>
                   </div>
                 ) : hasSentRequest ? (
                   <Button

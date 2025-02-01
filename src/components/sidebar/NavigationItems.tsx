@@ -7,6 +7,7 @@ import { useState } from "react";
 import FollowList from "../profile/FollowList";
 import { useQuery } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
+import { FollowUser } from "@/types/api";
 
 const NavigationItems = () => {
   const navigate = useNavigate();
