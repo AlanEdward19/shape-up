@@ -1,18 +1,19 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ViewProfileResponse, Gender, Friend, FriendRequest } from "@/types/api";
+import { ViewProfileResponse } from "@/types/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, UserPlus, UserMinus, Pencil, UserX } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
 import { getUserId } from "@/utils/auth";
+import FriendRequestButtons from "./friend-actions/FriendRequestButtons";
 
 interface ProfileHeaderProps {
   profile: ViewProfileResponse;
@@ -31,10 +32,6 @@ interface EditProfileForm {
   bio: string;
 }
 
-interface FriendRequestForm {
-  message: string;
-}
-
 const ProfileHeader = ({
   profile,
   isOwnProfile,
@@ -46,7 +43,6 @@ const ProfileHeader = ({
   onOpenChat,
 }: ProfileHeaderProps) => {
   const [open, setOpen] = useState(false);
-  const [friendRequestOpen, setFriendRequestOpen] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -67,21 +63,12 @@ const ProfileHeader = ({
   const hasSentRequest = friendRequests.some(request => 
     request.profileId === profile.id && request.status === 0
   );
-  const hasReceivedRequest = friendRequests.some(request => 
-    request.profileId === profile.id && request.status === 1
-  );
 
   const form = useForm<EditProfileForm>({
     defaultValues: {
       gender: profile.gender?.toString() ?? "",
       birthDate: profile.birthDate?.split('T')[0] ?? "",
       bio: profile.bio || "",
-    },
-  });
-
-  const friendRequestForm = useForm<FriendRequestForm>({
-    defaultValues: {
-      message: "",
     },
   });
 
@@ -112,53 +99,6 @@ const ProfileHeader = ({
     },
     onError: (error: Error) => {
       toast.error(`Erro ao atualizar perfil: ${error.message}`);
-    },
-  });
-
-  const sendFriendRequestMutation = useMutation({
-    mutationFn: (data: FriendRequestForm) => 
-      SocialService.sendFriendRequest(profile.id, data.message),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
-      toast.success("Solicitação de amizade enviada!");
-      setFriendRequestOpen(false);
-    },
-    onError: () => {
-      toast.error("Erro ao enviar solicitação de amizade");
-    },
-  });
-
-  const removeFriendMutation = useMutation({
-    mutationFn: () => SocialService.removeFriend(profile.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['friends'] });
-      toast.success("Amizade removida com sucesso!");
-    },
-    onError: () => {
-      toast.error("Erro ao remover amizade");
-    },
-  });
-
-  const cancelFriendRequestMutation = useMutation({
-    mutationFn: () => SocialService.removeFriendRequest(profile.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
-      toast.success("Solicitação de amizade cancelada!");
-    },
-    onError: () => {
-      toast.error("Erro ao cancelar solicitação de amizade");
-    },
-  });
-
-  const manageFriendRequestMutation = useMutation({
-    mutationFn: (accept: boolean) => SocialService.manageFriendRequest(profile.id, accept),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
-      queryClient.invalidateQueries({ queryKey: ['friends'] });
-      toast.success("Solicitação de amizade atualizada!");
-    },
-    onError: () => {
-      toast.error("Erro ao processar solicitação de amizade");
     },
   });
 
@@ -195,10 +135,6 @@ const ProfileHeader = ({
 
   const onSubmit = (data: EditProfileForm) => {
     editProfileMutation.mutate(data);
-  };
-
-  const onSubmitFriendRequest = (data: FriendRequestForm) => {
-    sendFriendRequestMutation.mutate(data);
   };
 
   return (
@@ -315,88 +251,12 @@ const ProfileHeader = ({
                   {isFollowing ? "Deixar de Seguir" : "Seguir"}
                 </Button>
 
-                <Button
-                  variant="outline"
-                  disabled={!isFriend}
-                  onClick={() => onOpenChat(profile.id)}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Mensagem
-                </Button>
-
-                {isFriend ? (
-                  <Button
-                    variant="destructive"
-                    onClick={() => removeFriendMutation.mutate()}
-                    disabled={removeFriendMutation.isPending}
-                  >
-                    <UserMinus className="w-4 h-4 mr-2" />
-                    Desfazer Amizade
-                  </Button>
-                ) : hasReceivedRequest ? (
-                  <div className="flex flex-col gap-2">
-                    <p className="text-sm text-muted-foreground">
-                      Você possui uma solicitação de amizade pendente deste perfil
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => manageFriendRequestMutation.mutate(true)}
-                        disabled={manageFriendRequestMutation.isPending}
-                      >
-                        Aceitar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => manageFriendRequestMutation.mutate(false)}
-                        disabled={manageFriendRequestMutation.isPending}
-                      >
-                        Recusar
-                      </Button>
-                    </div>
-                  </div>
-                ) : hasSentRequest ? (
-                  <Button
-                    variant="destructive"
-                    onClick={() => cancelFriendRequestMutation.mutate()}
-                    disabled={cancelFriendRequestMutation.isPending}
-                  >
-                    <UserX className="w-4 h-4 mr-2" />
-                    Cancelar Solicitação
-                  </Button>
-                ) : (
-                  <Dialog open={friendRequestOpen} onOpenChange={setFriendRequestOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline">
-                        <UserPlus className="w-4 h-4 mr-2" />
-                        Adicionar Amigo
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Enviar Solicitação de Amizade</DialogTitle>
-                      </DialogHeader>
-                      <Form {...friendRequestForm}>
-                        <form onSubmit={friendRequestForm.handleSubmit(onSubmitFriendRequest)} className="space-y-4">
-                          <FormField
-                            control={friendRequestForm.control}
-                            name="message"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Mensagem (opcional)</FormLabel>
-                                <FormControl>
-                                  <Textarea {...field} placeholder="Escreva uma mensagem..." />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <Button type="submit" disabled={sendFriendRequestMutation.isPending}>
-                            Enviar Solicitação
-                          </Button>
-                        </form>
-                      </Form>
-                    </DialogContent>
-                  </Dialog>
-                )}
+                <FriendRequestButtons
+                  profileId={profile.id}
+                  isFriend={isFriend}
+                  hasSentRequest={hasSentRequest}
+                  onOpenChat={onOpenChat}
+                />
               </>
             )}
           </div>

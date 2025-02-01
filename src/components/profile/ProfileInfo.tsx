@@ -1,23 +1,17 @@
-import { ViewProfileResponse, Gender, FriendRequestStatus } from "@/types/api";
+import { ViewProfileResponse, Gender } from "@/types/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MapPin, Calendar, Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import FriendRequestManagement from "./friend-actions/FriendRequestManagement";
 
 interface ProfileInfoProps {
   profile: ViewProfileResponse;
   hasReceivedRequest?: boolean;
-  onAcceptRequest?: () => void;
-  onRejectRequest?: () => void;
-  isRequestPending?: boolean;
 }
 
 const ProfileInfo = ({ 
   profile,
-  hasReceivedRequest,
-  onAcceptRequest,
-  onRejectRequest,
-  isRequestPending
+  hasReceivedRequest = false,
 }: ProfileInfoProps) => {
   return (
     <div className="space-y-6">
@@ -59,28 +53,10 @@ const ProfileInfo = ({
         </div>
       </div>
 
-      {hasReceivedRequest && (
-        <div className="mt-8 p-4 bg-secondary rounded-lg">
-          <p className="text-sm text-muted-foreground mb-3">
-            Você possui uma solicitação de amizade pendente deste perfil
-          </p>
-          <div className="flex gap-2">
-            <Button
-              onClick={onAcceptRequest}
-              disabled={isRequestPending}
-            >
-              Aceitar
-            </Button>
-            <Button
-              variant="outline"
-              onClick={onRejectRequest}
-              disabled={isRequestPending}
-            >
-              Recusar
-            </Button>
-          </div>
-        </div>
-      )}
+      <FriendRequestManagement
+        profileId={profile.id}
+        hasReceivedRequest={hasReceivedRequest}
+      />
     </div>
   );
 };
