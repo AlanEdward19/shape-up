@@ -210,23 +210,23 @@ const ProfileHeader = ({
         >
           <AvatarImage src={profile.imageUrl} alt={`${profile.firstName} ${profile.lastName}`} />
           <AvatarFallback>{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
-          {isOwnProfile && (
-            <div 
-              className="absolute top-2 right-2 p-1 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-              onClick={handleEditClick}
-            >
-              <Pencil className="h-4 w-4 text-white" />
-              <input
-                id="profile-picture"
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-            </div>
-          )}
         </Avatar>
+        {isOwnProfile && (
+          <div 
+            className="absolute -top-1 -right-1 p-1.5 bg-secondary rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-muted"
+            onClick={handleEditClick}
+          >
+            <Pencil className="h-4 w-4 text-white" />
+            <input
+              id="profile-picture"
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex-1 space-y-4">
