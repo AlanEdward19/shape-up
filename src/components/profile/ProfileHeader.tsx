@@ -6,7 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, UserPlus, UserMinus, Pencil, UserX, Image } from "lucide-react";
+import { MessageSquare, UserPlus, UserMinus, Pencil, UserX } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
@@ -184,12 +184,13 @@ const ProfileHeader = ({
     }
   };
 
-  const onSubmit = (data: EditProfileForm) => {
-    editProfileMutation.mutate(data);
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    fileInputRef.current?.click();
   };
 
-  const onSubmitFriendRequest = (data: FriendRequestForm) => {
-    sendFriendRequestMutation.mutate(data);
+  const handleAvatarClick = () => {
+    setShowFullImage(true);
   };
 
   return (
@@ -197,15 +198,16 @@ const ProfileHeader = ({
       <div className="relative group">
         <Avatar 
           className="w-32 h-32 md:w-40 md:h-40 cursor-pointer"
-          onClick={() => setShowFullImage(true)}
+          onClick={handleAvatarClick}
         >
           <AvatarImage src={profile.imageUrl} alt={`${profile.firstName} ${profile.lastName}`} />
           <AvatarFallback>{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
           {isOwnProfile && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
-              <label htmlFor="profile-picture" className="cursor-pointer">
-                <Pencil className="h-8 w-8 text-white" />
-              </label>
+            <div 
+              className="absolute top-2 right-2 p-1 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              onClick={handleEditClick}
+            >
+              <Pencil className="h-4 w-4 text-white" />
               <input
                 id="profile-picture"
                 type="file"
@@ -218,7 +220,7 @@ const ProfileHeader = ({
           )}
         </Avatar>
       </div>
-      
+
       <div className="flex-1 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex items-center gap-4">
