@@ -1,5 +1,5 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { Post, PostReaction, PostComment, ViewProfileResponse } from '@/types/api';
+import { Post, PostReaction, PostComment, ViewProfileResponse, Friend, FriendRequest } from '@/types/api';
 import { getAuthToken } from '@/utils/auth';
 
 export const createHeaders = () => {
@@ -158,82 +158,71 @@ export const SocialService = {
     return response.json();
   },
 
-  followUser: async (userId: string): Promise<void> => {
+  sendFriendRequest: async (friendId: string, requestMessage?: string): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.followUser.replace('id', userId)}`,
+      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/sendFriendRequest`,
       {
         method: 'POST',
         headers: createHeaders(),
+        body: JSON.stringify({ friendId, requestMessage })
       }
     );
-    if (!response.ok) throw new Error('Failed to follow user');
+    if (!response.ok) throw new Error('Failed to send friend request');
   },
 
-  unfollowUser: async (userId: string): Promise<void> => {
+  listFriends: async (profileId: string, page: number = 1, rows: number = 10): Promise<Friend[]> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.unfollowUser.replace('id', userId)}`,
+      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/listFriends/${profileId}?page=${page}&rows=${rows}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to list friends');
+    return response.json();
+  },
+
+  checkFriendRequestStatus: async (): Promise<FriendRequest[]> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/checkRequestStatus`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to check friend request status');
+    return response.json();
+  },
+
+  manageFriendRequest: async (profileId: string, accept: boolean): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/manageFriendRequests`,
+      {
+        method: 'PUT',
+        headers: createHeaders(),
+        body: JSON.stringify({ profileId, accept })
+      }
+    );
+    if (!response.ok) throw new Error('Failed to manage friend request');
+  },
+
+  removeFriend: async (profileId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/removeFriend/${profileId}`,
       {
         method: 'DELETE',
-        headers: createHeaders(),
+        headers: createHeaders()
       }
     );
-    if (!response.ok) throw new Error('Failed to unfollow user');
+    if (!response.ok) throw new Error('Failed to remove friend');
   },
 
-  getFollowing: async (userId: string, page: number = 1, rows: number = 10) => {
-    const endpoint = SERVICES.SOCIAL.endpoints.getFollowing
-      .replace('id', userId)
-      .replace('{page}', page.toString())
-      .replace('{rows}', rows.toString());
-    
+  removeFriendRequest: async (profileId: string): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${endpoint}`,
-      { headers: createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch following');
-    return response.json();
-  },
-
-  getCurrentUserFollowData: async (userId: string) => {
-    const [following, followers] = await Promise.all([
-      SocialService.getFollowing(userId),
-      SocialService.getFollowers(userId)
-    ]);
-    return { following, followers };
-  },
-
-  getFollowers: async (userId: string, page: number = 1, rows: number = 10) => {
-    const endpoint = SERVICES.SOCIAL.endpoints.getFollowers
-      .replace('id', userId)
-      .replace('{page}', page.toString())
-      .replace('{rows}', rows.toString());
-    
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${endpoint}`,
-      { headers: createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch followers');
-    return response.json();
-  },
-
-  getPost: async (id: string): Promise<Post> => {
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getPost.replace('id', id)}`,
-      { headers: createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch post');
-    return response.json();
-  },
-
-  editProfile: async (data: { gender?: number; birthDate?: string; bio?: string }): Promise<void> => {
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Profile/v1/editProfile`,
+      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/removeFriendRequest/${profileId}`,
       {
-        method: 'PATCH',
-        headers: createHeaders(),
-        body: JSON.stringify(data),
+        method: 'DELETE',
+        headers: createHeaders()
       }
     );
-    if (!response.ok) throw new Error('Failed to update profile');
+    if (!response.ok) throw new Error('Failed to remove friend request');
   },
+};
+
+export const STORAGE = {
+  baseUrl: import.meta.env.VITE_STORAGE_URL,
 };

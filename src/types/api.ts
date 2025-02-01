@@ -71,3 +71,22 @@ export interface FriendRecommendation {
 export interface FriendRecommendationsResponse {
   recommendations: FriendRecommendation[];
 }
+
+export enum FriendRequestStatus {
+  Sent = 0,
+  Received = 1
+}
+
+export interface Friend {
+  firstName: string;
+  lastName: string;
+  profileId: string;
+  imageUrl: string;
+}
+
+export interface FriendRequest {
+  firstName: string;
+  lastName: string;
+  status: FriendRequestStatus;
+  profileId: string;
+}

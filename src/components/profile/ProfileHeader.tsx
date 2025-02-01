@@ -1,17 +1,18 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ViewProfileResponse, Gender } from "@/types/api";
+import { ViewProfileResponse, Gender, Friend } from "@/types/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil } from "lucide-react";
+import { MessageSquare, UserPlus, UserMinus } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
 import { useState } from "react";
+import { getUserId } from "@/utils/auth";
 
 interface ProfileHeaderProps {
   profile: ViewProfileResponse;
@@ -21,12 +22,17 @@ interface ProfileHeaderProps {
   onShowFollowers: () => void;
   onShowFollowing: () => void;
   followActionPending: boolean;
+  onOpenChat: (profileId: string) => void;
 }
 
 interface EditProfileForm {
   gender: string;
   birthDate: string;
   bio: string;
+}
+
+interface FriendRequestForm {
+  message: string;
 }
 
 const ProfileHeader = ({
@@ -37,9 +43,19 @@ const ProfileHeader = ({
   onShowFollowers,
   onShowFollowing,
   followActionPending,
+  onOpenChat,
 }: ProfileHeaderProps) => {
   const [open, setOpen] = useState(false);
+  const [friendRequestOpen, setFriendRequestOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  const { data: friends = [] } = useQuery({
+    queryKey: ['friends', profile.id],
+    queryFn: () => SocialService.listFriends(profile.id),
+    enabled: !isOwnProfile,
+  });
+
+  const isFriend = friends.some(friend => friend.profileId === getUserId());
 
   const form = useForm<EditProfileForm>({
     defaultValues: {
@@ -49,12 +65,15 @@ const ProfileHeader = ({
     },
   });
 
+  const friendRequestForm = useForm<FriendRequestForm>({
+    defaultValues: {
+      message: "",
+    },
+  });
+
   const editProfileMutation = useMutation({
     mutationFn: async (data: Partial<EditProfileForm>) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = {};
-
-      console.log(data);
       
       if (profile.gender == null || data.gender !== profile.gender.toString()) {
         payload.gender = parseInt(data.gender);
@@ -82,8 +101,36 @@ const ProfileHeader = ({
     },
   });
 
+  const sendFriendRequestMutation = useMutation({
+    mutationFn: (data: FriendRequestForm) => 
+      SocialService.sendFriendRequest(profile.id, data.message),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      toast.success("Solicitação de amizade enviada!");
+      setFriendRequestOpen(false);
+    },
+    onError: () => {
+      toast.error("Erro ao enviar solicitação de amizade");
+    },
+  });
+
+  const removeFriendMutation = useMutation({
+    mutationFn: () => SocialService.removeFriend(profile.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friends'] });
+      toast.success("Amizade removida com sucesso!");
+    },
+    onError: () => {
+      toast.error("Erro ao remover amizade");
+    },
+  });
+
   const onSubmit = (data: EditProfileForm) => {
     editProfileMutation.mutate(data);
+  };
+
+  const onSubmitFriendRequest = (data: FriendRequestForm) => {
+    sendFriendRequestMutation.mutate(data);
   };
 
   return (
@@ -168,16 +215,72 @@ const ProfileHeader = ({
               </Dialog>
             )}
           </div>
-          {!isOwnProfile && (
-            <Button
-              onClick={onFollowAction}
-              variant={isFollowing ? "destructive" : "default"}
-              disabled={followActionPending}
-              className="w-full md:w-auto"
-            >
-              {isFollowing ? "Deixar de Seguir" : "Seguir"}
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {!isOwnProfile && (
+              <>
+                <Button
+                  onClick={onFollowAction}
+                  variant={isFollowing ? "destructive" : "default"}
+                  disabled={followActionPending}
+                >
+                  {isFollowing ? "Deixar de Seguir" : "Seguir"}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  disabled={!isFriend}
+                  onClick={() => onOpenChat(profile.id)}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Mensagem
+                </Button>
+
+                {isFriend ? (
+                  <Button
+                    variant="destructive"
+                    onClick={() => removeFriendMutation.mutate()}
+                    disabled={removeFriendMutation.isPending}
+                  >
+                    <UserMinus className="w-4 h-4 mr-2" />
+                    Desfazer Amizade
+                  </Button>
+                ) : (
+                  <Dialog open={friendRequestOpen} onOpenChange={setFriendRequestOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Adicionar Amigo
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Enviar Solicitação de Amizade</DialogTitle>
+                      </DialogHeader>
+                      <Form {...friendRequestForm}>
+                        <form onSubmit={friendRequestForm.handleSubmit(onSubmitFriendRequest)} className="space-y-4">
+                          <FormField
+                            control={friendRequestForm.control}
+                            name="message"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mensagem (opcional)</FormLabel>
+                                <FormControl>
+                                  <Textarea {...field} placeholder="Escreva uma mensagem..." />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <Button type="submit" disabled={sendFriendRequestMutation.isPending}>
+                            Enviar Solicitação
+                          </Button>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex space-x-6">
