@@ -29,11 +29,17 @@ const Login = () => {
         sessionStorage.setItem("userId", userId);
       }
 
-      // Prefetch follow data
-      await queryClient.prefetchQuery({
-        queryKey: ['currentUserFollowData', userId],
-        queryFn: () => SocialService.getCurrentUserFollowData(userId)
-      });
+      // Prefetch followers and following data
+      await Promise.all([
+        queryClient.prefetchQuery({
+          queryKey: ['followers', userId],
+          queryFn: () => SocialService.getFollowers(userId, 1, 10)
+        }),
+        queryClient.prefetchQuery({
+          queryKey: ['following', userId],
+          queryFn: () => SocialService.getFollowing(userId, 1, 10)
+        })
+      ]);
 
       navigate("/index");
     } catch (error) {
