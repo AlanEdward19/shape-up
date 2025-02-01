@@ -33,11 +33,11 @@ const Login = () => {
       await Promise.all([
         queryClient.prefetchQuery({
           queryKey: ['followers', userId],
-          queryFn: () => SocialService.getFollowers(userId, 1, 10)
+          queryFn: () => SocialService.getFollowers(userId)
         }),
         queryClient.prefetchQuery({
           queryKey: ['following', userId],
-          queryFn: () => SocialService.getFollowing(userId, 1, 10)
+          queryFn: () => SocialService.getFollowing(userId)
         })
       ]);
 
