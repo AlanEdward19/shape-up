@@ -1,12 +1,12 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ViewProfileResponse, Gender, Friend } from "@/types/api";
+import { ViewProfileResponse, Gender, Friend, FriendRequest } from "@/types/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, UserPlus, UserMinus, Pencil } from "lucide-react";
+import { MessageSquare, UserPlus, UserMinus, Pencil, UserX } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
@@ -55,7 +55,16 @@ const ProfileHeader = ({
     enabled: !isOwnProfile,
   });
 
+  const { data: friendRequests = [] } = useQuery({
+    queryKey: ['friendRequests'],
+    queryFn: () => SocialService.checkFriendRequestStatus(),
+    enabled: !isOwnProfile,
+  });
+
   const isFriend = friends.some(friend => friend.profileId === getUserId());
+  const hasSentRequest = friendRequests.some(request => 
+    request.profileId === profile.id && request.status === 0
+  );
 
   const form = useForm<EditProfileForm>({
     defaultValues: {
@@ -122,6 +131,17 @@ const ProfileHeader = ({
     },
     onError: () => {
       toast.error("Erro ao remover amizade");
+    },
+  });
+
+  const cancelFriendRequestMutation = useMutation({
+    mutationFn: () => SocialService.removeFriendRequest(profile.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      toast.success("Solicitação de amizade cancelada!");
+    },
+    onError: () => {
+      toast.error("Erro ao cancelar solicitação de amizade");
     },
   });
 
@@ -243,6 +263,15 @@ const ProfileHeader = ({
                   >
                     <UserMinus className="w-4 h-4 mr-2" />
                     Desfazer Amizade
+                  </Button>
+                ) : hasSentRequest ? (
+                  <Button
+                    variant="destructive"
+                    onClick={() => cancelFriendRequestMutation.mutate()}
+                    disabled={cancelFriendRequestMutation.isPending}
+                  >
+                    <UserX className="w-4 h-4 mr-2" />
+                    Cancelar Solicitação
                   </Button>
                 ) : (
                   <Dialog open={friendRequestOpen} onOpenChange={setFriendRequestOpen}>
