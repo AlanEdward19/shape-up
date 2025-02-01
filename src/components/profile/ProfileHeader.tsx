@@ -24,6 +24,7 @@ interface ProfileHeaderProps {
   onShowFollowing: () => void;
   followActionPending: boolean;
   onOpenChat: (profileId: string) => void;
+  hasReceivedRequest?: boolean;
 }
 
 interface EditProfileForm {
@@ -41,6 +42,7 @@ const ProfileHeader = ({
   onShowFollowing,
   followActionPending,
   onOpenChat,
+  hasReceivedRequest = false,
 }: ProfileHeaderProps) => {
   const [open, setOpen] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
@@ -255,6 +257,7 @@ const ProfileHeader = ({
                   profileId={profile.id}
                   isFriend={isFriend}
                   hasSentRequest={hasSentRequest}
+                  hasReceivedRequest={hasReceivedRequest}
                   onOpenChat={onOpenChat}
                 />
               </>

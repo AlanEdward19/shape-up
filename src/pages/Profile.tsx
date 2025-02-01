@@ -67,6 +67,9 @@ const Profile = () => {
   });
 
   const isFollowing = currentUserFollowData?.following?.some(f => f.profileId === id);
+  const hasReceivedRequest = currentUserFollowData?.friendRequests?.some(
+    request => request.profileId === id && request.status === 1
+  );
 
   const followMutation = useMutation({
     mutationFn: () => SocialService.followUser(id!),
@@ -140,8 +143,6 @@ const Profile = () => {
     );
   }
 
-  const hasReceivedRequest = currentUserFollowData?.friendRequests?.some(request => request.profileId === profile.id && request.status === 1);
-
   return (
     <div className="flex">
       <Sidebar />
@@ -161,6 +162,7 @@ const Profile = () => {
                   // Implement chat opening logic here
                   console.log('Opening chat with:', profileId);
                 }}
+                hasReceivedRequest={hasReceivedRequest}
               />
             </CardHeader>
             <CardContent>

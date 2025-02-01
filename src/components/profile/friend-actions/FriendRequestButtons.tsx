@@ -17,6 +17,7 @@ interface FriendRequestButtonsProps {
   profileId: string;
   isFriend: boolean;
   hasSentRequest: boolean;
+  hasReceivedRequest: boolean;
   onOpenChat: (profileId: string) => void;
 }
 
@@ -24,6 +25,7 @@ const FriendRequestButtons = ({
   profileId, 
   isFriend, 
   hasSentRequest,
+  hasReceivedRequest,
   onOpenChat 
 }: FriendRequestButtonsProps) => {
   const [friendRequestOpen, setFriendRequestOpen] = useState(false);
@@ -102,7 +104,7 @@ const FriendRequestButtons = ({
           <UserX className="w-4 h-4 mr-2" />
           Cancelar Solicitação
         </Button>
-      ) : (
+      ) : !hasReceivedRequest && (
         <Dialog open={friendRequestOpen} onOpenChange={setFriendRequestOpen}>
           <DialogTrigger asChild>
             <Button variant="outline">
