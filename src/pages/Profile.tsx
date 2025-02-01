@@ -63,13 +63,13 @@ const Profile = () => {
   const { data: followData } = useQuery({
     queryKey: ['followData', id],
     queryFn: async () => {
-      const [followers, following] = await Promise.all([
-        SocialService.getFollowers(id!),
-        SocialService.getFollowing(id!)
+      const [following, friendRequests] = await Promise.all([
+        SocialService.getFollowing(id!),
+        SocialService.checkFriendRequestStatus()
       ]);
       return {
-        following: following,
-        friendRequests: [] // This will be handled by a separate endpoint for friend requests
+        following,
+        friendRequests
       };
     },
     enabled: !!currentUserId && !isOwnProfile,
@@ -83,7 +83,7 @@ const Profile = () => {
   const followMutation = useMutation({
     mutationFn: () => SocialService.followUser(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserFollowData'] });
+      queryClient.invalidateQueries({ queryKey: ['followData'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast.success('Usuário seguido com sucesso!');
     },
@@ -95,7 +95,7 @@ const Profile = () => {
   const unfollowMutation = useMutation({
     mutationFn: () => SocialService.unfollowUser(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserFollowData'] });
+      queryClient.invalidateQueries({ queryKey: ['followData'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast.success('Deixou de seguir o usuário.');
     },
