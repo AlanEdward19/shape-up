@@ -5,8 +5,9 @@ export interface FriendRequestStatus {
 
 export interface FollowUser {
   profileId: string;
-  name: string;
-  avatarUrl?: string;
+  firstName: string;
+  lastName: string;
+  imageUrl: string;
 }
 
 export enum Visibility {
@@ -29,6 +30,7 @@ export interface Post {
   visibility: Visibility;
   images: string[];
   content: string;
+  createdAt: string;
 }
 
 export interface PostReaction {
@@ -67,11 +69,17 @@ export interface ViewProfileResponse {
   posts: number;
 }
 
-export interface FollowUser {
+export interface Friend {
   profileId: string;
   firstName: string;
   lastName: string;
   imageUrl: string;
+}
+
+export interface FriendRequest {
+  profileId: string;
+  status: number;
+  message?: string;
 }
 
 export interface FriendRecommendation {

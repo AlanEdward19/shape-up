@@ -285,4 +285,19 @@ export const SocialService = {
     );
     if (!response.ok) throw new Error('Failed to remove friend request');
   },
+
+  uploadProfilePicture: async (formData: FormData): Promise<void> => {
+    const headers = createHeaders();
+    delete headers['Content-Type'];
+    
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}/Profile/v1/uploadProfilePicture`,
+      {
+        method: 'PUT',
+        headers: headers,
+        body: formData,
+      }
+    );
+    if (!response.ok) throw new Error('Failed to upload profile picture');
+  },
 };

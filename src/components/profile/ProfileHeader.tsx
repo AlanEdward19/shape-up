@@ -6,12 +6,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, UserPlus, UserMinus, Pencil, UserX } from "lucide-react";
+import { MessageSquare, UserPlus, UserMinus, Pencil, UserX, Image } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { getUserId } from "@/utils/auth";
 
 interface ProfileHeaderProps {
@@ -47,6 +47,8 @@ const ProfileHeader = ({
 }: ProfileHeaderProps) => {
   const [open, setOpen] = useState(false);
   const [friendRequestOpen, setFriendRequestOpen] = useState(false);
+  const [showFullImage, setShowFullImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const { data: friends = [] } = useQuery({
@@ -160,6 +162,28 @@ const ProfileHeader = ({
     },
   });
 
+  const uploadProfilePictureMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      await SocialService.uploadProfilePicture(formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast.success('Foto de perfil atualizada com sucesso!');
+    },
+    onError: () => {
+      toast.error('Erro ao atualizar foto de perfil');
+    },
+  });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadProfilePictureMutation.mutate(file);
+    }
+  };
+
   const onSubmit = (data: EditProfileForm) => {
     editProfileMutation.mutate(data);
   };
@@ -170,10 +194,30 @@ const ProfileHeader = ({
 
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
-      <Avatar className="w-32 h-32 md:w-40 md:h-40">
-        <AvatarImage src={profile.imageUrl} alt={`${profile.firstName} ${profile.lastName}`} />
-        <AvatarFallback>{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
-      </Avatar>
+      <div className="relative group">
+        <Avatar 
+          className="w-32 h-32 md:w-40 md:h-40 cursor-pointer"
+          onClick={() => setShowFullImage(true)}
+        >
+          <AvatarImage src={profile.imageUrl} alt={`${profile.firstName} ${profile.lastName}`} />
+          <AvatarFallback>{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
+          {isOwnProfile && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
+              <label htmlFor="profile-picture" className="cursor-pointer">
+                <Pencil className="h-8 w-8 text-white" />
+              </label>
+              <input
+                id="profile-picture"
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </div>
+          )}
+        </Avatar>
+      </div>
       
       <div className="flex-1 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -372,6 +416,16 @@ const ProfileHeader = ({
           </button>
         </div>
       </div>
+
+      <Dialog open={showFullImage} onOpenChange={setShowFullImage}>
+        <DialogContent className="max-w-4xl">
+          <img 
+            src={profile.imageUrl} 
+            alt={`${profile.firstName} ${profile.lastName}`}
+            className="w-full h-auto"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
