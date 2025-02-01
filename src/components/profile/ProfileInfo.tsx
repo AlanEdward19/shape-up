@@ -21,7 +21,7 @@ console.log(profile)
         <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-muted-foreground" />
           <span>
-            Mora em <span className="font-medium">{profile.postalCode}</span>
+            Mora em <span className="font-medium">{profile.country}, {profile.city}-{profile.state}</span>
           </span>
         </div>
 

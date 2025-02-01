@@ -43,7 +43,9 @@ export interface ViewProfileResponse {
   id: string;
   firstName: string;
   lastName: string;
-  postalCode: string;
+  city: string;
+  state: string;
+  country: string;
   birthDate: string;
   bio: string;
   gender: number;
