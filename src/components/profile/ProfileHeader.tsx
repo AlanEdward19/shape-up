@@ -193,6 +193,14 @@ const ProfileHeader = ({
     setShowFullImage(true);
   };
 
+  const onSubmit = (data: EditProfileForm) => {
+    editProfileMutation.mutate(data);
+  };
+
+  const onSubmitFriendRequest = (data: FriendRequestForm) => {
+    sendFriendRequestMutation.mutate(data);
+  };
+
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
       <div className="relative group">
