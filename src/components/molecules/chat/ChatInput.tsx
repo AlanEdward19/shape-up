@@ -1,3 +1,4 @@
+
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,40 +31,7 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
       await ChatService.sendMessage(profileId, message);
       setMessage("");
 
-      // Add the sent message to the messages cache
-      queryClient.setQueryData(
-        ["messages", profileId],
-        (oldData: any) => {
-          if (!oldData) return { pages: [[]], pageParams: [1] };
-          
-          const newMessage = {
-            id: `temp-${Date.now()}`,
-            senderId: getUserId(),
-            receiverId: profileId,
-            encryptedMessage: encryptedMessage,
-            timestamp: timestamp
-          };
-
-          // Check if message already exists
-          const messageExists = oldData.pages.some((page: any[]) => 
-            page.some((msg: any) => 
-              msg.encryptedMessage === encryptedMessage && 
-              msg.timestamp === timestamp
-            )
-          );
-          
-          if (messageExists) return oldData;
-
-          const newPages = [...oldData.pages];
-          const lastPageIndex = newPages.length - 1;
-          newPages[lastPageIndex] = [...newPages[lastPageIndex], newMessage];
-          
-          return {
-            ...oldData,
-            pages: newPages
-          };
-        }
-      );
+      // Removemos a adição manual da mensagem ao cache, pois ela será adicionada via SignalR
     } catch (error) {
       toast.error("Erro ao enviar mensagem");
     } finally {
