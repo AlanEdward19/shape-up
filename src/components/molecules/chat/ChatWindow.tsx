@@ -28,7 +28,7 @@ const ChatWindow = ({ profileId, firstName, lastName, imageUrl, onClose }: ChatW
 
   const handleDrag = (e: React.DragEvent) => {
     if (isDragging && e.clientX !== 0 && e.clientY !== 0) {
-      const chat = e.currentTarget;
+      const chat = e.currentTarget as HTMLDivElement;
       chat.style.left = `${e.clientX - position.x}px`;
       chat.style.top = `${e.clientY - position.y}px`;
     }

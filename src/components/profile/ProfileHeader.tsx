@@ -256,6 +256,9 @@ const ProfileHeader = ({
                   isFriend={isFriend}
                   hasSentRequest={hasSentRequest}
                   hasReceivedRequest={hasReceivedRequest}
+                  firstName={profile.firstName}
+                  lastName={profile.lastName}
+                  imageUrl={profile.imageUrl}
                 />
               </>
             )}
