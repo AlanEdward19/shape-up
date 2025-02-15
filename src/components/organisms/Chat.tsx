@@ -1,4 +1,3 @@
-
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -83,7 +82,7 @@ const Chat = () => {
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           variant="secondary"
-          className="rounded-full p-3"
+          className="rounded-full p-3 relative"
           onClick={() => {
             setShowRecentMessages(!showRecentMessages);
             if (!showRecentMessages) {
@@ -91,14 +90,12 @@ const Chat = () => {
             }
           }}
         >
-          <div className="relative">
-            <MessageCircle className="h-6 w-6" />
-            {unreadMessages > 0 && (
-              <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                {unreadMessages}
-              </div>
-            )}
-          </div>
+          <MessageCircle className="h-6 w-6" />
+          {unreadMessages > 0 && (
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+              {unreadMessages}
+            </div>
+          )}
         </Button>
 
         {showRecentMessages && (

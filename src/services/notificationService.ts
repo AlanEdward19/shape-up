@@ -4,7 +4,7 @@ import { SERVICES } from "@/config/services";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { Notification, NotificationType } from "@/types/notifications";
 import { getAuthToken, getUserId } from "@/utils/auth";
-import { SocialService } from "./api";
+import { useChatStore } from "@/stores/useChatStore";
 
 class NotificationService {
   private connection: HubConnection | null = null;
@@ -34,21 +34,29 @@ class NotificationService {
     }
   }
 
-  private async handleNotification(type: string, message: string): Promise<void> {
-    console.log("Received notification:", type);
+  private async handleNotification(type: string, message: string, senderId?: string): Promise<void> {
+    console.log("Received notification:", type, message);
     const { addNotification } = useNotificationStore.getState();
+    const { isProfileChatOpen } = useChatStore.getState();
     let notification: Notification | null = null;
 
     try {
-
       switch (type) {
         case NotificationType.Message:
+          // Se o chat com o remetente estiver aberto, não criamos notificação
+          if (senderId && isProfileChatOpen(senderId)) {
+            console.log("Chat is open, skipping notification");
+            return;
+          }
           notification = {
             id: crypto.randomUUID(),
             type: NotificationType.Message,
             message: message,
             createdAt: new Date().toISOString(),
-            read: false
+            read: false,
+            data: {
+              senderId: senderId
+            }
           };
           break;
 
@@ -82,7 +90,7 @@ class NotificationService {
           };
           break;
 
-          case NotificationType.Reaction:
+        case NotificationType.Reaction:
           notification = {
             id: crypto.randomUUID(),
             type: NotificationType.Reaction,
@@ -110,14 +118,15 @@ class NotificationService {
     if (!this.connection) return;
 
     this.connection.on("ReceiveNotification", (content: string) => {
-
       const typeMatch = content.match(/Topic:\s*(.*)/);
-  const messageMatch = content.match(/Message:\s*(.*)/);
+      const messageMatch = content.match(/Message:\s*(.*)/);
+      const senderIdMatch = content.match(/SenderId:\s*(.*)/);
 
-  const type = typeMatch ? typeMatch[1].trim() : '';
-  const message = messageMatch ? messageMatch[1].trim() : '';
+      const type = typeMatch ? typeMatch[1].trim() : '';
+      const message = messageMatch ? messageMatch[1].trim() : '';
+      const senderId = senderIdMatch ? senderIdMatch[1].trim() : undefined;
 
-  this.handleNotification(type, message);
+      this.handleNotification(type, message, senderId);
     });
   }
 
