@@ -1,3 +1,4 @@
+
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,14 +14,30 @@ import { ChatService, decryptMessage } from "@/services/chatService";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { getUserId } from "@/utils/auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ChatConversation from "@/components/molecules/chat/ChatConversation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { create } from "zustand";
+
+interface ChatStore {
+  isOpen: boolean;
+  selectedChat: string | null;
+  setIsOpen: (isOpen: boolean) => void;
+  setSelectedChat: (chatId: string | null) => void;
+  openChatWithUser: (userId: string) => void;
+}
+
+export const useChatStore = create<ChatStore>((set) => ({
+  isOpen: false,
+  selectedChat: null,
+  setIsOpen: (isOpen) => set({ isOpen }),
+  setSelectedChat: (chatId) => set({ selectedChat: chatId }),
+  openChatWithUser: (userId) => set({ isOpen: true, selectedChat: userId }),
+}));
 
 const Chat = () => {
   const { unreadMessages, markAllAsRead } = useNotificationStore();
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const { isOpen, selectedChat, setIsOpen, setSelectedChat } = useChatStore();
 
   const { data: messages = [] } = useQuery({
     queryKey: ["recentMessages"],
@@ -77,6 +94,15 @@ const Chat = () => {
     setIsOpen(false);
     setSelectedChat(null);
   };
+
+  // If selectedChat is set but profile isn't loaded yet, load it
+  useEffect(() => {
+    if (selectedChat && !profiles[selectedChat]) {
+      ChatService.getProfileSimplified(selectedChat).then((profile) => {
+        profiles[selectedChat] = profile;
+      });
+    }
+  }, [selectedChat, profiles]);
 
   return (
     <Popover
@@ -138,7 +164,7 @@ const Chat = () => {
                           alt={profile ? `${profile.firstName} ${profile.lastName}` : ""}
                         />
                         <AvatarFallback>
-                          { profile ? profile.firstName[0] + profile.lastName[0] : ""}
+                          {profile ? profile.firstName[0] + profile.lastName[0] : ""}
                         </AvatarFallback>
                       </Avatar>
 
@@ -168,4 +194,3 @@ const Chat = () => {
 };
 
 export default Chat;
-
