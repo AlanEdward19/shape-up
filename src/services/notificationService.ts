@@ -34,7 +34,7 @@ class NotificationService {
     }
   }
 
-  private async handleNotification(type: string, message: string, senderId?: string): Promise<void> {
+  private async handleNotification(type: string, message: string): Promise<void> {
     console.log("Received notification:", type, message);
     const { addNotification } = useNotificationStore.getState();
     const { isProfileChatOpen } = useChatStore.getState();
@@ -43,11 +43,14 @@ class NotificationService {
     try {
       switch (type) {
         case NotificationType.Message:
+          { 
+            const senderIdMatch = message.match(/mensagem de\s*([a-f0-9-]{36})/i);
+            const senderId = senderIdMatch ? senderIdMatch[1].trim() : '';
+
           // Se o chat com o remetente estiver aberto, não criamos notificação
-          if (senderId && isProfileChatOpen(senderId)) {
-            console.log("Chat is open, skipping notification");
+          if (senderId && isProfileChatOpen(senderId))
             return;
-          }
+
           notification = {
             id: crypto.randomUUID(),
             type: NotificationType.Message,
@@ -58,7 +61,7 @@ class NotificationService {
               senderId: senderId
             }
           };
-          break;
+          break; }
 
         case NotificationType.NewFollower:
           notification = {
@@ -120,13 +123,11 @@ class NotificationService {
     this.connection.on("ReceiveNotification", (content: string) => {
       const typeMatch = content.match(/Topic:\s*(.*)/);
       const messageMatch = content.match(/Message:\s*(.*)/);
-      const senderIdMatch = content.match(/SenderId:\s*(.*)/);
 
       const type = typeMatch ? typeMatch[1].trim() : '';
       const message = messageMatch ? messageMatch[1].trim() : '';
-      const senderId = senderIdMatch ? senderIdMatch[1].trim() : undefined;
 
-      this.handleNotification(type, message, senderId);
+      this.handleNotification(type, message);
     });
   }
 
