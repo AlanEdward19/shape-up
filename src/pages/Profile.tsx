@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
@@ -167,9 +168,6 @@ const Profile = () => {
                 onShowFollowers={() => setShowFollowers(true)}
                 onShowFollowing={() => setShowFollowing(true)}
                 followActionPending={followMutation.isPending || unfollowMutation.isPending}
-                onOpenChat={(profileId) => {
-                  console.log('Opening chat with:', profileId);
-                }}
                 hasReceivedRequest={hasReceivedRequest}
               />
             </CardHeader>
