@@ -2,11 +2,6 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { NotificationType } from "@/types/notifications";
 import { useQuery } from "@tanstack/react-query";
@@ -14,35 +9,22 @@ import { ChatService, decryptMessage } from "@/services/chatService";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { getUserId } from "@/utils/auth";
-import { useState, useEffect } from "react";
-import ChatConversation from "@/components/molecules/chat/ChatConversation";
+import ChatWindow from "@/components/molecules/chat/ChatWindow";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { create } from "zustand";
-
-interface ChatStore {
-  isOpen: boolean;
-  selectedChat: string | null;
-  setIsOpen: (isOpen: boolean) => void;
-  setSelectedChat: (chatId: string | null) => void;
-  openChatWithUser: (userId: string) => void;
-}
-
-export const useChatStore = create<ChatStore>((set) => ({
-  isOpen: false,
-  selectedChat: null,
-  setIsOpen: (isOpen) => set({ isOpen }),
-  setSelectedChat: (chatId) => set({ selectedChat: chatId }),
-  openChatWithUser: (userId) => set({ isOpen: true, selectedChat: userId }),
-}));
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { useChatStore } from "@/stores/useChatStore";
 
 const Chat = () => {
   const { unreadMessages, markAllAsRead } = useNotificationStore();
-  const { isOpen, selectedChat, setIsOpen, setSelectedChat } = useChatStore();
+  const [showRecentMessages, setShowRecentMessages] = useState(false);
+  const { openChats, addChat, removeChat } = useChatStore();
 
   const { data: messages = [] } = useQuery({
     queryKey: ["recentMessages"],
     queryFn: ChatService.getRecentMessages,
-    enabled: isOpen,
+    enabled: showRecentMessages,
     meta: {
       onError: () => {
         toast.error("Falha ao carregar mensagens recentes");
@@ -77,7 +59,7 @@ const Chat = () => {
 
       return profiles;
     },
-    enabled: isOpen && messages.length > 0,
+    enabled: showRecentMessages && messages.length > 0,
     meta: {
       onError: () => {
         toast.error("Falha ao carregar informações dos perfis");
@@ -85,111 +67,109 @@ const Chat = () => {
     },
   });
 
-  const handleOpen = () => {
-    setIsOpen(true);
-    markAllAsRead(NotificationType.Message);
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
-    setSelectedChat(null);
-  };
-
-  // If selectedChat is set but profile isn't loaded yet, load it
-  useEffect(() => {
-    if (selectedChat && !profiles[selectedChat]) {
-      ChatService.getProfileSimplified(selectedChat).then((profile) => {
-        profiles[selectedChat] = profile;
-      });
-    }
-  }, [selectedChat, profiles]);
-
   return (
-    <Popover
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (open) handleOpen();
-        else handleClose();
-      }}
-    >
-      <PopoverTrigger className="fixed bottom-4 right-4 bg-secondary p-3 rounded-full hover:bg-primary/20 transition-colors">
-        <div className="w-3 h-3 bg-green-500 rounded-full absolute top-0 right-0" />
-        {unreadMessages > 0 && (
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-            {unreadMessages}
-          </div>
-        )}
-        <div className="w-10 h-10 rounded-full bg-primary/20" />
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-80 h-[500px] p-0 bg-background border border-border"
-        side="top"
-        align="end"
-      >
-        {selectedChat ? (
-          <ChatConversation
-            profileId={selectedChat}
-            firstName={profiles[selectedChat]?.firstName || ""}
-            lastName={profiles[selectedChat]?.lastName || ""}
-            imageUrl={profiles[selectedChat]?.imageUrl || ""}
-          />
-        ) : (
-          <div className="p-4 space-y-4">
-            <h2 className="text-lg font-semibold">Conversando</h2>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Procurar Mensagens"
-                className="pl-10 bg-secondary border-none"
-              />
-            </div>
-            <ScrollArea className="h-[400px]">
-              <div className="space-y-2">
-                {messages.map((msg) => {
-                  const chatId =
-                    msg.receiverId === getUserId()
-                      ? msg.senderId
-                      : msg.receiverId;
-                  const profile = profiles[chatId];
+    <>
+      {openChats.map((chat) => (
+        <ChatWindow
+          key={chat.profileId}
+          profileId={chat.profileId}
+          firstName={chat.firstName}
+          lastName={chat.lastName}
+          imageUrl={chat.imageUrl}
+          onClose={() => removeChat(chat.profileId)}
+        />
+      ))}
 
-                  return (
-                    <div
-                      key={msg.id}
-                      className="flex items-center gap-3 p-2 hover:bg-secondary rounded-lg cursor-pointer"
-                      onClick={() => setSelectedChat(chatId)}
-                    >
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage
-                          src={profile?.imageUrl || "U"}
-                          alt={profile ? `${profile.firstName} ${profile.lastName}` : ""}
-                        />
-                        <AvatarFallback>
-                          {profile ? profile.firstName[0] + profile.lastName[0] : ""}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="flex-1">
-                        <h4 className="font-medium">
-                          {profile
-                            ? `${profile.firstName} ${profile.lastName}`
-                            : "Carregando..."}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {decryptMessage(msg.encryptedMessage)}
-                        </p>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(msg.timestamp), "HH:mm")}
-                      </span>
-                    </div>
-                  );
-                })}
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button
+          variant="secondary"
+          className="rounded-full p-3"
+          onClick={() => {
+            setShowRecentMessages(!showRecentMessages);
+            if (!showRecentMessages) {
+              markAllAsRead(NotificationType.Message);
+            }
+          }}
+        >
+          <div className="relative">
+            <MessageCircle className="h-6 w-6" />
+            {unreadMessages > 0 && (
+              <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                {unreadMessages}
               </div>
-            </ScrollArea>
+            )}
+          </div>
+        </Button>
+
+        {showRecentMessages && (
+          <div className="absolute bottom-16 right-0 w-80 bg-background border border-border rounded-lg shadow-lg">
+            <div className="p-4 space-y-4">
+              <h2 className="text-lg font-semibold">Conversas Recentes</h2>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Procurar Mensagens"
+                  className="pl-10 bg-secondary border-none"
+                />
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-2">
+                  {messages.map((msg) => {
+                    const chatId =
+                      msg.receiverId === getUserId()
+                        ? msg.senderId
+                        : msg.receiverId;
+                    const profile = profiles[chatId];
+
+                    return (
+                      <div
+                        key={msg.id}
+                        className="flex items-center gap-3 p-2 hover:bg-secondary rounded-lg cursor-pointer"
+                        onClick={() => {
+                          if (profile) {
+                            addChat({
+                              profileId: chatId,
+                              firstName: profile.firstName,
+                              lastName: profile.lastName,
+                              imageUrl: profile.imageUrl,
+                            });
+                            setShowRecentMessages(false);
+                          }
+                        }}
+                      >
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage
+                            src={profile?.imageUrl}
+                            alt={profile ? `${profile.firstName} ${profile.lastName}` : ""}
+                          />
+                          <AvatarFallback>
+                            {profile ? profile.firstName[0] + profile.lastName[0] : ""}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1">
+                          <h4 className="font-medium">
+                            {profile
+                              ? `${profile.firstName} ${profile.lastName}`
+                              : "Carregando..."}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {decryptMessage(msg.encryptedMessage)}
+                          </p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(msg.timestamp), "HH:mm")}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
           </div>
         )}
-      </PopoverContent>
-    </Popover>
+      </div>
+    </>
   );
 };
 

@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { SocialService } from "@/services/api";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useChatStore } from "@/components/organisms/Chat";
+import { useChatStore } from "@/stores/useChatStore";
 
 interface FriendRequestButtonsProps {
   profileId: string;
   isFriend: boolean;
   hasSentRequest: boolean;
   hasReceivedRequest: boolean;
+  firstName: string;
+  lastName: string;
+  imageUrl?: string;
 }
 
 const FriendRequestButtons = ({
@@ -17,9 +20,12 @@ const FriendRequestButtons = ({
   isFriend,
   hasSentRequest,
   hasReceivedRequest,
+  firstName,
+  lastName,
+  imageUrl,
 }: FriendRequestButtonsProps) => {
   const queryClient = useQueryClient();
-  const { openChatWithUser } = useChatStore();
+  const { addChat } = useChatStore();
 
   const sendRequestMutation = useMutation({
     mutationFn: () => SocialService.sendFriendRequest(profileId),
@@ -66,10 +72,19 @@ const FriendRequestButtons = ({
     },
   });
 
+  const handleChatClick = () => {
+    addChat({
+      profileId,
+      firstName,
+      lastName,
+      imageUrl,
+    });
+  };
+
   if (isFriend) {
     return (
       <>
-        <Button variant="secondary" onClick={() => openChatWithUser(profileId)}>
+        <Button variant="secondary" onClick={handleChatClick}>
           Mensagem
         </Button>
         <Button
