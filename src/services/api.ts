@@ -297,4 +297,39 @@ export const SocialService = {
     );
     if (!response.ok) throw new Error('Failed to upload profile picture');
   },
+
+  acceptFriendRequest: async (profileId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.manageFriendRequests}`,
+      {
+        method: 'PUT',
+        headers: createHeaders(),
+        body: JSON.stringify({ profileId, accept: true })
+      }
+    );
+    if (!response.ok) throw new Error('Failed to accept friend request');
+  },
+
+  rejectFriendRequest: async (profileId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.manageFriendRequests}`,
+      {
+        method: 'PUT',
+        headers: createHeaders(),
+        body: JSON.stringify({ profileId, accept: false })
+      }
+    );
+    if (!response.ok) throw new Error('Failed to reject friend request');
+  },
+
+  unfriend: async (profileId: string): Promise<void> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.removeFriend.replace('id', profileId)}`,
+      {
+        method: 'DELETE',
+        headers: createHeaders()
+      }
+    );
+    if (!response.ok) throw new Error('Failed to unfriend');
+  }
 };

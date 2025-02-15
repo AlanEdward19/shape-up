@@ -66,14 +66,10 @@ const FriendRequestButtons = ({
     },
   });
 
-  const handleChatClick = () => {
-    openChatWithUser(profileId);
-  };
-
   if (isFriend) {
     return (
       <>
-        <Button variant="secondary" onClick={handleChatClick}>
+        <Button variant="secondary" onClick={() => openChatWithUser(profileId)}>
           Mensagem
         </Button>
         <Button

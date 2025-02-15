@@ -23,7 +23,6 @@ interface ProfileHeaderProps {
   onShowFollowers: () => void;
   onShowFollowing: () => void;
   followActionPending: boolean;
-  onOpenChat: (profileId: string) => void;
   hasReceivedRequest?: boolean;
 }
 
@@ -41,7 +40,6 @@ const ProfileHeader = ({
   onShowFollowers,
   onShowFollowing,
   followActionPending,
-  onOpenChat,
   hasReceivedRequest = false,
 }: ProfileHeaderProps) => {
   const [open, setOpen] = useState(false);
@@ -258,7 +256,6 @@ const ProfileHeader = ({
                   isFriend={isFriend}
                   hasSentRequest={hasSentRequest}
                   hasReceivedRequest={hasReceivedRequest}
-                  onOpenChat={onOpenChat}
                 />
               </>
             )}
