@@ -12,13 +12,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <div className="flex-1 ml-20">
-        <div className="fixed top-0 left-20 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-20 border-b">
+        <div className="fixed top-0 left-20 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-20">
           <div className="flex items-center justify-between h-16 px-4 max-w-7xl mx-auto">
-            <div className="flex-1" /> {/* Espaço à esquerda */}
+            <div className="flex-1" />
             <div className="flex-1 max-w-xl px-4">
               <SearchBar />
             </div>
-            <div className="flex-1" /> {/* Espaço à direita */}
+            <div className="flex-1" />
           </div>
         </div>
         <main className="p-6 mt-16">
