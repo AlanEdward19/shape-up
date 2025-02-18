@@ -55,13 +55,13 @@ const SearchBar = () => {
       </div>
 
       {(results.length > 0 || isSearching) && (
-        <div className="absolute top-full mt-2 w-full bg-background border rounded-lg shadow-lg z-50">
+        <div className="absolute top-full mt-2 w-full bg-background border rounded-lg shadow-lg z-50 mx-auto left-0 right-0 max-w-[calc(100vw-2rem)] sm:max-w-full">
           {isSearching ? (
             <div className="p-4 text-center text-muted-foreground">
               Pesquisando...
             </div>
           ) : (
-            <div className="max-h-[400px] overflow-y-auto">
+            <div className="max-h-[300px] sm:max-h-[400px] overflow-y-auto">
               {results.map((profile) => (
                 <div
                   key={profile.id}
@@ -72,7 +72,7 @@ const SearchBar = () => {
                     setResults([]);
                   }}
                 >
-                  <Avatar className="h-10 w-10">
+                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                     <AvatarImage src={profile.imageUrl} />
                     <AvatarFallback>
                       {profile.firstName[0]}
@@ -80,10 +80,10 @@ const SearchBar = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <span className="font-medium">
+                    <span className="font-medium text-sm sm:text-base">
                       {profile.firstName} {profile.lastName}
                     </span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs sm:text-sm text-muted-foreground">
                       Ver perfil
                     </span>
                   </div>
