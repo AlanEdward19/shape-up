@@ -28,6 +28,7 @@ export const SERVICES = {
       editComment: '/Post/v1/id/editComment',
       getPost: '/Post/v1/id',
       getProfilePosts: '/Profile/v1/id/getPosts?Page={page}',
+      searchProfileByName: '/Profile/v1/searchProfileByName?Name={name}'
     }
   },
   CHAT: {
