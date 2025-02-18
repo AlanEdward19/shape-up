@@ -42,7 +42,7 @@ const SearchBar = () => {
   }, [searchTerm]);
 
   return (
-    <div className="relative max-w-md w-full mx-auto">
+    <div className="relative w-full">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
@@ -50,39 +50,43 @@ const SearchBar = () => {
           placeholder="Pesquisar perfis..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full"
+          className="w-full bg-secondary/50 border-none pl-10 rounded-full focus:ring-primary"
         />
       </div>
 
-      {/* Results dropdown */}
       {(results.length > 0 || isSearching) && (
-        <div className="absolute top-full mt-1 w-full bg-background border rounded-md shadow-lg z-50">
+        <div className="absolute top-full mt-2 w-full bg-background border rounded-lg shadow-lg z-50">
           {isSearching ? (
             <div className="p-4 text-center text-muted-foreground">
               Pesquisando...
             </div>
           ) : (
-            <div className="max-h-72 overflow-y-auto">
+            <div className="max-h-[400px] overflow-y-auto">
               {results.map((profile) => (
                 <div
                   key={profile.id}
-                  className="flex items-center gap-3 p-3 hover:bg-secondary cursor-pointer"
+                  className="flex items-center gap-3 p-3 hover:bg-secondary/50 transition-colors cursor-pointer"
                   onClick={() => {
                     navigate(`/profile/${profile.id}`);
                     setSearchTerm("");
                     setResults([]);
                   }}
                 >
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={profile.imageUrl} />
                     <AvatarFallback>
                       {profile.firstName[0]}
                       {profile.lastName[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="font-medium">
-                    {profile.firstName} {profile.lastName}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {profile.firstName} {profile.lastName}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      Ver perfil
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
