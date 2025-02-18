@@ -1,5 +1,5 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { Post, PostReaction, PostComment, ViewProfileResponse, Friend, FriendRequest, FollowUser } from '@/types/api';
+import { Post, PostReaction, PostComment, ViewProfileResponse, Friend, FriendRequest, FollowUser, ProfileSearchResult } from '@/types/api';
 import { getAuthToken } from '@/utils/auth';
 
 export const createHeaders = () => {
