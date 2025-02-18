@@ -55,7 +55,7 @@ const SearchBar = () => {
       </div>
 
       {(results.length > 0 || isSearching) && (
-        <div className="absolute top-full mt-2 w-full bg-background border rounded-lg shadow-lg z-50 mx-auto left-0 right-0 max-w-[calc(100vw-2rem)] sm:max-w-full">
+        <div className="absolute top-full mt-2 w-[calc(100vw-2rem)] sm:w-full bg-background border rounded-lg shadow-lg z-50 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-0">
           {isSearching ? (
             <div className="p-4 text-center text-muted-foreground">
               Pesquisando...
