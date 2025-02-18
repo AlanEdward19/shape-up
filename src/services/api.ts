@@ -331,5 +331,14 @@ export const SocialService = {
       }
     );
     if (!response.ok) throw new Error('Failed to unfriend');
+  },
+
+  searchProfileByName: async (name: string): Promise<ProfileSearchResult[]> => {
+    const response = await fetch(
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.searchProfileByName.replace('{name}', encodeURIComponent(name))}`,
+      { headers: createHeaders() }
+    );
+    if (!response.ok) throw new Error('Failed to search profiles');
+    return response.json();
   }
 };

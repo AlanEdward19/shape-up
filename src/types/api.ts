@@ -90,3 +90,10 @@ export interface FriendRecommendation {
 export interface FriendRecommendationsResponse {
   recommendations: FriendRecommendation[];
 }
+
+export interface ProfileSearchResult {
+  id: string;
+  firstName: string;
+  lastName: string;
+  imageUrl: string;
+}
