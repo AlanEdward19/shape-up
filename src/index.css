@@ -37,16 +37,73 @@
   }
 }
 
-/* Add custom styles for date picker popover */
+/* Windows-style date picker styles */
 .react-day-picker {
   background-color: #fff;
-  color: #000;
+  color: #333;
   border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.rdp-caption {
+  padding: 0.5rem;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 0.5rem;
+}
+
+.rdp-nav {
+  background-color: #f8f8f8;
+}
+
+.rdp-nav_button {
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  background-color: white;
+  transition: background-color 0.2s;
+}
+
+.rdp-nav_button:hover {
+  background-color: #f2f2f2;
+}
+
+.rdp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 2px;
+}
+
+.rdp-head_cell {
+  font-weight: 600;
+  color: #555;
+  padding: 0.5rem 0;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.rdp-day {
+  border-radius: 4px;
+  width: 2rem;
+  height: 2rem;
+  margin: 1px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .rdp-day_today {
   font-weight: bold;
   color: #0FA0CE;
+  border: 1px solid #0FA0CE;
 }
 
 .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
@@ -56,4 +113,40 @@
 .rdp-day_selected {
   background-color: #0FA0CE;
   color: white;
+  font-weight: bold;
+}
+
+.rdp-day_selected:hover {
+  background-color: #0d8bb2;
+}
+
+.rdp-day_outside {
+  color: #aaa;
+}
+
+.rdp-months {
+  display: flex;
+  justify-content: center;
+}
+
+.rdp-dropdown {
+  appearance: none;
+  padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: #333;
+}
+
+.rdp-dropdown:focus {
+  outline: none;
+  border-color: #0FA0CE;
+  box-shadow: 0 0 0 2px rgba(15, 160, 206, 0.2);
 }
