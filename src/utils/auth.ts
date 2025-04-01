@@ -1,3 +1,16 @@
+
+import { 
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  getIdToken,
+  User
+} from "firebase/auth";
+import { auth } from "@/config/firebase";
+
 export const decodeJwt = (token: string) => {
   try {
     const base64Url = token.split('.')[1];
@@ -15,21 +28,27 @@ export const decodeJwt = (token: string) => {
   }
 };
 
-export const getAuthToken = () => {
-  return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+export const getAuthToken = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    return await getIdToken(user);
+  }
+  return null;
 };
 
 export const getUserId = () => {
-  return localStorage.getItem('userId') || sessionStorage.getItem('userId');
+  return auth.currentUser?.uid || null;
 };
 
-export const setAuthData = (token: string, rememberMe: boolean = false) => {
-  const storage = rememberMe ? localStorage : sessionStorage;
-  const decoded = decodeJwt(token);
+export const setAuthData = async (user: User, rememberMe: boolean = false) => {
+  const token = await getIdToken(user);
   
-  if (decoded && decoded.oid) {
-    storage.setItem('userId', decoded.oid);
-    storage.setItem('authToken', token);
+  if (rememberMe) {
+    localStorage.setItem('userId', user.uid);
+    localStorage.setItem('authToken', token);
+  } else {
+    sessionStorage.setItem('userId', user.uid);
+    sessionStorage.setItem('authToken', token);
   }
 };
 
@@ -43,13 +62,58 @@ export const clearAuthData = () => {
 // Adding the missing exports that were causing errors
 export const clearAuthConfig = clearAuthData; // Alias for backward compatibility
 
+export const signInWithEmail = async (email: string, password: string, rememberMe: boolean = false) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    await setAuthData(userCredential.user, rememberMe);
+    return { success: true, user: userCredential.user };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { success: false, error };
+  }
+};
+
+export const signInWithGoogle = async (rememberMe: boolean = false) => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    await setAuthData(userCredential.user, rememberMe);
+    return { success: true, user: userCredential.user };
+  } catch (error) {
+    console.error('Google login error:', error);
+    return { success: false, error };
+  }
+};
+
+export const signInWithFacebook = async (rememberMe: boolean = false) => {
+  try {
+    const provider = new FacebookAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    await setAuthData(userCredential.user, rememberMe);
+    return { success: true, user: userCredential.user };
+  } catch (error) {
+    console.error('Facebook login error:', error);
+    return { success: false, error };
+  }
+};
+
 export const signUp = async (email: string, password: string) => {
   try {
-    // Implement actual signup logic here
-    // For now, returning a mock success response
-    return { success: true };
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    return { success: true, user: userCredential.user };
   } catch (error) {
     console.error('Signup error:', error);
-    return { success: false };
+    return { success: false, error };
+  }
+};
+
+export const signOut = async () => {
+  try {
+    await firebaseSignOut(auth);
+    clearAuthData();
+    return { success: true };
+  } catch (error) {
+    console.error('Signout error:', error);
+    return { success: false, error };
   }
 };

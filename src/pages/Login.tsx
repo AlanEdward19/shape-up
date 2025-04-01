@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -9,43 +10,114 @@ import { toast } from "sonner";
 import { Facebook, Mail } from "lucide-react";
 import AuthLayout from "@/components/templates/AuthLayout";
 import Button from "@/components/atoms/Button";
+import { signInWithEmail, signInWithGoogle, signInWithFacebook } from "@/utils/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
-      // Simulate login - replace with actual login logic
-      const userId = "123"; // This should come from your login response
+      const result = await signInWithEmail(email, password, rememberMe);
       
-      if (rememberMe) {
-        localStorage.setItem("userId", userId);
+      if (result.success) {
+        const userId = result.user?.uid;
+        
+        // Prefetch followers and following data
+        await Promise.all([
+          queryClient.prefetchQuery({
+            queryKey: ['followers', userId],
+            queryFn: () => SocialService.getFollowers(userId || "")
+          }),
+          queryClient.prefetchQuery({
+            queryKey: ['following', userId],
+            queryFn: () => SocialService.getFollowing(userId || "")
+          })
+        ]);
+
+        toast.success("Login realizado com sucesso!");
+        navigate("/index");
       } else {
-        sessionStorage.setItem("userId", userId);
+        toast.error("Falha no login. Tente novamente.");
       }
-
-      // Prefetch followers and following data
-      await Promise.all([
-        queryClient.prefetchQuery({
-          queryKey: ['followers', userId],
-          queryFn: () => SocialService.getFollowers(userId)
-        }),
-        queryClient.prefetchQuery({
-          queryKey: ['following', userId],
-          queryFn: () => SocialService.getFollowing(userId)
-        })
-      ]);
-
-      navigate("/index");
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Falha no login. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const result = await signInWithGoogle(rememberMe);
+      
+      if (result.success) {
+        const userId = result.user?.uid;
+        
+        // Prefetch followers and following data
+        await Promise.all([
+          queryClient.prefetchQuery({
+            queryKey: ['followers', userId],
+            queryFn: () => SocialService.getFollowers(userId || "")
+          }),
+          queryClient.prefetchQuery({
+            queryKey: ['following', userId],
+            queryFn: () => SocialService.getFollowing(userId || "")
+          })
+        ]);
+
+        toast.success("Login com Google realizado com sucesso!");
+        navigate("/index");
+      } else {
+        toast.error("Falha no login com Google. Tente novamente.");
+      }
+    } catch (error) {
+      console.error("Google login failed:", error);
+      toast.error("Falha no login com Google. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    setIsLoading(true);
+    try {
+      const result = await signInWithFacebook(rememberMe);
+      
+      if (result.success) {
+        const userId = result.user?.uid;
+        
+        // Prefetch followers and following data
+        await Promise.all([
+          queryClient.prefetchQuery({
+            queryKey: ['followers', userId],
+            queryFn: () => SocialService.getFollowers(userId || "")
+          }),
+          queryClient.prefetchQuery({
+            queryKey: ['following', userId],
+            queryFn: () => SocialService.getFollowing(userId || "")
+          })
+        ]);
+
+        toast.success("Login com Facebook realizado com sucesso!");
+        navigate("/index");
+      } else {
+        toast.error("Falha no login com Facebook. Tente novamente.");
+      }
+    } catch (error) {
+      console.error("Facebook login failed:", error);
+      toast.error("Falha no login com Facebook. Tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -55,7 +127,12 @@ const Login = () => {
       subtitle="Entre com suas credenciais"
     >
       <div className="space-y-4">
-        <Button variant="outline" className="w-full" onClick={() => toast.info("Login com Google em desenvolvimento")}>
+        <Button 
+          variant="outline" 
+          className="w-full" 
+          onClick={handleGoogleLogin}
+          disabled={isLoading}
+        >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path
               fill="currentColor"
@@ -77,7 +154,12 @@ const Login = () => {
           Continuar com Google
         </Button>
 
-        <Button variant="outline" className="w-full" onClick={() => toast.info("Login com Facebook em desenvolvimento")}>
+        <Button 
+          variant="outline" 
+          className="w-full" 
+          onClick={handleFacebookLogin}
+          disabled={isLoading}
+        >
           <Facebook className="mr-2 h-5 w-5" />
           Continuar com Facebook
         </Button>
@@ -103,6 +185,7 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
         <div className="space-y-2">
@@ -113,6 +196,7 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
         <div className="flex items-center space-x-2">
@@ -120,25 +204,26 @@ const Login = () => {
             id="rememberMe"
             checked={rememberMe}
             onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+            disabled={isLoading}
           />
           <Label htmlFor="rememberMe">Lembrar-me</Label>
         </div>
         <Button
           type="submit"
           className="w-full"
-          disabled={!email || !password}
+          disabled={!email || !password || isLoading}
         >
           <Mail className="mr-2 h-4 w-4" />
           Continuar com Email
         </Button>
       </form>
       <div className="space-y-4 text-center">
-        <Button variant="link" onClick={() => navigate("/forgot-password")}>
+        <Button variant="link" onClick={() => navigate("/forgot-password")} disabled={isLoading}>
           Esqueceu sua senha?
         </Button>
         <div className="space-y-2">
           <p className="text-muted-foreground">Não possui uma conta?</p>
-          <Button variant="outline" className="w-full" onClick={() => navigate("/signup")}>
+          <Button variant="outline" className="w-full" onClick={() => navigate("/signup")} disabled={isLoading}>
             Criar conta
           </Button>
         </div>
