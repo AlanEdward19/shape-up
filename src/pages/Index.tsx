@@ -42,6 +42,7 @@ const Index = () => {
     if (hash && hash.includes('#id_token=')) {
       const token = hash.split('#id_token=')[1];
       if (token) {
+        // The token is a string, and our updated setAuthData function can now handle strings
         const rememberMe = localStorage.getItem('rememberMe') === 'true';
         setAuthData(token, rememberMe);
         navigate('/index', { replace: true });

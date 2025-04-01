@@ -40,14 +40,27 @@ export const getUserId = () => {
   return auth.currentUser?.uid || null;
 };
 
-export const setAuthData = async (user: User, rememberMe: boolean = false) => {
-  const token = await getIdToken(user);
+// Updated to accept either a User object or a token string
+export const setAuthData = async (userOrToken: User | string, rememberMe: boolean = false) => {
+  let token: string;
+  let userId: string;
+  
+  if (typeof userOrToken === 'string') {
+    // It's a token string
+    token = userOrToken;
+    const decoded = decodeJwt(token);
+    userId = decoded?.sub || '';
+  } else {
+    // It's a User object
+    token = await getIdToken(userOrToken);
+    userId = userOrToken.uid;
+  }
   
   if (rememberMe) {
-    localStorage.setItem('userId', user.uid);
+    localStorage.setItem('userId', userId);
     localStorage.setItem('authToken', token);
   } else {
-    sessionStorage.setItem('userId', user.uid);
+    sessionStorage.setItem('userId', userId);
     sessionStorage.setItem('authToken', token);
   }
 };
