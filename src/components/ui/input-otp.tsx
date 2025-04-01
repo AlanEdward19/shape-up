@@ -34,9 +34,15 @@ const InputOTPSlot = React.forwardRef<
   React.ComponentPropsWithoutRef<"div"> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
-  // Verificamos se o contexto e os slots existem antes de acessá-los
-  const slot = inputOTPContext?.slots?.[index] || {}
-  const { char = '', hasFakeCaret = false, isActive = false } = slot
+  // Create a fallback slot with explicit types for the properties
+  const slot = inputOTPContext?.slots?.[index] || {
+    char: '',
+    hasFakeCaret: false,
+    isActive: false
+  }
+  
+  // Now we can safely destructure with TypeScript knowing these properties exist
+  const { char, hasFakeCaret, isActive } = slot
 
   return (
     <div
