@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,7 +6,7 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
@@ -34,4 +35,25 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Add custom styles for date picker popover */
+.react-day-picker {
+  background-color: #fff;
+  color: #000;
+  border-radius: 0.5rem;
+}
+
+.rdp-day_today {
+  font-weight: bold;
+  color: #0FA0CE;
+}
+
+.rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: #e6e6e6;
+}
+
+.rdp-day_selected {
+  background-color: #0FA0CE;
+  color: white;
 }
