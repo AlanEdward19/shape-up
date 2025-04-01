@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
+import { format, parse, isValid } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const verificationSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -40,6 +42,8 @@ const signupSchema = z.object({
   message: "As senhas não coincidem",
   path: ["confirmPassword"],
 });
+
+const DATE_FORMAT = "dd-MM-yyyy";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -150,6 +154,24 @@ const Signup = () => {
       console.error("Signup error:", error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Function to handle manual date input
+  const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (date: Date | undefined) => void) => {
+    const inputValue = e.target.value;
+    
+    if (!inputValue) {
+      onChange(undefined);
+      return;
+    }
+    
+    // Parse the date from the input
+    const parsedDate = parse(inputValue, DATE_FORMAT, new Date());
+    
+    // Only update if the date is valid
+    if (isValid(parsedDate)) {
+      onChange(parsedDate);
     }
   };
 
@@ -284,7 +306,7 @@ const Signup = () => {
                                 disabled={!verificationValid}
                               >
                                 {field.value ? (
-                                  format(field.value, "dd/MM/yyyy")
+                                  format(field.value, DATE_FORMAT)
                                 ) : (
                                   <span>Selecione uma data</span>
                                 )}
@@ -293,16 +315,31 @@ const Signup = () => {
                             </FormControl>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date > new Date() || date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                              className={cn("p-3 pointer-events-auto")}
-                            />
+                            <div className="p-2 border-b">
+                              <Input
+                                type="text"
+                                placeholder={DATE_FORMAT}
+                                value={field.value ? format(field.value, DATE_FORMAT) : ""}
+                                onChange={(e) => handleDateInputChange(e, field.onChange)}
+                                className="w-full"
+                              />
+                            </div>
+                            <ScrollArea className="h-80">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date > new Date() || date < new Date("1900-01-01")
+                                }
+                                initialFocus
+                                className={cn("p-3 pointer-events-auto")}
+                                fromYear={1900}
+                                toYear={new Date().getFullYear()}
+                                captionLayout="dropdown-buttons"
+                                showOutsideDays
+                              />
+                            </ScrollArea>
                           </PopoverContent>
                         </Popover>
                         <FormMessage />
