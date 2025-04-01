@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -142,7 +141,6 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Left side - Branding */}
       <div className="hidden lg:flex lg:flex-1 flex-col justify-center p-12 bg-secondary">
         <h1 className="text-4xl font-bold text-white mb-4">ShapeUp</h1>
         <p className="text-lg text-gray-300">
@@ -151,7 +149,6 @@ const Signup = () => {
         </p>
       </div>
 
-      {/* Right side - Signup Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <Card className="w-full max-w-md bg-transparent border-0 shadow-none">
           <CardContent className="space-y-6">
@@ -213,7 +210,7 @@ const Signup = () => {
                       render={({ slots }) => (
                         <InputOTPGroup>
                           {slots.map((slot, index) => (
-                            <InputOTPSlot key={index} {...slot} />
+                            <InputOTPSlot key={index} {...slot} index={index} />
                           ))}
                         </InputOTPGroup>
                       )}
