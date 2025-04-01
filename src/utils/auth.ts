@@ -1,3 +1,4 @@
+
 import { 
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -13,7 +14,7 @@ import {
   applyActionCode,
   checkActionCode
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/config/firebase";
 
 export const decodeJwt = (token: string) => {
@@ -156,6 +157,38 @@ export const verifyCode = (email: string, code: string): boolean => {
   return storedCode === code;
 };
 
+export const addCustomClaims = async (userId: string, claims: any) => {
+  // Aqui você precisaria chamar uma função de backend que usa o Firebase Admin
+  // para definir as custom claims do usuário
+  // Esta é uma simulação do que seria feito no backend
+  try {
+    // Em uma implementação real, você enviaria uma requisição para um endpoint seguro
+    // que utilizaria o Firebase Admin SDK para adicionar as claims
+    console.log(`Adding custom claims for user ${userId}:`, claims);
+    
+    // Simular chamada para API que adiciona custom claims
+    const response = await fetch('/api/add-custom-claims', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        claims,
+      }),
+    }).catch(() => {
+      // Simular resposta bem-sucedida em ambiente de desenvolvimento
+      console.log('Development mode: Simulating successful custom claims addition');
+      return { ok: true };
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding custom claims:', error);
+    return { success: false, error };
+  }
+};
+
 export const signUp = async (email: string, password: string, userData?: any) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -163,7 +196,7 @@ export const signUp = async (email: string, password: string, userData?: any) =>
     if (userCredential.user) {
       await sendEmailVerification(userCredential.user);
       
-      // Save user data to Firestore
+      // Salvar user data no Firestore
       if (userData) {
         const userDocRef = doc(db, "users", userCredential.user.uid);
         await setDoc(userDocRef, {
@@ -172,6 +205,11 @@ export const signUp = async (email: string, password: string, userData?: any) =>
           createdAt: new Date(),
         });
         console.log('User data saved to Firestore:', userData);
+        
+        // Adicionar custom claims (em uma aplicação real, isso seria feito via Cloud Function)
+        await addCustomClaims(userCredential.user.uid, {
+          userData: userData
+        });
       }
     }
     

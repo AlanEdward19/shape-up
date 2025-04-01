@@ -135,6 +135,7 @@ const Signup = () => {
         birthday: data.birthday ? data.birthday.toISOString() : null,
       };
 
+      // Registra o usuário e adiciona custom claims via Firebase Admin (simulado)
       const result = await signUp(data.email, data.password, userData);
       
       if (result.success) {
