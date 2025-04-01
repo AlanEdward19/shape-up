@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,6 @@ const Signup = () => {
     },
   });
 
-  // Update signup form email when email form changes
   useEffect(() => {
     if (emailForm.watch("email")) {
       signupForm.setValue("email", emailForm.watch("email"));
@@ -209,8 +207,8 @@ const Signup = () => {
                       onChange={handleVerificationCodeChange}
                       render={({ slots }) => (
                         <InputOTPGroup>
-                          {slots.map((slot, index) => (
-                            <InputOTPSlot key={index} {...slot} index={index} />
+                          {slots && Array.from({ length: 6 }).map((_, index) => (
+                            <InputOTPSlot key={index} index={index} />
                           ))}
                         </InputOTPGroup>
                       )}
