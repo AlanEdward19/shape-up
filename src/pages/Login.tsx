@@ -37,7 +37,15 @@ const Login = () => {
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.data();
 
-        const customToken = ""
+        // Criar token customizado com claims do Firestore
+        const decodedToken = token ? JSON.parse(atob(token.split(".")[1])) : {};
+        const customToken = token ? 
+          `${token.split(".")[0]}.${btoa(JSON.stringify({
+            ...decodedToken,
+            userData: {
+              ...userData
+            }
+          }))}.${token.split(".")[2]}` : "";
 
         console.log(`Id: ${userId}`);
         console.log(`Token: ${token}`);
