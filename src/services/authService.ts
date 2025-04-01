@@ -1,13 +1,12 @@
 
-// Esse arquivo mostra como seria implementado um serviço backend
-// para adicionar custom claims usando Firebase Admin SDK
-// Nota: Em um ambiente real, isso seria uma Cloud Function ou API serverless
+// This file demonstrates how a backend service would handle token enhancement
+// using Firebase Admin SDK in a real environment
 
 import { initializeApp, cert, ServiceAccount } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
 /*
-// Em um ambiente real, o serviço seria inicializado com um service account
+// In a real environment, the service would be initialized with a service account
 const serviceAccount = require('../path/to/serviceAccountKey.json');
 
 initializeApp({
@@ -15,32 +14,48 @@ initializeApp({
 });
 */
 
-// Função que seria chamada pelo endpoint de API para adicionar custom claims
-export const addCustomUserClaims = async (userId: string, claims: any) => {
+// Function that would be called by the API endpoint to enhance the token with custom claims
+export const enhanceUserToken = async (userId: string, scopes: any) => {
   try {
-    // Em uma implementação real, esta função seria executada no backend
-    // usando o Firebase Admin SDK
+    // In a real implementation, this function would run on the backend
+    // using the Firebase Admin SDK
     
     // const auth = getAuth();
-    // await auth.setCustomUserClaims(userId, claims);
-    console.log(`[SERVER] Added custom claims for user ${userId}:`, claims);
+    // await auth.setCustomUserClaims(userId, { scopes });
+    console.log(`[SERVER] Enhanced token for user ${userId} with scopes:`, scopes);
     
     return { success: true };
   } catch (error) {
-    console.error('[SERVER] Error adding custom claims:', error);
+    console.error('[SERVER] Error enhancing token:', error);
     return { success: false, error };
   }
 };
 
-// Exemplo de como seria a rota da API em um framework como Express
+// Example of how the API route would be implemented in a framework like Express
 /*
-app.post('/api/add-custom-claims', async (req, res) => {
+app.post('/v1/Authentication/enhanceToken', async (req, res) => {
   try {
-    const { userId, claims } = req.body;
+    // Get the user ID from the verified JWT in the Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // In a real implementation, the token would be verified and the user ID extracted
+    const token = authHeader.split(' ')[1];
+    // const decodedToken = await admin.auth().verifyIdToken(token);
+    // const userId = decodedToken.uid;
     
-    // Verificar autenticação e autorização aqui
+    // For demo purposes
+    const userId = 'extracted-from-token';
     
-    const result = await addCustomUserClaims(userId, claims);
+    const { scopes } = req.body;
+    
+    if (!scopes) {
+      return res.status(400).json({ error: 'Scopes are required' });
+    }
+    
+    const result = await enhanceUserToken(userId, scopes);
     
     if (result.success) {
       res.status(200).json({ success: true });
@@ -48,36 +63,36 @@ app.post('/api/add-custom-claims', async (req, res) => {
       res.status(500).json({ success: false, error: result.error });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error });
+    console.error('Error processing request:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 */
 
-// Em um ambiente Firebase, isso seria uma Cloud Function:
+// In a Firebase environment, this could be a Cloud Function:
 /*
-export const addCustomClaims = functions.https.onCall(async (data, context) => {
-  // Verificar se o usuário está autenticado
+export const enhanceToken = functions.https.onCall(async (data, context) => {
+  // Check if the user is authenticated
   if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'O usuário deve estar autenticado.');
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated.');
   }
   
-  // Obter dados da requisição
-  const { userId, claims } = data;
+  // Get the user ID and scopes from the request
+  const userId = context.auth.uid;
+  const { scopes } = data;
   
-  // Verificar se o usuário que fez a requisição tem permissão para atualizar as claims
-  // (Geralmente apenas um administrador ou o próprio usuário)
-  if (context.auth.uid !== userId && !context.auth.token.admin) {
-    throw new functions.https.HttpsError('permission-denied', 'Sem permissão para atualizar claims.');
+  if (!scopes) {
+    throw new functions.https.HttpsError('invalid-argument', 'Scopes are required.');
   }
   
   try {
     const auth = getAuth();
-    await auth.setCustomUserClaims(userId, claims);
+    await auth.setCustomUserClaims(userId, { scopes });
     
     return { success: true };
   } catch (error) {
-    console.error('Erro ao adicionar custom claims:', error);
-    throw new functions.https.HttpsError('internal', 'Erro ao adicionar custom claims.');
+    console.error('Error enhancing token:', error);
+    throw new functions.https.HttpsError('internal', 'Error enhancing token.');
   }
 });
 */
