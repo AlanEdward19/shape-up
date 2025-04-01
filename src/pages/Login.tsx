@@ -30,41 +30,11 @@ const Login = () => {
       const result = await signInWithEmail(email, password, rememberMe);
       
       if (result.success) {
-        const userId = result.user?.uid;
         const token = await result.user?.getIdToken();
 
-        // Obter dados adicionais do usuário do Firestore
-        const userDocRef = doc(db, "users", userId);
-        const userDoc = await getDoc(userDocRef);
-        const userData = userDoc.data();
-
-        // Criar token customizado com claims do usuário
-        if (token) {
-          // Decodificar o token atual
-          const tokenParts = token.split('.');
-          const payload = JSON.parse(atob(tokenParts[1]));
-          
-          // Adicionar os dados do usuário como claims customizadas
-          const newPayload = {
-            ...payload,
-            userData: userData || {}
-          };
-          
-          // Reconstruir o token com as novas claims
-          const customToken = `${tokenParts[0]}.${btoa(JSON.stringify(newPayload))}.${tokenParts[2]}`;
-          
-          console.log(`Id: ${userId}`);
-          console.log(`Original Token: ${token}`);
-          console.log('User data:', userData);
-          console.log(`Custom Token: ${customToken}`);
-          
-          // Salvar o token customizado diretamente
-          await setAuthData(customToken, rememberMe);
-          toast.success("Login realizado com sucesso!");
-          navigate('/index', { replace: true });
-        } else {
-          throw new Error("Token não disponível");
-        }
+        await setAuthData(token, rememberMe);
+        toast.success("Login realizado com sucesso!");
+        navigate('/index', { replace: true });
       } else {
         toast.error("Falha no login. Tente novamente.");
       }
