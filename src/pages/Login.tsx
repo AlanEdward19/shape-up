@@ -38,24 +38,32 @@ const Login = () => {
         const userData = userDoc.data();
 
         // Criar token customizado com claims do Firestore
-        const decodedToken = token ? JSON.parse(atob(token.split(".")[1])) : {};
-        const customToken = token ? 
-          `${token.split(".")[0]}.${btoa(JSON.stringify({
-            ...decodedToken,
-            userData: {
-              ...userData
-            }
-          }))}.${token.split(".")[2]}` : "";
-
-        console.log(`Id: ${userId}`);
-        console.log(`Token: ${token}`);
-        console.log('User doc ref:', userData);
-        console.log(`Custom Token: ${customToken}`);
-
-
-        toast.success("Login realizado com sucesso!");
-        await setAuthData(token, rememberMe);
-        navigate('/index', { replace: true });
+        if (token) {
+          // Decodificar o token atual
+          const tokenParts = token.split('.');
+          const payload = JSON.parse(atob(tokenParts[1]));
+          
+          // Adicionar os dados do Firestore como claims
+          const newPayload = {
+            ...payload,
+            userData: userData || {}
+          };
+          
+          // Reconstruir o token com as novas claims
+          const customToken = `${tokenParts[0]}.${btoa(JSON.stringify(newPayload))}.${tokenParts[2]}`;
+          
+          console.log(`Id: ${userId}`);
+          console.log(`Token: ${token}`);
+          console.log('User doc ref:', userData);
+          console.log(`Custom Token: ${customToken}`);
+          
+          // Salvar o token customizado
+          await setAuthData(customToken, rememberMe);
+          toast.success("Login realizado com sucesso!");
+          navigate('/index', { replace: true });
+        } else {
+          throw new Error("Token não disponível");
+        }
       } else {
         toast.error("Falha no login. Tente novamente.");
       }
