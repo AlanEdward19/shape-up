@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -35,18 +36,10 @@ const signupSchema = z.object({
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
   const [verificationCodeSent, setVerificationCodeSent] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [verificationValid, setVerificationValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
 
   const emailForm = useForm<z.infer<typeof verificationSchema>>({
     resolver: zodResolver(verificationSchema),
@@ -55,16 +48,33 @@ const Signup = () => {
     },
   });
 
-  const handleSendVerificationCode = async () => {
+  const signupForm = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      verificationCode: "",
+      firstName: "",
+      lastName: "",
+      password: "",
+      confirmPassword: "",
+      country: "",
+      city: "",
+      state: "",
+    },
+  });
+
+  // Update signup form email when email form changes
+  useEffect(() => {
+    if (emailForm.watch("email")) {
+      signupForm.setValue("email", emailForm.watch("email"));
+    }
+  }, [emailForm.watch("email")]);
+
+  const handleSendVerificationCode = async (data: z.infer<typeof verificationSchema>) => {
     try {
       setIsSubmitting(true);
-      const validEmail = await emailForm.trigger("email");
       
-      if (!validEmail) {
-        return;
-      }
-      
-      const result = await sendVerificationCode(email);
+      const result = await sendVerificationCode(data.email);
       
       if (result.success) {
         setVerificationCodeSent(true);
@@ -86,9 +96,10 @@ const Signup = () => {
 
   const handleVerificationCodeChange = (value: string) => {
     setVerificationCode(value);
+    signupForm.setValue("verificationCode", value);
     
     if (value.length === 6) {
-      const isValid = verifyCode(email, value);
+      const isValid = verifyCode(emailForm.watch("email"), value);
       setVerificationValid(isValid);
       
       if (isValid) {
@@ -99,16 +110,9 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSignup = async (data: z.infer<typeof signupSchema>) => {
     if (!verificationValid) {
       toast.error("Por favor, verifique seu email antes de continuar.");
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      toast.error("As senhas não coincidem");
       return;
     }
 
@@ -116,14 +120,14 @@ const Signup = () => {
       setIsSubmitting(true);
       
       const userData = {
-        firstName,
-        lastName,
-        country,
-        city,
-        state,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        country: data.country,
+        city: data.city,
+        state: data.state,
       };
 
-      const result = await signUp(email, password, userData);
+      const result = await signUp(data.email, data.password, userData);
       
       if (result.success) {
         toast.success("Conta criada com sucesso! Verifique seu email para confirmar.");
@@ -164,8 +168,8 @@ const Signup = () => {
               <h2 className="text-2xl font-semibold text-center flex-1">Criar Conta</h2>
             </div>
             
-            <form onSubmit={emailForm.handleSubmit(handleSendVerificationCode)} className="space-y-4">
-              <div className="space-y-2">
+            <Form {...emailForm}>
+              <form onSubmit={emailForm.handleSubmit(handleSendVerificationCode)} className="space-y-4">
                 <FormField
                   control={emailForm.control}
                   name="email"
@@ -177,10 +181,6 @@ const Signup = () => {
                           {...field}
                           placeholder="Seu email"
                           disabled={verificationCodeSent}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            setEmail(e.target.value);
-                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -195,12 +195,12 @@ const Signup = () => {
                 >
                   {isSubmitting ? "Enviando..." : "Enviar código de confirmação"}
                 </Button>
-              </div>
-            </form>
+              </form>
+            </Form>
 
             {verificationCodeSent && (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-4">
+              <Form {...signupForm}>
+                <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="verification-code">Código de verificação</Label>
                     <InputOTP
@@ -220,97 +220,150 @@ const Signup = () => {
                     )}
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">Primeiro Nome</Label>
-                    <Input
-                      id="firstName"
-                      placeholder="Primeiro Nome"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      disabled={!verificationValid}
-                    />
-                  </div>
+                  <FormField
+                    control={signupForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Primeiro Nome</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Primeiro Nome"
+                            disabled={!verificationValid}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Sobrenome</Label>
-                    <Input
-                      id="lastName"
-                      placeholder="Sobrenome"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      disabled={!verificationValid}
-                    />
-                  </div>
+                  <FormField
+                    control={signupForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sobrenome</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Sobrenome"
+                            disabled={!verificationValid}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Senha"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={!verificationValid}
-                    />
-                  </div>
+                  <FormField
+                    control={signupForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Senha</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Senha"
+                            disabled={!verificationValid}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirmar Senha"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      disabled={!verificationValid}
-                    />
-                  </div>
+                  <FormField
+                    control={signupForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirmar Senha</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Confirmar Senha"
+                            disabled={!verificationValid}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="country">País</Label>
-                    <Select 
-                      value={country} 
-                      onValueChange={setCountry}
-                      disabled={!verificationValid}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="País" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="brasil">Brasil</SelectItem>
-                        <SelectItem value="portugal">Portugal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <FormField
+                    control={signupForm.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>País</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={!verificationValid}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="País" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="brasil">Brasil</SelectItem>
+                            <SelectItem value="portugal">Portugal</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="city">Cidade</Label>
-                    <Input
-                      id="city"
-                      placeholder="Cidade"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      disabled={!verificationValid}
-                    />
-                  </div>
+                  <FormField
+                    control={signupForm.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Cidade"
+                            disabled={!verificationValid}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="state">Estado</Label>
-                    <Select 
-                      value={state} 
-                      onValueChange={setState}
-                      disabled={!verificationValid}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Estado" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="sp">São Paulo</SelectItem>
-                        <SelectItem value="rj">Rio de Janeiro</SelectItem>
-                        <SelectItem value="mg">Minas Gerais</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <FormField
+                    control={signupForm.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={!verificationValid}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Estado" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="sp">São Paulo</SelectItem>
+                            <SelectItem value="rj">Rio de Janeiro</SelectItem>
+                            <SelectItem value="mg">Minas Gerais</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
                   <Button 
                     type="submit" 
@@ -319,8 +372,8 @@ const Signup = () => {
                   >
                     {isSubmitting ? "Criando conta..." : "Criar conta"}
                   </Button>
-                </div>
-              </form>
+                </form>
+              </Form>
             )}
           </CardContent>
         </Card>
