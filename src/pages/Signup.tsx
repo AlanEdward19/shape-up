@@ -32,6 +32,7 @@ const signupSchema = z.object({
   country: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
+  postalCode: z.string().optional(),
   birthday: z.date({
     required_error: "Por favor, selecione uma data de aniversário",
   }).optional(),
@@ -66,6 +67,7 @@ const Signup = () => {
       country: "",
       city: "",
       state: "",
+      postalCode: "",
       birthday: undefined,
     },
   });
@@ -131,10 +133,10 @@ const Signup = () => {
         country: data.country,
         city: data.city,
         state: data.state,
+        postalCode: data.postalCode,
         birthday: data.birthday ? data.birthday.toISOString() : null,
       };
 
-      // Register the user and enhance the token via the Auth service
       const result = await signUp(data.email, data.password, userData);
       
       if (result.success) {
@@ -412,6 +414,24 @@ const Signup = () => {
                             <SelectItem value="mg">Minas Gerais</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={signupForm.control}
+                    name="postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Código Postal</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Código Postal"
+                            disabled={!verificationValid}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
