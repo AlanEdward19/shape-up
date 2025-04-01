@@ -7,10 +7,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { Facebook, Mail } from "lucide-react";
 import AuthLayout from "@/components/templates/AuthLayout";
 import Button from "@/components/atoms/Button";
-import { signInWithEmail, signInWithGoogle, signInWithFacebook } from "@/utils/auth";
+import {signInWithEmail, signInWithGoogle, signInWithFacebook, setAuthData} from "@/utils/auth";
+import {db} from "@/config/firebase.ts";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -29,21 +31,23 @@ const Login = () => {
       
       if (result.success) {
         const userId = result.user?.uid;
-        
-        // Prefetch followers and following data
-        await Promise.all([
-          queryClient.prefetchQuery({
-            queryKey: ['followers', userId],
-            queryFn: () => SocialService.getFollowers(userId || "")
-          }),
-          queryClient.prefetchQuery({
-            queryKey: ['following', userId],
-            queryFn: () => SocialService.getFollowing(userId || "")
-          })
-        ]);
+        const token = await result.user?.getIdToken();
+
+        const userDocRef = doc(db, "users", userId);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.data();
+
+        const customToken = ""
+
+        console.log(`Id: ${userId}`);
+        console.log(`Token: ${token}`);
+        console.log('User doc ref:', userData);
+        console.log(`Custom Token: ${customToken}`);
+
 
         toast.success("Login realizado com sucesso!");
-        navigate("/index");
+        await setAuthData(token, rememberMe);
+        navigate('/index', { replace: true });
       } else {
         toast.error("Falha no login. Tente novamente.");
       }
@@ -62,21 +66,14 @@ const Login = () => {
       
       if (result.success) {
         const userId = result.user?.uid;
-        
-        // Prefetch followers and following data
-        await Promise.all([
-          queryClient.prefetchQuery({
-            queryKey: ['followers', userId],
-            queryFn: () => SocialService.getFollowers(userId || "")
-          }),
-          queryClient.prefetchQuery({
-            queryKey: ['following', userId],
-            queryFn: () => SocialService.getFollowing(userId || "")
-          })
-        ]);
+        const token = await result.user?.getIdToken();
+
+        console.log(`Id: ${userId}`);
+        console.log(`Token: ${token}`);
 
         toast.success("Login com Google realizado com sucesso!");
-        navigate("/index");
+        await setAuthData(token, rememberMe);
+        navigate('/index', { replace: true });
       } else {
         toast.error("Falha no login com Google. Tente novamente.");
       }
@@ -95,21 +92,14 @@ const Login = () => {
       
       if (result.success) {
         const userId = result.user?.uid;
-        
-        // Prefetch followers and following data
-        await Promise.all([
-          queryClient.prefetchQuery({
-            queryKey: ['followers', userId],
-            queryFn: () => SocialService.getFollowers(userId || "")
-          }),
-          queryClient.prefetchQuery({
-            queryKey: ['following', userId],
-            queryFn: () => SocialService.getFollowing(userId || "")
-          })
-        ]);
+        const token = await result.user?.getIdToken();
+
+        console.log(`Id: ${userId}`);
+        console.log(`Token: ${token}`);
 
         toast.success("Login com Facebook realizado com sucesso!");
-        navigate("/index");
+        await setAuthData(token, rememberMe);
+        navigate('/index', { replace: true });
       } else {
         toast.error("Falha no login com Facebook. Tente novamente.");
       }
