@@ -42,6 +42,12 @@ export const SERVICES = {
   NOTIFICATION: {
     baseUrl: import.meta.env.VITE_NOTIFICATION_API_BASE_URL,
     hubUrl: 'notifications'
+  },
+  AUTH:{
+    baseUrl: import.meta.env.VITE_AUTH_API_BASE_URL,
+    endpoints: {
+      enhanceToken: 'v1/Authentication/enhanceToken'
+    }
   }
 };
 
