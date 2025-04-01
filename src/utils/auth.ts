@@ -34,12 +34,16 @@ export const decodeJwt = (token: string) => {
   }
 };
 
-export const getAuthToken = async () => {
-  const user = auth.currentUser;
-  if (user) {
-    return await getIdToken(user);
+export const getAuthToken = () => {
+  // First try to get the token from session storage
+  let token = sessionStorage.getItem('authToken');
+  
+  // If not found, try from local storage
+  if (!token) {
+    token = localStorage.getItem('authToken');
   }
-  return null;
+  
+  return token;
 };
 
 export const getUserId = () => {

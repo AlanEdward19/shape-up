@@ -1,6 +1,7 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CreatePost from "@/components/CreatePost";
 import Stories from "@/components/Stories";
 import Suggestions from "@/components/Suggestions";
@@ -8,14 +9,12 @@ import Post from "@/components/Post";
 import Sidebar from "@/components/Sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SocialService } from "@/services/api";
-import { setAuthData } from "@/utils/auth";
 import { toast } from "sonner";
 import { notificationService } from "@/services/notificationService";
 import PostModal from "@/components/PostModal";
 import { Post as PostType } from "@/types/api";
 
 const Index = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const [selectedPost, setSelectedPost] = useState<PostType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,20 +35,6 @@ const Index = () => {
       notificationService.stopConnection();
     };
   }, []);
-
-  useEffect(() => {
-    const hash = location.hash;
-    if (hash && hash.includes('#id_token=')) {
-      const token = hash.split('#id_token=')[1];
-      if (token) {
-        // The token is a string, and our updated setAuthData function can now handle strings
-        const rememberMe = localStorage.getItem('rememberMe') === 'true';
-        setAuthData(token, rememberMe);
-        navigate('/index', { replace: true });
-        toast.success('Login realizado com sucesso!');
-      }
-    }
-  }, [location, navigate]);
 
   const { data: posts, isLoading, error } = useQuery({
     queryKey: ['activityFeed'],
