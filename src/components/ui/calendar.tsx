@@ -1,11 +1,10 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, UseNavigation } from "react-day-picker";
+import { DayPicker, useNavigation } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -61,7 +60,7 @@ function Calendar({
           return (
             <select
               value={value}
-              onChange={e => onChange && onChange(e.target.value)}
+              onChange={(e) => onChange && onChange(e)}
               className="rdp-dropdown"
               {...props}
             >
@@ -70,8 +69,8 @@ function Calendar({
           );
         },
         // Custom caption component to show year/month dropdowns
-        Caption: ({ displayMonth, currencyDate }) => {
-          const navigation = DayPicker.useNavigation();
+        Caption: ({ displayMonth }) => {
+          const navigation = useNavigation();
           const [currentMonth, setCurrentMonth] = React.useState(displayMonth);
           
           React.useEffect(() => {
