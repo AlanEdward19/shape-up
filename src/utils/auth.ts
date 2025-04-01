@@ -13,7 +13,8 @@ import {
   applyActionCode,
   checkActionCode
 } from "firebase/auth";
-import { auth } from "@/config/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/config/firebase";
 
 export const decodeJwt = (token: string) => {
   try {
@@ -161,10 +162,17 @@ export const signUp = async (email: string, password: string, userData?: any) =>
     
     if (userCredential.user) {
       await sendEmailVerification(userCredential.user);
-    }
-    
-    if (userData) {
-      console.log('Additional user data to store:', userData);
+      
+      // Save user data to Firestore
+      if (userData) {
+        const userDocRef = doc(db, "users", userCredential.user.uid);
+        await setDoc(userDocRef, {
+          ...userData,
+          email: email,
+          createdAt: new Date(),
+        });
+        console.log('User data saved to Firestore:', userData);
+      }
     }
     
     return { success: true, user: userCredential.user };
