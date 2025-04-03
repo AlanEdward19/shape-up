@@ -2,6 +2,7 @@ export const SERVICES = {
   SOCIAL: {
     baseUrl: import.meta.env.VITE_SOCIAL_API_BASE_URL,
     endpoints: {
+      uploadProfilePicture: 'v1/Profile/uploadProfilePicture',
       sendFriendRequest: 'v1/Friend/sendFriendRequest',
       listFriends: 'v1/Friend/listFriends/id?page=pageNumber&rows=rowsNumber',
       removeFriendRequest: 'v1/Friend/removeFriendRequest/id',

@@ -288,7 +288,7 @@ export const SocialService = {
     delete headers['Content-Type'];
     
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Profile/v1/uploadProfilePicture`,
+        `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.uploadProfilePicture}`,
       {
         method: 'PUT',
         headers: headers,
