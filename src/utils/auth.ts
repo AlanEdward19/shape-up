@@ -164,6 +164,7 @@ export const verifyCode = (email: string, code: string): boolean => {
 export const enhanceToken = async (userData: any): Promise<boolean> => {
   try {
     const token = await getAuthToken();
+
     if (!token) {
       console.error('No auth token available');
       return false;
@@ -201,6 +202,7 @@ export const signUp = async (email: string, password: string, userData?: any) =>
       
       // Add custom claims via the Auth service if userData is provided
       if (userData) {
+        await setAuthData(userCredential.user);
         await enhanceToken(userData);
       }
     }
