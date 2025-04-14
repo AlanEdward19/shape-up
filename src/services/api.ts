@@ -221,7 +221,7 @@ export const SocialService = {
 
   sendFriendRequest: async (friendId: string, requestMessage?: string): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}/Friend/v1/sendFriendRequest`,
+      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.sendFriendRequest}`,
       {
         method: 'POST',
         headers: createHeaders(),

@@ -8,7 +8,7 @@ export const SERVICES = {
       removeFriendRequest: 'v1/Friend/removeFriendRequest/id',
       removeFriend: 'v1/Friend/removeFriend/id',
       manageFriendRequests: 'v1/Friend/manageFriendRequests',
-      checkRequestStatus: '/Friend/checkRequestStatus',
+      checkRequestStatus: 'v1/Friend/checkRequestStatus',
       editProfile: 'v1/Profile/EditProfile',
       viewProfile: 'v1/Profile/ViewProfile/id',
       viewProfileSimplified: 'v1/Profile/viewProfile/id/simplified',
