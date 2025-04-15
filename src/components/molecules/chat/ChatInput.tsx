@@ -27,11 +27,30 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
       const timestamp = date.toISOString();
       const messageWithTimestamp = `${message} ${format(date, 'dd/MM/yyyy HH:mm:ss')}`;
       const encryptedMessage = encryptMessage(messageWithTimestamp);
-      
+
+      // Atualiza o cache manualmente
+      queryClient.setQueryData(["messages", profileId], (oldData: any) => {
+        if (!oldData) {
+          return { pages: [[{ id: Date.now(), senderId: getUserId(), encryptedMessage, timestamp }]], pageParams: [1] };
+        }
+
+        const newPages = [...oldData.pages];
+        if (newPages.length === 0) {
+          newPages.push([{ id: Date.now(), senderId: getUserId(), encryptedMessage, timestamp }]);
+        } else {
+          const lastPageIndex = newPages.length - 1;
+          newPages[lastPageIndex] = [
+            ...newPages[lastPageIndex],
+            { id: Date.now(), senderId: getUserId(), encryptedMessage, timestamp }
+          ];
+        }
+
+        return { ...oldData, pages: newPages };
+      });
+
+      // Envia a mensagem para o servidor
       await ChatService.sendMessage(profileId, message);
       setMessage("");
-
-      // Removemos a adição manual da mensagem ao cache, pois ela será adicionada via SignalR
     } catch (error) {
       toast.error("Erro ao enviar mensagem");
     } finally {
