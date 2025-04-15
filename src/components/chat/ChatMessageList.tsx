@@ -42,6 +42,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
 
   useEffect(() => {
     const startConnection = async () => {
+
       try {
         if (connectionRef.current) {
           await connectionRef.current.stop();
@@ -50,7 +51,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         }
 
         const connection = new signalR.HubConnectionBuilder()
-          .withUrl(`${SERVICES.CHAT.baseUrl}/chat?ProfileId=${profileId}`, {
+          .withUrl(`${SERVICES.CHAT.baseUrl}chat?ProfileId=${profileId}`, {
             accessTokenFactory: () => getAuthToken() || ''
           })
           .withAutomaticReconnect()
