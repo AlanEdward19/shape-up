@@ -34,16 +34,59 @@ export const decodeJwt = (token: string) => {
   }
 };
 
-export const getAuthToken = () => {
-  // First try to get the token from session storage
+const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
+
+export const refreshIdToken = async (refreshToken: string) => {
+  const url = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`;
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+  });
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!response.ok) throw new Error("Failed to refresh token");
+  return response.json();
+};
+
+export const getAuthToken = async (): Promise<string | null> => {
+  // Try sessionStorage first
   let token = sessionStorage.getItem('authToken');
-  
-  // If not found, try from local storage
+  let refreshToken = sessionStorage.getItem('refreshToken');
+  let storage = sessionStorage;
+
+  // If not found, try localStorage
   if (!token) {
     token = localStorage.getItem('authToken');
+    refreshToken = localStorage.getItem('refreshToken');
+    storage = localStorage;
   }
-  
-  return token;
+
+  if (!token) return null;
+
+  const decoded = decodeJwt(token);
+  const now = Math.floor(Date.now() / 1000);
+  if (decoded?.exp && decoded.exp > now) {
+    return token;
+  }
+
+  // Token expired, try to refresh
+  if (refreshToken) {
+    try {
+      const refreshed = await refreshIdToken(refreshToken);
+      const newToken = refreshed.id_token;
+      const newRefreshToken = refreshed.refresh_token;
+      storage.setItem('authToken', newToken);
+      storage.setItem('refreshToken', newRefreshToken);
+      return newToken;
+    } catch (err) {
+      console.error('Failed to refresh token:', err);
+      return null;
+    }
+  }
+  return null;
 };
 
 export const getUserId = () => {
@@ -53,22 +96,27 @@ export const getUserId = () => {
 export const setAuthData = async (userOrToken: User | string, rememberMe: boolean = false) => {
   let token: string;
   let userId: string;
-  
+  let refreshToken: string | undefined;
+
   if (typeof userOrToken === 'string') {
     token = userOrToken;
     const decoded = decodeJwt(token);
     userId = decoded?.sub || '';
+    // No refreshToken available in this case
   } else {
     token = await getIdToken(userOrToken);
     userId = userOrToken.uid;
+    refreshToken = userOrToken.refreshToken;
   }
-  
+
   if (rememberMe) {
     localStorage.setItem('userId', userId);
     localStorage.setItem('authToken', token);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
   } else {
     sessionStorage.setItem('userId', userId);
     sessionStorage.setItem('authToken', token);
+    if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken);
   }
 };
 
