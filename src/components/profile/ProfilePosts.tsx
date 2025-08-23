@@ -6,7 +6,7 @@ import { SocialService } from "@/services/api";
 import { toast } from "sonner";
 import { MessageCircle, Heart } from "lucide-react";
 import { Post, PostReaction, PostComment } from "@/types/api";
-import PostModal from "@/components/PostModal";
+import PostModal from "@/components/organisms/PostModal.tsx";
 
 interface ProfilePostsProps {
   profileId: string;

@@ -1,7 +1,7 @@
 import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
-import Post from "@/components/Post";
+import Post from "@/components/organisms/Post";
 import { toast } from "sonner";
 import { Post as PostType } from "@/types/api";
 

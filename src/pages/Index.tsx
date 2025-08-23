@@ -4,13 +4,13 @@ import { useNavigate } from "react-router-dom";
 import CreatePost from "@/components/organisms/CreatePost";
 import Stories from "@/components/organisms/Stories";
 import Suggestions from "@/components/organisms/Suggestions";
-import Post from "@/components/Post";
+import Post from "@/components/organisms/Post";
 import Sidebar from "@/components/organisms/Sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
 import { notificationService } from "@/services/notificationService";
-import PostModal from "@/components/PostModal";
+import PostModal from "@/components/organisms/PostModal";
 import { Post as PostType } from "@/types/api";
 
 const Index = () => {
