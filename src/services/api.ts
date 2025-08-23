@@ -10,22 +10,6 @@ export const createHeaders = () => {
   };
 };
 
-export const getTimeDifference = (updatedAt: string): string => {
-  const now = new Date();
-  const updated = new Date(updatedAt);
-  const diffHours = Math.floor((now.getTime() - updated.getTime()) / (1000 * 60 * 60));
-  
-  if (diffHours < 24) {
-    return `${diffHours}h atrás`;
-  }
-  
-  return updated.toLocaleDateString();
-};
-
-export const getImageUrl = (imageGuid: string): string => {
-  return `${STORAGE.baseUrl}/images/${imageGuid}`;
-};
-
 export const SocialService = {
   viewProfile: async (id: string): Promise<ViewProfileResponse> => {
     const response = await fetch(
