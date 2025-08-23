@@ -49,6 +49,46 @@ export const SERVICES = {
     endpoints: {
       enhanceToken: 'v1/Authentication/enhanceToken'
     }
+  },
+    PROFESSIONAL_MANAGEMENT: {
+    baseUrl: import.meta.env.VITE_PROFESSIONAL_MANAGEMENT_API_BASE_URL,
+    endpoints: {
+        createServicePlan: 'v1/ServicePlan',
+        deactivateServicePlanFromClient: 'v1/ServicePlan/servicePlanId/Client/clientId',
+        activateServicePlanToClient: 'v1/ServicePlan/servicePlanId/Client/clientId',
+        updateServicePlanById: 'v1/ServicePlan/servicePlanId',
+        deleteServicePlanById: 'v1/ServicePlan/servicePlanId',
+        getProfessionalClients: 'v1/Professional/professionalId/Client',
+        addServicePlanToClient: 'v1/ServicePlan/serviePlanId/Client/clientId',
+        createProfessionalReview: 'v1/Professional/professionalId/ServicePlan/servicePlanId/Review',
+        deleteProfessionalReview: 'v1/Review/id',
+        updateProfessionalReview: 'v1/Review/id',
+        getProfessionalReviewsById: 'v1/Professional/professionalId/Review',
+        getProfessionals: 'v1/Professional',
+        getProfessionalScoreById: 'v1/Professional/professionalId/Score',
+        getProfessionalById: 'v1/Professional/professionalId',
+        getClientById: 'v1/Client/clientId',
+    }
+    },
+  TRAINING: {
+    baseUrl: import.meta.env.VITE_TRAINING_API_BASE_URL,
+    endpoints: {
+      getExerciseById:"v1/Exercise/exerciseId",
+      getExercisesByMuscleGroup:"v1/Exercise",
+      getWorkoutById:"v1/Workout/workoutId",
+      getWorkoutsByUserId:"v1/User/userId/Workout",
+      deleteWorkoutById:"v1/Workout/workoutId",
+      createWorkout:"v1/Workout",
+      createWorkoutForClient:"v1/User/clientId/Workout",
+      updateWorkout:"v1/Workout/workoutId",
+      createWorkoutSession:"v1/WorkoutSession",
+      getWorkoutSessionsByWorkoutId:"v1/Workout/workoutId/WorkoutSession",
+      getWorkoutSessionById:"v1/WorkoutSession/sessionId",
+      updateWorkoutSession:"v1/WorkoutSession/sessionId",
+      deleteWorkoutSessionById:"v1/WorkoutSession/sessionId",
+      getCurrentWorkoutSession:"v1/WorkoutSession/CurrentWorkoutSession",
+      getWorkoutSessionsByUserId:"v1/User/userId/WorkoutSession"
+    }
   }
 };
 

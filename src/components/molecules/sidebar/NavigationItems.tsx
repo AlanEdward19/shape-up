@@ -40,7 +40,7 @@ const NavigationItems = () => {
   ];
 
   return (
-    <div className="flex flex-col items-center space-y-6">
+    <div className="flex flex-col items-center space-y-6 mt-8">
       {items.map((item) => (
         <SidebarItem key={item.label} {...item} />
       ))}
