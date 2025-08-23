@@ -1,98 +1,262 @@
+import { 
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  getIdToken,
+  User,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  sendEmailVerification,
+  applyActionCode,
+  checkActionCode
+} from "firebase/auth";
+import { getDoc } from "firebase/firestore";
+import { auth } from "@/config/firebase.ts";
+import { SERVICES } from "@/config/services.ts";
+import {createHeaders} from "@/services/utils/serviceUtils.ts";
 
-// This file demonstrates how a backend service would handle token enhancement
-// using Firebase Admin SDK in a real environment
-
-import { initializeApp, cert, ServiceAccount } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-
-/*
-// In a real environment, the service would be initialized with a service account
-const serviceAccount = require('../path/to/serviceAccountKey.json');
-
-initializeApp({
-  credential: cert(serviceAccount as ServiceAccount)
-});
-*/
-
-// Function that would be called by the API endpoint to enhance the token with custom claims
-export const enhanceUserToken = async (userId: string, scopes: any) => {
+export const decodeJwt = (token: string) => {
   try {
-    // In a real implementation, this function would run on the backend
-    // using the Firebase Admin SDK
-    
-    // const auth = getAuth();
-    // await auth.setCustomUserClaims(userId, { scopes });
-    console.log(`[SERVER] Enhanced token for user ${userId} with scopes:`, scopes);
-    
-    return { success: true };
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error('[SERVER] Error enhancing token:', error);
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+};
+
+const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
+
+export const refreshIdToken = async (refreshToken: string) => {
+  console.log(`Refresh token: ${refreshToken}`);
+
+  const url = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`;
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+  });
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!response.ok) throw new Error("Failed to refresh token");
+  return response.json();
+};
+
+export const getAuthToken = async (): Promise<string | null> => {
+  let token = sessionStorage.getItem('authToken');
+  let refreshToken = sessionStorage.getItem('refreshToken');
+  let storage = sessionStorage;
+
+  // If not found, try localStorage
+  if (!token) {
+    token = localStorage.getItem('authToken');
+    refreshToken = localStorage.getItem('refreshToken');
+    storage = localStorage;
+  }
+
+  if (!token) return null;
+
+  const decoded = decodeJwt(token);
+  const now = Math.floor(Date.now() / 1000);
+  if (decoded?.exp && decoded.exp > now) {
+    return token;
+  }
+  // Token expired, try to refresh
+  if (refreshToken) {
+    try {
+      const refreshed = await refreshIdToken(refreshToken);
+      const newToken = refreshed.id_token;
+      const newRefreshToken = refreshed.refresh_token;
+      storage.setItem('authToken', newToken);
+      storage.setItem('refreshToken', newRefreshToken);
+      return newToken;
+    } catch (err) {
+      console.error('Failed to refresh token:', err);
+      return null;
+    }
+  }
+  return null;
+};
+
+export const getUserId = () => {
+  return auth.currentUser?.uid || null;
+};
+
+export const setAuthData = async (userOrToken: User | string, rememberMe: boolean = false) => {
+  let token: string;
+  let userId: string;
+  let refreshToken: string | undefined;
+
+  console.log("setAuthData called with:", userOrToken);
+
+  if (typeof userOrToken === 'string') {
+    token = userOrToken;
+    const decoded = decodeJwt(token);
+    userId = decoded?.sub || '';
+  } else {
+    token = await getIdToken(userOrToken);
+    userId = userOrToken.uid;
+    refreshToken = userOrToken.refreshToken;
+  }
+
+  if (rememberMe) {
+    localStorage.setItem('userId', userId);
+    localStorage.setItem('authToken', token);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+  } else {
+    sessionStorage.setItem('userId', userId);
+    sessionStorage.setItem('authToken', token);
+    if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken);
+  }
+};
+
+export const clearAuthData = () => {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('userId');
+  sessionStorage.removeItem('authToken');
+  sessionStorage.removeItem('userId');
+    localStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('refreshToken');
+};
+
+export const signInWithEmail = async (email: string, password: string, rememberMe: boolean = false) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    await setAuthData(userCredential.user, rememberMe);
+    return { success: true, user: userCredential.user };
+  } catch (error) {
+    console.error('Login error:', error);
     return { success: false, error };
   }
 };
 
-// Example of how the API route would be implemented in a framework like Express
-/*
-app.post('/v1/Authentication/enhanceToken', async (req, res) => {
+export const signInWithGoogle = async (rememberMe: boolean = false) => {
   try {
-    // Get the user ID from the verified JWT in the Authorization header
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    // In a real implementation, the token would be verified and the user ID extracted
-    const token = authHeader.split(' ')[1];
-    // const decodedToken = await admin.auth().verifyIdToken(token);
-    // const userId = decodedToken.uid;
-    
-    // For demo purposes
-    const userId = 'extracted-from-token';
-    
-    const { scopes } = req.body;
-    
-    if (!scopes) {
-      return res.status(400).json({ error: 'Scopes are required' });
-    }
-    
-    const result = await enhanceUserToken(userId, scopes);
-    
-    if (result.success) {
-      res.status(200).json({ success: true });
-    } else {
-      res.status(500).json({ success: false, error: result.error });
-    }
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    await setAuthData(userCredential.user, rememberMe);
+    return { success: true, user: userCredential.user };
   } catch (error) {
-    console.error('Error processing request:', error);
-    res.status(500).json({ success: false, error: 'Internal server error' });
+    console.error('Google login error:', error);
+    return { success: false, error };
   }
-});
-*/
+};
 
-// In a Firebase environment, this could be a Cloud Function:
-/*
-export const enhanceToken = functions.https.onCall(async (data, context) => {
-  // Check if the user is authenticated
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated.');
-  }
-  
-  // Get the user ID and scopes from the request
-  const userId = context.auth.uid;
-  const { scopes } = data;
-  
-  if (!scopes) {
-    throw new functions.https.HttpsError('invalid-argument', 'Scopes are required.');
-  }
-  
+export const signInWithFacebook = async (rememberMe: boolean = false) => {
   try {
-    const auth = getAuth();
-    await auth.setCustomUserClaims(userId, { scopes });
+    const provider = new FacebookAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    await setAuthData(userCredential.user, rememberMe);
+    return { success: true, user: userCredential.user };
+  } catch (error) {
+    console.error('Facebook login error:', error);
+    return { success: false, error };
+  }
+};
+
+export const checkEmailExists = async (email: string): Promise<boolean> => {
+  try {
+    const randomPassword = Math.random().toString(36).slice(-8);
+    await createUserWithEmailAndPassword(auth, email, randomPassword);
+    
+    if (auth.currentUser) {
+      await auth.currentUser.delete();
+    }
+    
+    return false;
+  } catch (error: any) {
+    if (error.code === 'auth/email-already-in-use') {
+      return true;
+    }
+    
+    console.error('Error checking email existence:', error);
+    return false;
+  }
+};
+
+export const sendVerificationCode = async (email: string): Promise<{ success: boolean; error?: any }> => {
+  try {
+    const emailExists = await checkEmailExists(email);
+    
+    if (emailExists) {
+      return { success: false, error: { code: 'auth/email-already-in-use' } };
+    }
+    
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    sessionStorage.setItem(`verification_code_${email}`, verificationCode);
+    console.log(`Verification code for ${email}: ${verificationCode}`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     return { success: true };
   } catch (error) {
-    console.error('Error enhancing token:', error);
-    throw new functions.https.HttpsError('internal', 'Error enhancing token.');
+    console.error('Error sending verification code:', error);
+    return { success: false, error };
   }
-});
-*/
+};
+
+export const verifyCode = (email: string, code: string): boolean => {
+  const storedCode = sessionStorage.getItem(`verification_code_${email}`);
+  return storedCode === code;
+};
+
+export const enhanceToken = async (userData: any): Promise<boolean> => {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      console.error('No auth token available');
+      return false;
+    }
+    
+    const response = await fetch(`${SERVICES.AUTH.baseUrl}${SERVICES.AUTH.endpoints.enhanceToken}`, {
+      method: 'POST',
+      headers: await createHeaders(),
+      body: JSON.stringify({
+        scopes: userData
+      }),
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to enhance token:', await response.text());
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error enhancing token:', error);
+    return false;
+  }
+};
+
+export const signUp = async (email: string, password: string, userData?: any) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    
+    if (userCredential.user) {
+      await sendEmailVerification(userCredential.user);
+      
+      // Add custom claims via the Auth service if userData is provided
+      if (userData) {
+        await setAuthData(userCredential.user);
+        await enhanceToken(userData);
+      }
+    }
+    
+    return { success: true, user: userCredential.user };
+  } catch (error) {
+    console.error('Signup error:', error);
+    return { success: false, error };
+  }
+};

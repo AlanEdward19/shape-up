@@ -1,6 +1,6 @@
 import { Settings, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { clearAuthData } from "@/utils/auth";
+import { clearAuthData } from "@/services/authService.ts";
 import { toast } from "sonner";
 import { notificationService } from "@/services/notificationService";
 import SidebarItem from "./SidebarItem";

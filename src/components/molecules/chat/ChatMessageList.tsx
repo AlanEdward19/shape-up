@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import ChatMessage from "./ChatMessage";
 import ChatDateSeparator from "./ChatDateSeparator";
 import * as signalR from "@microsoft/signalr";
-import { getAuthToken } from "@/utils/auth";
+import { getAuthToken } from "@/services/authService.ts";
 import { SERVICES } from "@/config/services";
 import { format, parseISO } from "date-fns";
 

@@ -1,4 +1,4 @@
-import { getUserId } from "@/utils/auth";
+import { getUserId } from "@/services/authService.ts";
 import { decryptMessage } from "@/services/chatService";
 
 interface ChatMessageProps {

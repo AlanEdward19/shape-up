@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ViewProfileResponse } from "@/types/api";
+import { ViewProfileResponse } from "@/types/socialService.ts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
-import { getUserId } from "@/utils/auth";
+import { getUserId } from "@/services/authService.ts";
 import FriendRequestButtons from "./friend-actions/FriendRequestButtons";
 
 interface ProfileHeaderProps {
@@ -141,10 +141,10 @@ const ProfileHeader = ({
     <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
       <div className="relative group">
         <Avatar 
-          className="w-32 h-32 md:w-40 md:h-40 cursor-pointer"
+          className="w-32 h-32 md:w-40 md:h-40 cursor-pointer overflow-hidden rounded-full flex items-center justify-center"
           onClick={handleAvatarClick}
         >
-          <AvatarImage src={profile.imageUrl} alt={`${profile.firstName} ${profile.lastName}`} />
+          <AvatarImage src={profile.imageUrl} alt={`${profile.firstName} ${profile.lastName}`} className="object-cover w-full h-full rounded-full" />
           <AvatarFallback>{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
         </Avatar>
         {isOwnProfile && (

@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { ChatService, decryptMessage, encryptMessage } from "@/services/chatService";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { getUserId } from "@/utils/auth";
+import { getUserId } from "@/services/authService.ts";
 
 interface ChatInputProps {
   profileId: string;

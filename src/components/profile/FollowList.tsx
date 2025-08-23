@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { FollowUser } from "@/types/api";
+import { FollowUser } from "@/types/socialService.ts";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -25,7 +25,7 @@ interface FollowListProps {
   title: string;
   currentPage: number;
   onPageChange: (page: number) => void;
-  onRowsChange: (rows: string) => void;
+  onRowsChange: (rows: number) => void;
   totalUsers: number;
 }
 
@@ -39,14 +39,16 @@ const FollowList = ({
   totalUsers 
 }: FollowListProps) => {
   const navigate = useNavigate();
-  const [itemsPerPage, setItemsPerPage] = useState("10");
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   if (isLoading) return <div>Carregando...</div>;
   if (!users) return null;
 
   const handleRowsChange = (value: string) => {
-    setItemsPerPage(value);
-    onRowsChange(value);
+    const parsedValue = parseInt(value, 10);
+
+    setItemsPerPage(parsedValue);
+    onRowsChange(parsedValue);
   };
 
   const totalPages = Math.ceil(totalUsers / Number(itemsPerPage));
@@ -60,7 +62,7 @@ const FollowList = ({
           Página {currentPage} • {totalUsers} {title.toLowerCase()}
         </div>
         <Select
-          value={itemsPerPage}
+          value={itemsPerPage.toString()}
           onValueChange={handleRowsChange}
         >
           <SelectTrigger className="w-[120px]">

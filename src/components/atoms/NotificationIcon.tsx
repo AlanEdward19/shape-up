@@ -1,16 +1,16 @@
 import { Bell } from "lucide-react";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { NotificationType } from "@/types/notifications";
 import { format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 
 const NotificationIcon = () => {
@@ -40,8 +40,8 @@ const NotificationIcon = () => {
   };
 
   return (
-    <HoverCard>
-      <HoverCardTrigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-6 w-6 text-primary" />
           {unreadNotifications > 0 && (
@@ -50,15 +50,16 @@ const NotificationIcon = () => {
             </div>
           )}
         </Button>
-      </HoverCardTrigger>
-      <HoverCardContent 
-        className="w-80 bg-secondary border-muted shadow-lg" 
-        align="end"
-        sideOffset={5}
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-80 bg-secondary border-muted shadow-lg"
+        align="center"
+        side="right"
+        sideOffset={24}
         style={{ zIndex: 1000 }}
       >
         <div className="space-y-2">
-          <div className="font-semibold">Notificações</div>
+          <div className="font-semibold text-center">Notificações</div>
           <ScrollArea className="h-[300px]">
             <div className="space-y-2">
               {generalNotifications.length === 0 ? (
@@ -104,8 +105,8 @@ const NotificationIcon = () => {
             </div>
           </ScrollArea>
         </div>
-      </HoverCardContent>
-    </HoverCard>
+      </PopoverContent>
+    </Popover>
   );
 };
 

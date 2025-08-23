@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useChatStore } from "@/stores/useChatStore";

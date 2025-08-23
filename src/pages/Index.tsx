@@ -1,18 +1,17 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CreatePost from "@/components/CreatePost";
-import Stories from "@/components/Stories";
-import Suggestions from "@/components/Suggestions";
-import Post from "@/components/Post";
-import Sidebar from "@/components/Sidebar";
+import CreatePost from "@/components/organisms/CreatePost";
+import Stories from "@/components/organisms/Stories";
+import Suggestions from "@/components/organisms/Suggestions";
+import Post from "@/components/organisms/Post";
+import Sidebar from "@/components/organisms/Sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 import { notificationService } from "@/services/notificationService";
-import PostModal from "@/components/PostModal";
-import { Post as PostType } from "@/types/api";
+import PostModal from "@/components/organisms/PostModal";
+import { Post as PostType } from "@/types/socialService.ts";
 
 const Index = () => {
   const navigate = useNavigate();

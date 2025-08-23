@@ -1,8 +1,7 @@
 
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { SocialService } from "@/services/api";
-import { ProfileService } from "@/services/profileService";
+import { SocialService } from "@/services/socialService.ts";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,7 +10,7 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileInfo from "@/components/profile/ProfileInfo";
 import ProfilePosts from "@/components/profile/ProfilePosts";
 import FollowList from "@/components/profile/FollowList";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/organisms/Sidebar.tsx";
 
 const Profile = () => {
   const { id } = useParams();
@@ -22,13 +21,13 @@ const Profile = () => {
   const isOwnProfile = currentUserId === id;
 
   const [followersPage, setFollowersPage] = useState(1);
-  const [followersPerPage, setFollowersPerPage] = useState("10");
+  const [followersPerPage, setFollowersPerPage] = useState(10);
   const [followingPage, setFollowingPage] = useState(1);
-  const [followingPerPage, setFollowingPerPage] = useState("10");
+  const [followingPerPage, setFollowingPerPage] = useState(10);
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['profile', id],
-    queryFn: () => ProfileService.viewProfile(id!),
+    queryFn: () => SocialService.viewProfile(id!),
     meta: {
       onError: (error: Error) => {
         console.error('Failed to fetch profile:', error);
@@ -39,7 +38,7 @@ const Profile = () => {
 
   const { data: followers, isLoading: isLoadingFollowers } = useQuery({
     queryKey: ['followers', id, followersPage, followersPerPage],
-    queryFn: () => ProfileService.getFollowers(id!, followersPage, Number(followersPerPage)),
+    queryFn: () => SocialService.getFollowers(id!, followersPage, Number(followersPerPage)),
     enabled: showFollowers,
     meta: {
       onError: (error: Error) => {
@@ -51,7 +50,7 @@ const Profile = () => {
 
   const { data: following, isLoading: isLoadingFollowing } = useQuery({
     queryKey: ['following', id, followingPage, followingPerPage],
-    queryFn: () => SocialService.getFollowing(id!, followingPage.toString(), followingPerPage),
+    queryFn: () => SocialService.getFollowing(id!, followingPage, followingPerPage),
     enabled: showFollowing,
     meta: {
       onError: (error: Error) => {
@@ -117,7 +116,7 @@ const Profile = () => {
     setFollowersPage(page);
   };
 
-  const handleFollowersRowsChange = (rows: string) => {
+  const handleFollowersRowsChange = (rows: number) => {
     setFollowersPerPage(rows);
     setFollowersPage(1);
   };
@@ -126,7 +125,7 @@ const Profile = () => {
     setFollowingPage(page);
   };
 
-  const handleFollowingRowsChange = (rows: string) => {
+  const handleFollowingRowsChange = (rows: number) => {
     setFollowingPerPage(rows);
     setFollowingPage(1);
   };

@@ -1,9 +1,9 @@
 import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { SocialService } from "@/services/api";
-import Post from "@/components/Post";
+import { SocialService } from "@/services/socialService.ts";
+import Post from "@/components/organisms/Post";
 import { toast } from "sonner";
-import { Post as PostType } from "@/types/api";
+import { Post as PostType } from "@/types/socialService.ts";
 
 const PostPage = () => {
   const { id } = useParams<{ id: string }>();

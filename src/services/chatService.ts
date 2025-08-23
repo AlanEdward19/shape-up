@@ -1,7 +1,7 @@
 import { SERVICES } from "@/config/services";
 import { ChatMessage, SimplifiedProfile } from "@/types/chat";
-import { createHeaders } from "./api";
 import CryptoJS from 'crypto-js';
+import {createHeaders} from "@/services/utils/serviceUtils.ts";
 
 const _encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || '';
 const InitializationVector = CryptoJS.enc.Hex.parse('00000000000000000000000000000000');
@@ -41,7 +41,7 @@ export const ChatService = {
     try {
       const response = await fetch(
         `${SERVICES.CHAT.baseUrl}${SERVICES.CHAT.endpoints.getRecentMessages}`,
-        { headers: createHeaders() }
+        { headers: await createHeaders() }
       );
       if (!response.ok) throw new Error("Failed to fetch recent messages");
       return response.json();
@@ -55,7 +55,7 @@ export const ChatService = {
     try {
       const response = await fetch(
         `${SERVICES.CHAT.baseUrl}${SERVICES.CHAT.endpoints.getMessages.replace('id', profileId)}?page=${page}`,
-        { headers: createHeaders() }
+        { headers: await createHeaders() }
       );
       if (!response.ok) throw new Error("Failed to fetch messages");
       return response.json();
@@ -69,7 +69,7 @@ export const ChatService = {
     try {
       const response = await fetch(
         `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfileSimplified.replace('id', profileId)}`,
-        { headers: createHeaders() }
+        { headers: await createHeaders() }
       );
       if (!response.ok) throw new Error("Failed to fetch profile");
       return response.json();
@@ -84,7 +84,7 @@ export const ChatService = {
       `${SERVICES.CHAT.baseUrl}${SERVICES.CHAT.endpoints.sendMessage}`,
       {
         method: 'POST',
-        headers: createHeaders(),
+        headers: await createHeaders(),
         body: JSON.stringify({
           receiverId,
           message
