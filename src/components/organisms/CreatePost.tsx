@@ -98,9 +98,13 @@ const CreatePost = () => {
   return (
     <div className="bg-secondary rounded-lg p-4 mb-6">
       <div className="flex gap-4 items-center mb-4">
-        <Avatar className="w-10 h-10">
-          <AvatarImage src={profile?.imageUrl} alt="Profile picture" />
-          <AvatarFallback>{(profile?.firstName[0] + profile?.lastName[0]) || 'U'}</AvatarFallback>
+        <Avatar className="w-10 h-10 overflow-hidden rounded-full flex items-center justify-center">
+          <AvatarImage
+            src={profile?.imageUrl}
+            alt="Profile picture"
+            // srcSet and sizes can be passed here if available from backend
+          />
+          <AvatarFallback>{(profile?.firstName?.[0] || '') + (profile?.lastName?.[0] || 'U')}</AvatarFallback>
         </Avatar>
         <Input
           placeholder="No que está pensando?"

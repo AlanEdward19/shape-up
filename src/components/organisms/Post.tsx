@@ -155,9 +155,13 @@ const Post = ({ post, expandComments = false, onImageClick }: PostProps) => {
     return (
         <div className="bg-secondary rounded-lg p-4 mb-4" onClick={handlePostClick}>
             <div className="flex items-center gap-3 mb-4">
-                <Avatar className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity" onClick={handleProfileClick}>
-                    <AvatarImage src={post.publisherImageUrl} alt={`${post.publisherFirstName} ${post.publisherLastName}`} />
-                    <AvatarFallback>{post.publisherFirstName[0]}{post.publisherLastName[0]}</AvatarFallback>
+                <Avatar className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity overflow-hidden rounded-full flex items-center justify-center" onClick={handleProfileClick}>
+                    <AvatarImage
+                        src={post.publisherImageUrl}
+                        alt={`${post.publisherFirstName} ${post.publisherLastName}`}
+                        // srcSet and sizes can be passed here if available from backend
+                    />
+                    <AvatarFallback>{(post.publisherFirstName?.[0] || '') + (post.publisherLastName?.[0] || 'U')}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                     <h3
@@ -226,7 +230,7 @@ const Post = ({ post, expandComments = false, onImageClick }: PostProps) => {
                             <div key={comment.id} className="flex items-start gap-3 p-3 rounded-lg bg-background">
                                 <Avatar className="w-8 h-8">
                                     <AvatarImage src={comment.profileImageUrl} alt={`${comment.profileFirstName} ${comment.profileLastName}`} />
-                                    <AvatarFallback>{comment.profileFirstName[0]}{comment.profileLastName[0]}</AvatarFallback>
+                                    <AvatarFallback>{(comment.profileFirstName?.[0] || '') + (comment.profileLastName?.[0] || 'U')}</AvatarFallback>
                                 </Avatar>
 
                                 <div className="flex-1">
@@ -288,3 +292,4 @@ const Post = ({ post, expandComments = false, onImageClick }: PostProps) => {
 };
 
 export default Post;
+
