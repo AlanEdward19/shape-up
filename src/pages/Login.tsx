@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,8 +10,7 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { Facebook, Mail, Eye, EyeOff } from "lucide-react";
 import AuthLayout from "@/components/templates/AuthLayout";
 import Button from "@/components/atoms/Button";
-import {signInWithEmail, signInWithGoogle, signInWithFacebook, setAuthData} from "@/services/authService.ts";
-import {db} from "@/config/firebase.ts";
+import {signInWithEmail, signInWithGoogle, signInWithFacebook, setAuthData, getAuthToken} from "@/services/authService.ts";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +20,20 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const autoLogin = async () => {
+      const authToken = localStorage.getItem('authToken');
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (authToken && refreshToken) {
+        const validToken = await getAuthToken();
+        if (validToken) {
+          navigate('/index', { replace: true });
+        }
+      }
+    };
+    autoLogin();
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

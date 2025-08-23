@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, CalendarIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { signUp, sendVerificationCode, verifyCode } from "@/services/authService.ts";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
@@ -13,11 +13,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format, parse, isValid } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const verificationSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -34,15 +29,16 @@ const signupSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   postalCode: z.string().optional(),
-  birthday: z.date({
-    required_error: "Por favor, selecione uma data de aniversário",
-  }).optional(),
-}).refine((data) => data.password === data.confirmPassword, {
+  birthday: z.string().optional(),
+}).refine((data) => {
+  if (data.password && data.confirmPassword) {
+    return data.password === data.confirmPassword;
+  }
+  return true;
+}, {
   message: "As senhas não coincidem",
   path: ["confirmPassword"],
 });
-
-const DATE_FORMAT = "dd-MM-yyyy";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -71,7 +67,7 @@ const Signup = () => {
       city: "",
       state: "",
       postalCode: "",
-      birthday: undefined,
+      birthday: "",
     },
   });
 
@@ -139,7 +135,7 @@ const Signup = () => {
         city: data.city,
         state: data.state,
         postalCode: data.postalCode,
-        birthday: data.birthday ? data.birthday.toISOString() : null,
+        birthday: data.birthday || null, // now a string
       };
 
       const result = await signUp(data.email, data.password, userData);
@@ -155,24 +151,6 @@ const Signup = () => {
       console.error("Signup error:", error);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  // Function to handle manual date input
-  const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (date: Date | undefined) => void) => {
-    const inputValue = e.target.value;
-    
-    if (!inputValue) {
-      onChange(undefined);
-      return;
-    }
-    
-    // Parse the date from the input
-    const parsedDate = parse(inputValue, DATE_FORMAT, new Date());
-    
-    // Only update if the date is valid
-    if (isValid(parsedDate)) {
-      onChange(parsedDate);
     }
   };
 
@@ -212,6 +190,7 @@ const Signup = () => {
                       <FormControl>
                         <Input
                           {...field}
+                          type="email"
                           placeholder="Seu email"
                           disabled={verificationCodeSent}
                         />
@@ -293,56 +272,17 @@ const Signup = () => {
                     control={signupForm.control}
                     name="birthday"
                     render={({ field }) => (
-                      <FormItem className="flex flex-col">
+                      <FormItem>
                         <FormLabel>Data de aniversário</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                                disabled={!verificationValid}
-                              >
-                                {field.value ? (
-                                  format(field.value, DATE_FORMAT)
-                                ) : (
-                                  <span>Selecione uma data</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <div className="p-2 border-b">
-                              <Input
-                                type="text"
-                                placeholder={DATE_FORMAT}
-                                value={field.value ? format(field.value, DATE_FORMAT) : ""}
-                                onChange={(e) => handleDateInputChange(e, field.onChange)}
-                                className="w-full"
-                              />
-                            </div>
-                            <ScrollArea className="h-80">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) =>
-                                  date > new Date() || date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                                className={cn("p-3 pointer-events-auto")}
-                                fromYear={1900}
-                                toYear={new Date().getFullYear()}
-                                captionLayout="dropdown-buttons"
-                                showOutsideDays
-                              />
-                            </ScrollArea>
-                          </PopoverContent>
-                        </Popover>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            disabled={!verificationValid}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
