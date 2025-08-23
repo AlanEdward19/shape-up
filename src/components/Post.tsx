@@ -6,8 +6,8 @@ import { Post as PostType, PostReaction, PostComment } from "@/types/api";
 import { SocialService } from "@/services/api";
 import { getUserId } from "@/utils/auth";
 import { toast } from "sonner";
-import PostReactions from "./PostReactions";
-import PostMedia from "./PostMedia";
+import PostReactions from "@/components/molecules/PostReactions";
+import PostMedia from "@/components/molecules/PostMedia";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 

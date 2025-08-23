@@ -1,7 +1,7 @@
 import { Home, Users, Dumbbell, Utensils, UserCircle, ListTodo } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SidebarItem from "./SidebarItem";
-import NotificationIcon from "../NotificationIcon";
+import NotificationIcon from "../atoms/NotificationIcon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import FollowList from "../profile/FollowList";

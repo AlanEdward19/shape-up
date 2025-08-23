@@ -8,8 +8,8 @@ import { useState, useEffect } from "react";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
 import { getUserId } from "@/utils/auth";
-import PostReactions from "./PostReactions";
 import PostMedia from "./PostMedia";
+import PostReactions from "@/components/molecules/PostReactions.tsx";
 
 interface PostModalProps {
   post: PostType | null;

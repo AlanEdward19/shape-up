@@ -1,7 +1,7 @@
 
 import Sidebar from "@/components/organisms/Sidebar";
 import Chat from "@/components/organisms/Chat";
-import SearchBar from "@/components/SearchBar";
+import SearchBar from "@/components/SearchBar.tsx";
 
 interface MainLayoutProps {
   children: React.ReactNode;

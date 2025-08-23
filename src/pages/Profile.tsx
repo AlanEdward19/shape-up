@@ -11,7 +11,7 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileInfo from "@/components/profile/ProfileInfo";
 import ProfilePosts from "@/components/profile/ProfilePosts";
 import FollowList from "@/components/profile/FollowList";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/organisms/Sidebar.tsx";
 
 const Profile = () => {
   const { id } = useParams();
