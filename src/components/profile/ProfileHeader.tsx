@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ViewProfileResponse } from "@/types/api";
+import { ViewProfileResponse } from "@/types/socialService.ts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
-import { getUserId } from "@/utils/auth";
+import { getUserId } from "@/services/authService.ts";
 import FriendRequestButtons from "./friend-actions/FriendRequestButtons";
 
 interface ProfileHeaderProps {

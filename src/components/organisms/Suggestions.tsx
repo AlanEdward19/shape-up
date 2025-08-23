@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 import Avatar from "@/components/atoms/Avatar";
 import Button from "@/components/atoms/Button";

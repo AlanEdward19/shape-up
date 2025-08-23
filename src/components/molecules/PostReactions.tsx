@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PostReaction } from "@/types/api";
+import { PostReaction } from "@/types/socialService.ts";
 import { ReactionType, reactionEmojis, getReactionEmoji } from "@/types/reactions";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import Button from "@/components/atoms/Button";

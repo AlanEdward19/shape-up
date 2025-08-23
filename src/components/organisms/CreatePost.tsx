@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const actions = [

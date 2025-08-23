@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import { SocialService } from "@/services/api";
-import { ProfileSearchResult } from "@/types/api";
+import { SocialService } from "@/services/socialService.ts";
+import { ProfileSearchResult } from "@/types/socialService.ts";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import debounce from "lodash/debounce";
 

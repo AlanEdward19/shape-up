@@ -1,8 +1,8 @@
-import { ViewProfileResponse, Gender } from "@/types/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MapPin, Calendar, Heart } from "lucide-react";
 import FriendRequestManagement from "./friend-actions/FriendRequestManagement";
+import {Gender, ViewProfileResponse} from "@/types/socialService.ts";
 
 interface ProfileInfoProps {
   profile: ViewProfileResponse;

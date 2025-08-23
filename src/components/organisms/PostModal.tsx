@@ -1,13 +1,13 @@
 ﻿import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Post as PostType } from "@/types/api";
+import { Post as PostType } from "@/types/socialService.ts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Share2, X, Edit2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
-import { getUserId } from "@/utils/auth";
+import { getUserId } from "@/services/authService.ts";
 import PostReactions from "@/components/molecules/PostReactions.tsx";
 import PostMedia from "../molecules/PostMedia";
 

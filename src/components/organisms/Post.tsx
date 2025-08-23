@@ -2,9 +2,9 @@
 import { MessageCircle, Share2, X, Edit2, Image, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Post as PostType, PostReaction, PostComment } from "@/types/api";
-import { SocialService } from "@/services/api";
-import { getUserId } from "@/utils/auth";
+import { Post as PostType, PostReaction, PostComment } from "@/types/socialService.ts";
+import { SocialService } from "@/services/socialService.ts";
+import { getUserId } from "@/services/authService.ts";
 import { toast } from "sonner";
 import PostReactions from "@/components/molecules/PostReactions";
 import PostMedia from "@/components/molecules/PostMedia";

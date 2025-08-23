@@ -1,11 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { ProfileService } from "@/services/profileService";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 import { MessageCircle, Heart } from "lucide-react";
-import { Post, PostReaction, PostComment } from "@/types/api";
+import { Post, PostReaction, PostComment } from "@/types/socialService.ts";
 import PostModal from "@/components/organisms/PostModal.tsx";
 
 interface ProfilePostsProps {
@@ -28,7 +27,7 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['profilePosts', profileId],
-    queryFn: ({ pageParam = 1 }) => ProfileService.getPosts(profileId, pageParam),
+    queryFn: ({ pageParam = 1 }) => SocialService.getPosts(profileId, pageParam),
     getNextPageParam: (lastPage: Post[], allPages: Post[][]) => {
       return lastPage.length === 0 ? undefined : allPages.length + 1;
     },

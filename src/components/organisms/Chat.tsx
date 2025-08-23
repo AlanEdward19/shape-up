@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChatService, decryptMessage } from "@/services/chatService";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { getUserId } from "@/utils/auth";
+import { getUserId } from "@/services/authService.ts";
 import ChatWindow from "@/components/molecules/chat/ChatWindow";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";

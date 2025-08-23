@@ -1,25 +1,51 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { Post, PostReaction, PostComment, ViewProfileResponse, Friend, FriendRequest, FollowUser, ProfileSearchResult } from '@/types/api';
-import { getAuthToken } from '@/utils/auth';
-
-export const createHeaders = async () => {
-  const token = await getAuthToken();
-  
-  return {
-    'Authorization': token ? `Bearer ${token}` : '',
-    'Content-Type': 'application/json',
-  };
-};
+import { Post, PostReaction, PostComment, ViewProfileResponse, Friend, FriendRequest, FollowUser, ProfileSearchResult } from '@/types/socialService.ts';
+import { createHeaders } from '@/services/utils/serviceUtils.ts';
 
 export const SocialService = {
-  viewProfile: async (id: string): Promise<ViewProfileResponse> => {
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfile.replace('id', id)}`,
-      { headers: await createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch profile');
-    return response.json();
-  },
+    viewProfile: async (id: string): Promise<ViewProfileResponse> => {
+        const response = await fetch(
+            `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfile.replace('id', id)}`,
+            { headers: await createHeaders() }
+        );
+        if (!response.ok) throw new Error('Failed to fetch profile');
+        return response.json();
+    },
+
+    getPosts: async (profileId: string, page: number = 1): Promise<Post[]> => {
+        const response = await fetch(
+            `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getProfilePosts.replace('id', profileId).replace('{page}', page.toString())}`,
+            { headers: await createHeaders() }
+        );
+        if (!response.ok) throw new Error('Failed to fetch profile posts');
+        return response.json();
+    },
+
+    getFollowers: async (id: string, page: number = 1, rows: number = 10): Promise<FollowUser[]> => {
+        const endpoint = SERVICES.SOCIAL.endpoints.getFollowers
+            .replace('id', id)
+            .replace('{page}', page.toString())
+            .replace('{rows}', rows.toString());
+
+        const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${endpoint}`, {
+            headers: await createHeaders(),
+        });
+        if (!response.ok) throw new Error('Failed to fetch followers');
+        return response.json();
+    },
+
+    getFollowing: async (id: string, page: number = 1, rows: number = 10): Promise<FollowUser[]> => {
+        const endpoint = SERVICES.SOCIAL.endpoints.getFollowing
+            .replace('id', id)
+            .replace('{page}', page.toString())
+            .replace('{rows}', rows.toString());
+
+        const response = await fetch(`${SERVICES.SOCIAL.baseUrl}${endpoint}`, {
+            headers: await createHeaders(),
+        });
+        if (!response.ok) throw new Error('Failed to fetch following');
+        return response.json();
+    },
 
   editProfile: async (data: { gender?: number; birthDate?: string; bio?: string }): Promise<void> => {
     const response = await fetch(
@@ -31,24 +57,6 @@ export const SocialService = {
       }
     );
     if (!response.ok) throw new Error('Failed to edit profile');
-  },
-
-  getFollowers: async (userId: string, page: string = '1', rows: string = '10'): Promise<FollowUser[]> => {
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowers.replace('id', userId).replace('{page}', page).replace('{rows}', rows)}`,
-      { headers: await createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch followers list');
-    return response.json();
-  },
-
-  getFollowing: async (userId: string, page: string = '1', rows: string = '10'): Promise<FollowUser[]> => {
-    const response = await fetch(
-      `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.getFollowing.replace('id', userId).replace('{page}', page).replace('{rows}', rows)}`,
-      { headers: await createHeaders() }
-    );
-    if (!response.ok) throw new Error('Failed to fetch following list');
-    return response.json();
   },
 
   followUser: async (userId: string): Promise<void> => {

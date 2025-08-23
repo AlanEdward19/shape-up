@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, CalendarIcon } from "lucide-react";
-import { signUp, sendVerificationCode, verifyCode } from "@/utils/auth";
+import { signUp, sendVerificationCode, verifyCode } from "@/services/authService.ts";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";

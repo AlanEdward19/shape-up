@@ -4,13 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQueryClient } from "@tanstack/react-query";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { Facebook, Mail, Eye, EyeOff } from "lucide-react";
 import AuthLayout from "@/components/templates/AuthLayout";
 import Button from "@/components/atoms/Button";
-import {signInWithEmail, signInWithGoogle, signInWithFacebook, setAuthData} from "@/utils/auth";
+import {signInWithEmail, signInWithGoogle, signInWithFacebook, setAuthData} from "@/services/authService.ts";
 import {db} from "@/config/firebase.ts";
 
 const Login = () => {

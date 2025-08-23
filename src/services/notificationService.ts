@@ -3,7 +3,7 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { SERVICES } from "@/config/services";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { Notification, NotificationType } from "@/types/notifications";
-import { getAuthToken, getUserId } from "@/utils/auth";
+import { getAuthToken, getUserId } from "@/services/authService.ts";
 import { useChatStore } from "@/stores/useChatStore";
 
 class NotificationService {

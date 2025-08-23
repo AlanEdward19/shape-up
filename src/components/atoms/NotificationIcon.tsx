@@ -10,7 +10,7 @@ import { useNotificationStore } from "@/stores/useNotificationStore";
 import { NotificationType } from "@/types/notifications";
 import { format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { SocialService } from "@/services/api";
+import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 
 const NotificationIcon = () => {
