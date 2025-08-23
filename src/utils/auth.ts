@@ -37,6 +37,8 @@ export const decodeJwt = (token: string) => {
 const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
 
 export const refreshIdToken = async (refreshToken: string) => {
+  console.log(`Refresh token: ${refreshToken}`);
+
   const url = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`;
   const body = new URLSearchParams({
     grant_type: "refresh_token",
@@ -52,7 +54,6 @@ export const refreshIdToken = async (refreshToken: string) => {
 };
 
 export const getAuthToken = async (): Promise<string | null> => {
-  // Try sessionStorage first
   let token = sessionStorage.getItem('authToken');
   let refreshToken = sessionStorage.getItem('refreshToken');
   let storage = sessionStorage;
@@ -71,7 +72,6 @@ export const getAuthToken = async (): Promise<string | null> => {
   if (decoded?.exp && decoded.exp > now) {
     return token;
   }
-
   // Token expired, try to refresh
   if (refreshToken) {
     try {
@@ -98,11 +98,12 @@ export const setAuthData = async (userOrToken: User | string, rememberMe: boolea
   let userId: string;
   let refreshToken: string | undefined;
 
+  console.log("setAuthData called with:", userOrToken);
+
   if (typeof userOrToken === 'string') {
     token = userOrToken;
     const decoded = decodeJwt(token);
     userId = decoded?.sub || '';
-    // No refreshToken available in this case
   } else {
     token = await getIdToken(userOrToken);
     userId = userOrToken.uid;
@@ -125,9 +126,9 @@ export const clearAuthData = () => {
   localStorage.removeItem('userId');
   sessionStorage.removeItem('authToken');
   sessionStorage.removeItem('userId');
+    localStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('refreshToken');
 };
-
-export const clearAuthConfig = clearAuthData;
 
 export const signInWithEmail = async (email: string, password: string, rememberMe: boolean = false) => {
   try {

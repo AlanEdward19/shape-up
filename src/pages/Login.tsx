@@ -32,6 +32,8 @@ const Login = () => {
       if (result.success) {
         const token = await result.user?.getIdToken();
 
+        console.log(`Token: ${token}`);
+
         await setAuthData(token, rememberMe);
         toast.success("Login realizado com sucesso!");
         navigate('/index', { replace: true });
