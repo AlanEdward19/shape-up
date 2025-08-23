@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -118,6 +117,8 @@ const Signup = () => {
         toast.success("Código verificado com sucesso!");
       } else {
         toast.error("Código inválido. Tente novamente.");
+        setVerificationCode("");
+        signupForm.setValue("verificationCode", "");
       }
     }
   };
@@ -242,7 +243,7 @@ const Signup = () => {
                       render={({ slots }) => (
                         <InputOTPGroup>
                           {slots && Array.from({ length: 6 }).map((_, index) => (
-                            <InputOTPSlot key={index} index={index} />
+                            <InputOTPSlot key={index} index={index} char={slots[index]?.char} />
                           ))}
                         </InputOTPGroup>
                       )}

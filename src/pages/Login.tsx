@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/api";
 import { toast } from "sonner";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { Facebook, Mail } from "lucide-react";
+import { Facebook, Mail, Eye, EyeOff } from "lucide-react";
 import AuthLayout from "@/components/templates/AuthLayout";
 import Button from "@/components/atoms/Button";
 import {signInWithEmail, signInWithGoogle, signInWithFacebook, setAuthData} from "@/utils/auth";
@@ -19,6 +18,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -167,14 +167,28 @@ const Login = () => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={isLoading}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="w-5 h-5 text-white" />
+              ) : (
+                <Eye className="w-5 h-5 text-white" />
+              )}
+            </button>
+          </div>
         </div>
         <div className="flex items-center space-x-2">
           <Checkbox

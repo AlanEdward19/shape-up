@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { Dot } from "lucide-react"
@@ -30,37 +29,48 @@ const InputOTPGroup = React.forwardRef<
 InputOTPGroup.displayName = "InputOTPGroup"
 
 const InputOTPSlot = React.forwardRef<
-  React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div"> & { index: number }
->(({ index, className, ...props }, ref) => {
+    React.ElementRef<"div">,
+    React.ComponentPropsWithoutRef<"div"> & { index: number; char?: string }
+>(({ index, char, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
-  // Create a fallback slot with explicit types for the properties
   const slot = inputOTPContext?.slots?.[index] || {
     char: '',
     hasFakeCaret: false,
     isActive: false
   }
-  
-  // Now we can safely destructure with TypeScript knowing these properties exist
-  const { char, hasFakeCaret, isActive } = slot
+
+  // Prioriza o char passado por prop, se existir
+  const displayChar = char !== undefined ? char : slot.char
+  const { hasFakeCaret, isActive } = slot
+
+  // Debug para verificar o valor do dígito
+  // console.log('InputOTPSlot', { index, displayChar })
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
-        isActive && "z-10 ring-2 ring-ring ring-offset-background",
-        className
-      )}
-      {...props}
-    >
-      {char}
-      {hasFakeCaret && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
-        </div>
-      )}
-    </div>
+      <div
+          ref={ref}
+          className={cn(
+              "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
+              isActive && "z-10 ring-2 ring-ring ring-offset-background",
+              className
+          )}
+          style={{
+            color: "#fff", // Cor do texto branco
+            fontWeight: "bold", // Fonte bold
+            backgroundColor: "#1a1f2c", // Fundo
+            borderColor: "#ccc", // Cor da borda
+            fontSize: "16px", // Tamanho da fonte
+            textAlign: "center", // Centraliza o texto
+          }}
+          {...props}
+      >
+        {displayChar}
+        {hasFakeCaret && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
+            </div>
+        )}
+      </div>
   )
 })
 InputOTPSlot.displayName = "InputOTPSlot"
