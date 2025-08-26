@@ -4,6 +4,7 @@ import Avatar from '../components/atoms/Avatar';
 import Button from '../components/atoms/Button';
 import { ProfessionalManagementService, getProfessionalProfile } from '../services/professionalManagementService';
 import { professionalResponse, servicePlanResponse, clientProfessionalReviewResponse } from '../types/professionalManagementService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const ProfessionalProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,15 @@ const ProfessionalProfile: React.FC = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasActiveContract, setHasActiveContract] = useState(false);
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [editRating, setEditRating] = useState<number>(0);
+  const [editComment, setEditComment] = useState<string>('');
+  const [loadingReviewAction, setLoadingReviewAction] = useState(false);
+  const [errorReviewAction, setErrorReviewAction] = useState<string | null>(null);
+  const [showDeleteReviewModal, setShowDeleteReviewModal] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<any | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -52,6 +62,70 @@ const ProfessionalProfile: React.FC = () => {
       case 1: return 'Dieta';
       default: return 'Outro';
     }
+  };
+
+  const refreshProfile = async () => {
+    setLoading(true);
+    const data = await getProfessionalProfile(id, user);
+    setProfessional(data.professional);
+    setHasActiveContract(data.hasActiveContract);
+    setLoading(false);
+  };
+
+  const handleEditClick = (review: any) => {
+    setEditingReviewId(review.id);
+    setEditRating(review.score);
+    setEditComment(review.text);
+    setErrorReviewAction(null);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingReviewId) return;
+    setLoadingReviewAction(true);
+    setErrorReviewAction(null);
+    try {
+      await ProfessionalManagementService.updateProfessionalReview(editingReviewId, {
+        rating: editRating,
+        comment: editComment
+      });
+      setEditingReviewId(null);
+      await refreshProfile();
+    } catch (err: any) {
+      setErrorReviewAction('Erro ao editar avaliação.');
+    }
+    setLoadingReviewAction(false);
+  };
+
+  const handleEditCancel = () => {
+    setEditingReviewId(null);
+    setErrorReviewAction(null);
+  };
+
+  const handleDeleteReview = (review: any) => {
+    setReviewToDelete(review);
+    setShowDeleteReviewModal(true);
+    setDeleteError(null);
+  };
+
+  const handleConfirmDeleteReview = async () => {
+    if (!reviewToDelete) return;
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      await ProfessionalManagementService.deleteProfessionalReview(reviewToDelete.id);
+      setShowDeleteReviewModal(false);
+      setReviewToDelete(null);
+      await refreshProfile();
+    } catch (err: any) {
+      setDeleteError('Erro ao excluir avaliação.');
+    }
+    setDeleteLoading(false);
+  };
+
+  const handleCancelDeleteReview = () => {
+    setShowDeleteReviewModal(false);
+    setReviewToDelete(null);
+    setDeleteError(null);
   };
 
   if (loading || !professional) return <div className="text-center py-12 text-[#8b93a7]">Carregando dados...</div>;
@@ -119,27 +193,47 @@ const ProfessionalProfile: React.FC = () => {
             ) : (
               professional.feedbacks?.map((f: any, idx: number) => {
                 const isOwnReview = user && f.by === user.name;
+                const isEditing = editingReviewId === f.id;
                 return (
-                  <div key={idx} className="bg-[#12182a] border border-[#23283a] rounded-xl p-4 shadow">
+                  <div key={f.id || idx} className="bg-[#12182a] border border-[#23283a] rounded-xl p-4 shadow">
                     <div className="flex justify-between items-center">
                       <div className="font-semibold">{f.by}</div>
                       <div className="pill px-3 py-1 rounded-full border border-[#222737] bg-[#1b2233] text-xs">Nota: {f.score}</div>
                     </div>
-                    <p className="muted mt-2">{f.text}</p>
-                    <div className="muted mt-1 text-xs">Última atualização: {formatDate(f.updated)}</div>
-                    {isOwnReview && (
-                      <div className="flex gap-2 mt-2">
-                        <Button
-                          style={{ height: '24px', minHeight: '24px', paddingTop: 0, paddingBottom: 0 }}
-                          className="btn px-3 rounded bg-[#6ea8fe] text-[#0b1222] text-sm"
-                          onClick={() => alert('Editar review não implementado')}
-                        >Editar</Button>
-                        <Button
-                          style={{ height: '24px', minHeight: '24px', paddingTop: 0, paddingBottom: 0 }}
-                          className="btn px-3 rounded bg-[#e85d75] text-[#fff] text-sm"
-                          onClick={() => alert('Excluir review não implementado')}
-                        >Excluir</Button>
+                    {isEditing ? (
+                      <div className="mt-2">
+                        <div className="flex gap-2 items-center mb-2">
+                          <label className="text-xs">Nota:</label>
+                          <input type="number" min={1} max={5} value={editRating} onChange={e => setEditRating(Number(e.target.value))} className="w-16 px-2 py-1 rounded bg-[#23283a] text-[#e8ecf8] border border-[#222737] text-sm" />
+                        </div>
+                        <textarea value={editComment} onChange={e => setEditComment(e.target.value)} className="w-full px-2 py-1 rounded bg-[#23283a] text-[#e8ecf8] border border-[#222737] text-sm mb-2" rows={2} />
+                        {errorReviewAction && <div className="text-red-500 text-xs mb-2">{errorReviewAction}</div>}
+                        <div className="flex gap-2">
+                          <Button style={{ height: '24px', minHeight: '24px', paddingTop: 0, paddingBottom: 0 }} className="btn px-3 rounded bg-[#6ea8fe] text-[#0b1222] text-sm" onClick={handleEditSave} disabled={loadingReviewAction}>Salvar</Button>
+                          <Button style={{ height: '24px', minHeight: '24px', paddingTop: 0, paddingBottom: 0 }} className="btn px-3 rounded bg-[#e85d75] text-[#fff] text-sm" onClick={handleEditCancel} disabled={loadingReviewAction}>Cancelar</Button>
+                        </div>
                       </div>
+                    ) : (
+                      <>
+                        <p className="muted mt-2">{f.text}</p>
+                        <div className="muted mt-1 text-xs">Última atualização: {formatDate(f.updated)}</div>
+                        {isOwnReview && (
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              style={{ height: '24px', minHeight: '24px', paddingTop: 0, paddingBottom: 0 }}
+                              className="btn px-3 rounded bg-[#6ea8fe] text-[#0b1222] text-sm"
+                              onClick={() => handleEditClick(f)}
+                              disabled={loadingReviewAction}
+                            >Editar</Button>
+                            <Button
+                              style={{ height: '24px', minHeight: '24px', paddingTop: 0, paddingBottom: 0 }}
+                              className="btn px-3 rounded bg-[#e85d75] text-[#fff] text-sm"
+                              onClick={() => handleDeleteReview(f)}
+                              disabled={loadingReviewAction}
+                            >Excluir</Button>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 );
@@ -147,6 +241,30 @@ const ProfessionalProfile: React.FC = () => {
             )}
           </div>
         </section>
+        {/* Modal de confirmação de exclusão de review */}
+        <Dialog open={showDeleteReviewModal} onOpenChange={setShowDeleteReviewModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar exclusão</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 text-center text-[#8b93a7]">
+              Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.
+            </div>
+            {deleteError && <div className="text-red-500 text-sm mb-2">{deleteError}</div>}
+            <div className="flex justify-center gap-2">
+              <Button
+                className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent"
+                onClick={handleCancelDeleteReview}
+                disabled={deleteLoading}
+              >Cancelar</Button>
+              <Button
+                className="btn danger px-4 py-2 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-[#2b3347]"
+                onClick={handleConfirmDeleteReview}
+                disabled={deleteLoading}
+              >{deleteLoading ? "Excluindo..." : "Excluir avaliação"}</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

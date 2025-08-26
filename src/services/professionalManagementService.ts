@@ -213,6 +213,7 @@ export const getProfessionalProfile = async (professionalId: string, client?: cl
 
     // Prepare feedbacks
     const feedbacks = feedbacksRaw.map(f => ({
+        id: f.id,
         by: f.clientName,
         score: f.rating || 0,
         text: f.comment || '',
