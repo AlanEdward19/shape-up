@@ -1,5 +1,5 @@
 import { SERVICES } from "@/config/services";
-import { ChatMessage, SimplifiedProfile } from "@/types/chat";
+import { ChatMessage } from "@/types/chat";
 import CryptoJS from 'crypto-js';
 import {createHeaders} from "@/services/utils/serviceUtils.ts";
 
@@ -40,7 +40,7 @@ export const ChatService = {
   getRecentMessages: async (): Promise<ChatMessage[]> => {
     try {
       const response = await fetch(
-        `${SERVICES.CHAT.baseUrl}${SERVICES.CHAT.endpoints.getRecentMessages}`,
+        `${SERVICES.CHAT.baseUrl}${ SERVICES.CHAT.endpoints.getRecentMessages}`,
         { headers: await createHeaders() }
       );
       if (!response.ok) throw new Error("Failed to fetch recent messages");
@@ -51,10 +51,24 @@ export const ChatService = {
     }
   },
 
-  getMessages: async (profileId: string, page: number = 1): Promise<ChatMessage[]> => {
+  getProfessionalRecentMessages: async (): Promise<ChatMessage[]> => {
     try {
       const response = await fetch(
-        `${SERVICES.CHAT.baseUrl}${SERVICES.CHAT.endpoints.getMessages.replace('id', profileId)}?page=${page}`,
+          `${SERVICES.CHAT.baseUrl}${SERVICES.CHAT.endpoints.getProfessionalRecentMessages}`,
+          { headers: await createHeaders() }
+      );
+      if (!response.ok) throw new Error("Failed to fetch recent messages");
+      return response.json();
+    } catch (error) {
+      console.error("Error fetching recent messages:", error);
+      throw error;
+    }
+  },
+
+  getMessages: async (isProfessionalChat:boolean, profileId: string, page: number = 1): Promise<ChatMessage[]> => {
+    try {
+      const response = await fetch(
+        `${SERVICES.CHAT.baseUrl}${(isProfessionalChat ? SERVICES.CHAT.endpoints.getProfessionalMessages : SERVICES.CHAT.endpoints.getMessages).replace('id', profileId)}?page=${page}`,
         { headers: await createHeaders() }
       );
       if (!response.ok) throw new Error("Failed to fetch messages");
@@ -65,23 +79,9 @@ export const ChatService = {
     }
   },
 
-  getProfileSimplified: async (profileId: string): Promise<SimplifiedProfile> => {
-    try {
-      const response = await fetch(
-        `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfileSimplified.replace('id', profileId)}`,
-        { headers: await createHeaders() }
-      );
-      if (!response.ok) throw new Error("Failed to fetch profile");
-      return response.json();
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      throw error;
-    }
-  },
-
-  sendMessage: async (receiverId: string, message: string): Promise<void> => {
+  sendMessage: async (isProfessionalChat:boolean, receiverId: string, message: string): Promise<void> => {
     const response = await fetch(
-      `${SERVICES.CHAT.baseUrl}${SERVICES.CHAT.endpoints.sendMessage}`,
+      `${SERVICES.CHAT.baseUrl}${(isProfessionalChat ? SERVICES.CHAT.endpoints.sendProfessionalMessage : SERVICES.CHAT.endpoints.sendMessage)}`,
       {
         method: 'POST',
         headers: await createHeaders(),

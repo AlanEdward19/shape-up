@@ -10,11 +10,14 @@ import {
   clientResponse
 } from '../types/professionalManagementService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useChatStore } from "@/stores/useChatStore";
+import ChatWindow from "@/components/molecules/chat/ChatWindow.tsx";
 
 const ProfessionalProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const { addChat, isProfileChatOpen, openChats, removeChat } = useChatStore();
   const [user, setUser] = useState<clientResponse | null>(location.state?.user);
   const [professional, setProfessional] = useState<{
     id: string;
@@ -180,7 +183,23 @@ const ProfessionalProfile: React.FC = () => {
             </div>
             <div style={{flex:1}}></div>
             <div>
-              <Button disabled={!hasActiveContract} title={!hasActiveContract ? 'Disponível quando houver um plano ativo' : ''} className={hasActiveContract ? 'btn primary px-4 py-2 rounded-lg border-none bg-gradient-to-br from-[#6ea8fe] to-[#7ef0c1] text-[#0b1222]' : 'btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent'}>💬 Chat</Button>
+              <Button
+                disabled={!hasActiveContract}
+                title={!hasActiveContract ? 'Disponível quando houver um plano ativo' : ''}
+                className={hasActiveContract ? 'btn primary px-4 py-2 rounded-lg border-none bg-gradient-to-br from-[#6ea8fe] to-[#7ef0c1] text-[#0b1222]' : 'btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent'}
+                onClick={() => {
+                  if (!professional || !hasActiveContract) return;
+                  if (!isProfileChatOpen(professional.id, true)) {
+                    addChat({
+                      profileId: professional.id,
+                      firstName: professional.name.split(' ')[0],
+                      lastName: professional.name.split(' ')[1] || '',
+                      imageUrl: professional.avatar,
+                      isProfessionalChat: true
+                    });
+                  }
+                }}
+              >💬 Chat</Button>
             </div>
           </div>
         </section>
@@ -299,6 +318,21 @@ const ProfessionalProfile: React.FC = () => {
             </div>
           </DialogContent>
         </Dialog>
+        {openChats.map((chat) =>
+          chat.isProfessionalChat && chat.profileId === professional?.id ? (
+            <ChatWindow
+              key={chat.profileId + '-professional'}
+              profileId={chat.profileId}
+              firstName={chat.firstName}
+              lastName={chat.lastName}
+              imageUrl={chat.imageUrl}
+              isProfessionalChat={chat.isProfessionalChat}
+              onClose={() => {
+                removeChat(chat.profileId, chat.isProfessionalChat);
+              }}
+            />
+          ) : null
+        )}
       </main>
     </div>
   );

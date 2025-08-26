@@ -12,6 +12,7 @@ import { format, parseISO } from "date-fns";
 
 interface ChatMessageListProps {
   profileId: string;
+  isProfessionalChat?: boolean;
 }
 
 interface GroupedMessages {
@@ -19,15 +20,16 @@ interface GroupedMessages {
   messages: any[];
 }
 
-const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
+const ChatMessageList = ({ profileId, isProfessionalChat = false }: ChatMessageListProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const connectionRef = useRef<signalR.HubConnection | null>(null);
   const queryClient = useQueryClient();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ["messages", profileId],
+    queryKey: ["messages", profileId, isProfessionalChat],
     queryFn: async ({ pageParam = 1 }) => {
-      return ChatService.getMessages(profileId, pageParam);
+      console.log("isProfessionalChat", isProfessionalChat)
+      return ChatService.getMessages(isProfessionalChat, profileId, pageParam);
     },
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.length === 0 ? undefined : allPages.length + 1;
@@ -49,8 +51,10 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
           connectionRef.current = null;
         }
 
+        console.log(isProfessionalChat)
+        const chatUrl = `${SERVICES.CHAT.baseUrl}chat?ProfileId=${profileId}${isProfessionalChat ? "&isProfessionalChat=true" : ""}`;
         const connection = new signalR.HubConnectionBuilder()
-          .withUrl(`${SERVICES.CHAT.baseUrl}chat?ProfileId=${profileId}`, {
+          .withUrl(chatUrl, {
             accessTokenFactory: () => getAuthToken() || ''
           })
           .withAutomaticReconnect()
@@ -60,7 +64,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
 
         connection.on("ReceiveMessage", (message) => {
           queryClient.setQueryData(
-            ["messages", profileId],
+            ["messages", profileId, isProfessionalChat],
             (oldData: any) => {
               if (!oldData) return { pages: [[message]], pageParams: [1] };
               
@@ -109,7 +113,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         connectionRef.current = null;
       }
     };
-  }, [profileId, queryClient]);
+  }, [profileId, isProfessionalChat, queryClient]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

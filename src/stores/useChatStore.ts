@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 
 interface OpenChat {
@@ -6,29 +5,32 @@ interface OpenChat {
   firstName: string;
   lastName: string;
   imageUrl?: string;
+  isProfessionalChat: boolean;
 }
 
 interface ChatStore {
   openChats: OpenChat[];
   addChat: (chat: OpenChat) => void;
-  removeChat: (profileId: string) => void;
-  isProfileChatOpen: (profileId: string) => boolean;
+  removeChat: (profileId: string, isProfessionalChat?: boolean) => void;
+  isProfileChatOpen: (profileId: string, isProfessionalChat: boolean) => boolean;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
   openChats: [],
   addChat: (chat) => {
     set((state) => {
-      if (!state.openChats.some((c) => c.profileId === chat.profileId)) {
+      if (!state.openChats.some((c) => c.profileId === chat.profileId && c.isProfessionalChat === chat.isProfessionalChat)) {
         return { openChats: [...state.openChats, chat] };
       }
       return state;
     });
   },
-  removeChat: (profileId) =>
+  removeChat: (profileId, isProfessionalChat) =>
     set((state) => ({
-      openChats: state.openChats.filter((chat) => chat.profileId !== profileId),
+      openChats: state.openChats.filter((chat) =>
+        chat.profileId !== profileId || (isProfessionalChat !== undefined && chat.isProfessionalChat !== isProfessionalChat)
+      ),
     })),
-  isProfileChatOpen: (profileId) =>
-    get().openChats.some((chat) => chat.profileId === profileId),
+  isProfileChatOpen: (profileId, isProfessionalChat) =>
+    get().openChats.some((chat) => chat.profileId === profileId && chat.isProfessionalChat === isProfessionalChat),
 }));

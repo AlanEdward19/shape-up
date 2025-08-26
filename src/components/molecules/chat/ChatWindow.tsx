@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { X } from "lucide-react";
 import ChatHeader from "./ChatHeader";
@@ -10,10 +9,11 @@ interface ChatWindowProps {
   firstName: string;
   lastName: string;
   imageUrl?: string;
+  isProfessionalChat?: boolean;
   onClose: () => void;
 }
 
-const ChatWindow = ({ profileId, firstName, lastName, imageUrl, onClose }: ChatWindowProps) => {
+const ChatWindow = ({ profileId, firstName, lastName, imageUrl, isProfessionalChat = false, onClose }: ChatWindowProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
@@ -59,8 +59,8 @@ const ChatWindow = ({ profileId, firstName, lastName, imageUrl, onClose }: ChatW
           <X className="h-4 w-4" />
         </button>
       </div>
-      <ChatMessageList profileId={profileId} />
-      <ChatInput profileId={profileId} />
+      <ChatMessageList profileId={profileId} isProfessionalChat={isProfessionalChat} />
+      <ChatInput profileId={profileId} isProfessionalChat={isProfessionalChat} />
     </div>
   );
 };

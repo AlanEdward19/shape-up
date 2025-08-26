@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useChatStore } from "@/stores/useChatStore";
+import {SocialService} from "@/services/socialService.ts";
 
 const Chat = () => {
   const { unreadMessages, markAllAsRead } = useNotificationStore();
@@ -51,7 +52,7 @@ const Chat = () => {
 
       await Promise.all(
         uniqueProfileIds.map(async (id) => {
-          const profile = await ChatService.getProfileSimplified(id);
+          const profile = await SocialService.viewProfileSimplified(id);
           profiles[id] = profile;
         })
       );
@@ -70,12 +71,13 @@ const Chat = () => {
     <>
       {openChats.map((chat) => (
         <ChatWindow
-          key={chat.profileId}
+          key={chat.profileId + '-' + chat.isProfessionalChat}
           profileId={chat.profileId}
           firstName={chat.firstName}
           lastName={chat.lastName}
           imageUrl={chat.imageUrl}
-          onClose={() => removeChat(chat.profileId)}
+          isProfessionalChat={chat.isProfessionalChat}
+          onClose={() => removeChat(chat.profileId, chat.isProfessionalChat)}
         />
       ))}
 
@@ -129,6 +131,7 @@ const Chat = () => {
                               firstName: profile.firstName,
                               lastName: profile.lastName,
                               imageUrl: profile.imageUrl,
+                              isProfessionalChat: false
                             });
                             setShowRecentMessages(false);
                           }
