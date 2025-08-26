@@ -263,15 +263,26 @@ const ProfessionalsHub: React.FC = () => {
   const navigate = useNavigate();
 
   // State for reactivate plan
+  const [showReactivateModal, setShowReactivateModal] = useState(false);
+  const [planToReactivate, setPlanToReactivate] = useState<clientServicePlanResponse | null>(null);
   const [reactivateLoading, setReactivateLoading] = useState(false);
   const [reactivateError, setReactivateError] = useState<string | null>(null);
 
-  const handleReactivatePlan = async (plan: clientServicePlanResponse) => {
+  const openReactivateModal = (plan: clientServicePlanResponse) => {
+    setPlanToReactivate(plan);
+    setShowReactivateModal(true);
+    setReactivateError(null);
+  };
+
+  const handleConfirmReactivatePlan = async () => {
+    if (!planToReactivate) return;
     setReactivateLoading(true);
     setReactivateError(null);
     try {
-      const userData = await ProfessionalManagementService.activateServicePlanToClient(user.id,plan.servicePlan.id);
+      const userData = await ProfessionalManagementService.activateServicePlanToClient(user.id, planToReactivate.servicePlan.id);
       setActivePlans(userData.clientServicePlans);
+      setShowReactivateModal(false);
+      setPlanToReactivate(null);
     } catch (err: any) {
       setReactivateError(err.message || 'Erro ao reativar plano.');
     } finally {
@@ -304,7 +315,7 @@ const ProfessionalsHub: React.FC = () => {
                     <div className="flex gap-2 mt-2">
                       {plan.status === 1 ? (
                         <button className="btn small success px-3 py-1 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347] flex items-center gap-1"
-                          onClick={() => handleReactivatePlan(plan)}
+                          onClick={() => openReactivateModal(plan)}
                           disabled={reactivateLoading}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -742,6 +753,37 @@ const ProfessionalsHub: React.FC = () => {
             <button className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent" onClick={() => setShowActivateModal(false)} disabled={activateLoading}>Cancelar</button>
             <button className="btn primary px-4 py-2 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347]" onClick={handleActivateClientPlan} disabled={activateLoading}>
               {activateLoading ? "Ativando..." : "Ativar plano"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Modal de confirmação de reativação de plano */}
+      <Dialog open={showReactivateModal} onOpenChange={setShowReactivateModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar reativação</DialogTitle>
+          </DialogHeader>
+          {planToReactivate && (
+            <div className="space-y-2">
+              <div>Tem certeza que deseja reativar o plano <strong>{planToReactivate.servicePlan.title}</strong>?</div>
+              <div>Período: {new Date(planToReactivate.startDate).toLocaleDateString()} - {new Date(planToReactivate.endDate).toLocaleDateString()}</div>
+            </div>
+          )}
+          {reactivateError && <div className="text-red-500 text-sm mt-2">{reactivateError}</div>}
+          <div className="flex gap-2 mt-4">
+            <button
+              className="btn success px-4 py-2 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347]"
+              onClick={handleConfirmReactivatePlan}
+              disabled={reactivateLoading}
+            >
+              {reactivateLoading ? 'Reativando...' : 'Confirmar'}
+            </button>
+            <button
+              className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent"
+              onClick={() => setShowReactivateModal(false)}
+              disabled={reactivateLoading}
+            >
+              Cancelar
             </button>
           </div>
         </DialogContent>
