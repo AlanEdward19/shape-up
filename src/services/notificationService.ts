@@ -25,11 +25,9 @@ class NotificationService {
         .build();
 
       await this.connection.start();
-      console.log("SignalR Connected");
 
       this.setupNotificationHandlers();
     } catch (error) {
-      console.error("SignalR Connection Error:", error);
       throw error;
     }
   }
@@ -48,7 +46,7 @@ class NotificationService {
             const senderId = senderIdMatch ? senderIdMatch[1].trim() : '';
 
           // Se o chat com o remetente estiver aberto, não criamos notificação
-          if (senderId && isProfileChatOpen(senderId))
+          if (senderId && isProfileChatOpen(senderId, false) || isProfileChatOpen(senderId, true))
             return;
 
           notification = {

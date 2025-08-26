@@ -101,18 +101,16 @@ const ChatMessageList = ({ profileId, isProfessionalChat = false }: ChatMessageL
           });
 
           await connection.start();
-          // Success, exit loop
           return;
         } catch (err) {
           lastError = err;
           attempts++;
           if (attempts < maxAttempts) {
-            // Wait a bit before retrying (e.g., 1s)
             await new Promise(res => setTimeout(res, 1000));
           }
         }
       }
-      // If we reach here, all attempts failed
+
       console.error("SignalR Connection Error: ", lastError);
       toast.error("Falha ao conectar ao serviço de mensagens em tempo real");
     };
