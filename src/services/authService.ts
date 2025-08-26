@@ -17,6 +17,7 @@ import { getDoc } from "firebase/firestore";
 import { auth } from "@/config/firebase.ts";
 import { SERVICES } from "@/config/services.ts";
 import {createHeaders} from "@/services/utils/serviceUtils.ts";
+import {SocialService} from "@/services/socialService.ts";
 
 export const decodeJwt = (token: string) => {
   try {
@@ -145,8 +146,12 @@ export const signInWithEmail = async (email: string, password: string, rememberM
 export const signInWithGoogle = async (rememberMe: boolean = false) => {
   try {
     const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/user.birthday.read');
+    provider.addScope('https://www.googleapis.com/auth/user.addresses.read');
+
     const userCredential = await signInWithPopup(auth, provider);
     await setAuthData(userCredential.user, rememberMe);
+
     return { success: true, user: userCredential.user };
   } catch (error) {
     console.error('Google login error:', error);

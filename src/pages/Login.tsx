@@ -3,14 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useQueryClient } from "@tanstack/react-query";
-import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { Facebook, Mail, Eye, EyeOff } from "lucide-react";
 import AuthLayout from "@/components/templates/AuthLayout";
 import Button from "@/components/atoms/Button";
-import {signInWithEmail, signInWithGoogle, signInWithFacebook, setAuthData, getAuthToken} from "@/services/authService.ts";
+import {
+  signInWithEmail,
+  signInWithGoogle,
+  signInWithFacebook,
+  setAuthData,
+  getAuthToken,
+  enhanceToken,
+  refreshIdToken
+} from "@/services/authService.ts";
+import { User } from "firebase/auth";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,8 +26,11 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showClaimsModal, setShowClaimsModal] = useState(false);
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState("");
+  const [googleUser, setGoogleUser] = useState<User | null>(null);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     const autoLogin = async () => {
@@ -65,17 +76,20 @@ const Login = () => {
     setIsLoading(true);
     try {
       const result = await signInWithGoogle(rememberMe);
-      
       if (result.success) {
-        const userId = result.user?.uid;
-        const token = await result.user?.getIdToken();
-
-        console.log(`Id: ${userId}`);
-        console.log(`Token: ${token}`);
-
-        toast.success("Login com Google realizado com sucesso!");
-        await setAuthData(token, rememberMe);
-        navigate('/index', { replace: true });
+        const user = result.user;
+        const token = await user?.getIdToken();
+        setGoogleUser(user);
+        // Check if user is new using metadata
+        if (user && user.metadata.creationTime === user.metadata.lastSignInTime) {
+          // User is new, show modal
+          setShowClaimsModal(true);
+        } else {
+          // User exists, proceed as normal
+          await setAuthData(token, rememberMe);
+          toast.success("Login realizado com sucesso!");
+          navigate('/index', { replace: true });
+        }
       } else {
         toast.error("Falha no login com Google. Tente novamente.");
       }
@@ -113,11 +127,32 @@ const Login = () => {
     }
   };
 
+  const handleClaimsSubmit = async () => {
+    setIsLoading(true);
+    try {
+      // Add claims to token
+      const success = await enhanceToken({ postalCode, country });
+      if (success && googleUser) {
+        const refreshToken = sessionStorage.getItem('refreshToken');
+        const refreshed = await refreshIdToken(refreshToken);
+        const token = refreshed.id_token;
+        await setAuthData(token, rememberMe);
+        toast.success("Login realizado com sucesso!");
+        setShowClaimsModal(false);
+        navigate('/index', { replace: true });
+      } else {
+        toast.error("Falha ao salvar dados adicionais. Tente novamente.");
+      }
+    } catch (error) {
+      console.error("Claims submit failed:", error);
+      toast.error("Falha ao salvar dados adicionais. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthLayout 
-      title="Login" 
-      subtitle="Entre com suas credenciais"
-    >
+    <AuthLayout title="Login" subtitle="Entre com suas credenciais">
       <div className="space-y-4">
         <Button 
           variant="outline" 
@@ -234,6 +269,22 @@ const Login = () => {
           </Button>
         </div>
       </div>
+
+      {/* Claims Modal */}
+      <Dialog open={showClaimsModal} onOpenChange={setShowClaimsModal}>
+        <DialogContent className="max-w-sm">
+          <h2 className="text-lg font-semibold mb-4">Complete seu cadastro</h2>
+          <div className="space-y-2">
+            <Label htmlFor="postalCode">Código Postal</Label>
+            <Input id="postalCode" value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="Digite seu código postal" />
+            <Label htmlFor="country">País</Label>
+            <Input id="country" value={country} onChange={e => setCountry(e.target.value)} placeholder="Digite seu país" />
+          </div>
+          <Button className="mt-4 w-full" onClick={handleClaimsSubmit} disabled={isLoading || !postalCode || !country}>
+            Salvar e continuar
+          </Button>
+        </DialogContent>
+      </Dialog>
     </AuthLayout>
   );
 };
