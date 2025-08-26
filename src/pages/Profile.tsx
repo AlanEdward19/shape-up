@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/socialService.ts";
@@ -153,7 +152,9 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen w-full text-[#e8ecf8]" style={{
+      background: "radial-gradient(1200px 600px at 10% -10%, #1b2437 0, transparent 60%), #0f1420"
+    }}>
       <Sidebar />
       <div className="flex-1 ml-20">
         <div className="container mx-auto p-6">

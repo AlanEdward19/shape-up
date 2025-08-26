@@ -1,5 +1,4 @@
-﻿
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -39,18 +38,17 @@ const SearchBar = () => {
         return () => {
             debouncedSearch.cancel();
         };
-    }, [searchTerm]);
+    }, [searchTerm, debouncedSearch]);
 
     return (
-        <div className="relative w-full">
+        <div className="relative w-full max-w-md">
             <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 opacity-70 text-[#8b93a7]" size={18} />
                 <Input
-                    type="text"
-                    placeholder="Pesquisar perfis..."
+                    className="pl-10 pr-4 py-2 rounded-xl bg-[#161b28] border border-[#222737] text-[#e8ecf8] outline-none shadow focus:border-[#6ea8fe] transition-colors"
+                    placeholder="Buscar perfis..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-secondary/50 border-none pl-10 rounded-full focus:ring-primary"
                 />
             </div>
 

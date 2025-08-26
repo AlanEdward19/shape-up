@@ -36,7 +36,7 @@ const NavigationItems = () => {
     { icon: Dumbbell, label: "Treinos" },
     { icon: Utensils, label: "Nutrição" },
     { icon: UserCircle, label: "Perfil", onClick: () => navigate(`/profile/${userId}`) },
-    { icon: ListTodo, label: "Planos" },
+    { icon: ListTodo, label: "Planos", onClick: () => navigate('/hub') },
   ];
 
   return (

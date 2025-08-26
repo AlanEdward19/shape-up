@@ -6,7 +6,9 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen w-full text-[#e8ecf8]" style={{
+      background: "radial-gradient(1200px 600px at 10% -10%, #1b2437 0, transparent 60%), #0f1420"
+    }}>
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:flex-1 flex-col justify-center p-12 bg-secondary">
         <h1 className="text-4xl font-bold text-white mb-4">ShapeUp</h1>

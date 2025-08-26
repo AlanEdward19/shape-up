@@ -52,7 +52,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen w-full text-[#e8ecf8] bg-transparent">
       <Sidebar />
       
       <main className="ml-20 flex gap-6 p-6">

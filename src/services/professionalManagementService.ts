@@ -36,7 +36,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    activateServicePlanToClientAsync: async (clientId: string, servicePlanId: string) : Promise<clientResponse> => {
+    activateServicePlanToClient: async (clientId: string, servicePlanId: string) : Promise<clientResponse> => {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.activateServicePlanToClient}`
                 .replace('clientId', clientId)
@@ -51,7 +51,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    updateServicePlanByIdAsync : async (servicePlanId: string, updatedDetails: updateServicePlanRequest) : Promise<servicePlanResponse>=> {
+    updateServicePlanById : async (servicePlanId: string, updatedDetails: updateServicePlanRequest) : Promise<servicePlanResponse>=> {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.updateServicePlanById}`
                 .replace('servicePlanId', servicePlanId),
@@ -64,7 +64,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    deleteServicePlanByIdAsync : async (servicePlanId: string) => {
+    deleteServicePlanById : async (servicePlanId: string) => {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.deleteServicePlanById}`
                 .replace('servicePlanId', servicePlanId),
@@ -75,7 +75,7 @@ export const ProfessionalManagementService = {
         if (!response.ok) throw new Error('Failed to delete service plan');
     },
 
-    getProfessionalClientsAsync : async (professionalId: string) : Promise<clientResponse[]>=> {
+    getProfessionalClients : async (professionalId: string) : Promise<clientResponse[]>=> {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.getProfessionalClients}`
                 .replace('professionalId', professionalId),
@@ -87,7 +87,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    addServicePlanToClientAsync : async (clientId: string, servicePlanId: string):Promise<clientResponse> => {
+    addServicePlanToClient : async (clientId: string, servicePlanId: string):Promise<clientResponse> => {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.addServicePlanToClient}`
                 .replace('clientId', clientId)
@@ -100,7 +100,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    createProfessionalReviewAsync : async (professionalId:string, servicePlanId:string,reviewDetails: createProfessionalReviewRequest) : Promise<clientProfessionalReviewResponse>=> {
+    createProfessionalReview : async (professionalId:string, servicePlanId:string,reviewDetails: createProfessionalReviewRequest) : Promise<clientProfessionalReviewResponse>=> {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.createProfessionalReview}`
                 .replace('professionalId', professionalId)
@@ -114,7 +114,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    deleteProfessionalReviewAsync : async (reviewId: string) => {
+    deleteProfessionalReview : async (reviewId: string) => {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.deleteProfessionalReview}`
                 .replace('id', reviewId),
@@ -125,7 +125,7 @@ export const ProfessionalManagementService = {
         if (!response.ok) throw new Error('Failed to delete professional review');
     },
 
-    updateProfessionalReviewAsync : async (reviewId: string, updatedDetails: updateProfessionalReviewRequest): Promise<clientProfessionalReviewResponse> => {
+    updateProfessionalReview : async (reviewId: string, updatedDetails: updateProfessionalReviewRequest): Promise<clientProfessionalReviewResponse> => {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.updateProfessionalReview}`
                 .replace('id', reviewId),
@@ -138,7 +138,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    getProfessionalReviewsByIdAsync : async (professionalId: string) : Promise<clientProfessionalReviewResponse[]>=> {
+    getProfessionalReviewsById : async (professionalId: string) : Promise<clientProfessionalReviewResponse[]>=> {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.getProfessionalReviewsById}`
                 .replace('professionalId', professionalId),
@@ -150,7 +150,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    getProfessionalsAsync : async ():Promise<professionalResponse[]> => {
+    getProfessionals : async ():Promise<professionalResponse[]> => {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.getProfessionals}`,
             {
@@ -162,7 +162,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    getProfessionalScoreByIdAsync : async (professionalId: string) : Promise<professionalScoreResponse>=> {
+    getProfessionalScoreById : async (professionalId: string) : Promise<professionalScoreResponse>=> {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.getProfessionalScoreById}`
                 .replace('professionalId', professionalId),
@@ -175,7 +175,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    getProfessionalByIdAsync : async (professionalId: string) : Promise<professionalResponse> => {
+    getProfessionalById : async (professionalId: string) : Promise<professionalResponse> => {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.getProfessionalById}`
                 .replace('professionalId', professionalId),
@@ -188,7 +188,7 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 
-    getClientByIdAsync : async (clientId: string) : Promise<clientResponse> => {
+    getClientById : async (clientId: string) : Promise<clientResponse> => {
         const response = await fetch(
             `${SERVICES.PROFESSIONAL_MANAGEMENT.baseUrl}${SERVICES.PROFESSIONAL_MANAGEMENT.endpoints.getClientById}`
                 .replace('clientId', clientId),
