@@ -3,14 +3,19 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import Avatar from '../components/atoms/Avatar';
 import Button from '../components/atoms/Button';
 import { ProfessionalManagementService, getProfessionalProfile } from '../services/professionalManagementService';
-import { professionalResponse, servicePlanResponse, clientProfessionalReviewResponse } from '../types/professionalManagementService';
+import {
+  professionalResponse,
+  servicePlanResponse,
+  clientProfessionalReviewResponse,
+  clientResponse
+} from '../types/professionalManagementService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const ProfessionalProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const user = location.state?.user;
+  const [user, setUser] = useState<clientResponse | null>(location.state?.user);
   const [professional, setProfessional] = useState<{
     id: string;
     name: string;
@@ -37,11 +42,18 @@ const ProfessionalProfile: React.FC = () => {
   const [reviewToDelete, setReviewToDelete] = useState<any | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [contractLoading, setContractLoading] = useState<string | null>(null);
+  const [contractError, setContractError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      const data = await getProfessionalProfile(id, user);
+      let currentUser = user;
+      if (!currentUser && location.state?.user) {
+        currentUser = location.state.user;
+        setUser(currentUser);
+      }
+      const data = await getProfessionalProfile(id, currentUser);
       setProfessional(data.professional);
       setHasActiveContract(data.hasActiveContract);
       setLoading(false);
@@ -64,9 +76,14 @@ const ProfessionalProfile: React.FC = () => {
     }
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = async (shouldRefreshUser = false) => {
     setLoading(true);
-    const data = await getProfessionalProfile(id, user);
+    let currentUser = user;
+    if (shouldRefreshUser && user) {
+      currentUser = await ProfessionalManagementService.getClientById(user.id);
+      setUser(currentUser);
+    }
+    const data = await getProfessionalProfile(id, currentUser);
     setProfessional(data.professional);
     setHasActiveContract(data.hasActiveContract);
     setLoading(false);
@@ -128,6 +145,19 @@ const ProfessionalProfile: React.FC = () => {
     setDeleteError(null);
   };
 
+  const handleContractPlan = async (planId: string) => {
+    if (!user) return;
+    setContractLoading(planId);
+    setContractError(null);
+    try {
+      await ProfessionalManagementService.addServicePlanToClient(user.id, planId);
+      await refreshProfile(true); // refresh user after contracting
+    } catch (err: any) {
+      setContractError('Erro ao contratar plano.');
+    }
+    setContractLoading(null);
+  };
+
   if (loading || !professional) return <div className="text-center py-12 text-[#8b93a7]">Carregando dados...</div>;
 
   return (
@@ -163,7 +193,7 @@ const ProfessionalProfile: React.FC = () => {
               <div className="text-center text-[#8b93a7] py-4">Nenhum plano disponível.</div>
             ) : (
               professional.plans?.map((p: servicePlanResponse) => {
-                const isContracted = user?.clientServicePlans?.some(plan => plan.status === 0 && plan.servicePlan.id === p.id);
+                const isContracted = user?.clientServicePlans?.some(plan => plan.servicePlan.id === p.id);
                 return (
                   <div key={p.id} className="flex justify-between items-center bg-[#12182a] border border-[#23283a] rounded-xl p-4 shadow">
                     <div>
@@ -172,11 +202,15 @@ const ProfessionalProfile: React.FC = () => {
                     </div>
                     <div>
                       <Button
-                        disabled={isContracted}
+                        disabled={isContracted || !!contractLoading}
                         className={isContracted ? 'btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent' : 'btn primary px-4 py-2 rounded-lg border-none bg-gradient-to-br from-[#6ea8fe] to-[#7ef0c1] text-[#0b1222]'}
+                        onClick={() => handleContractPlan(p.id)}
                       >
-                        {isContracted ? 'Já contratado' : 'Contratar'}
+                        {contractLoading === p.id ? 'Contratando...' : isContracted ? 'Já contratado' : 'Contratar'}
                       </Button>
+                      {contractError && contractLoading === p.id && (
+                        <div className="text-red-500 text-xs mt-1">{contractError}</div>
+                      )}
                     </div>
                   </div>
                 );

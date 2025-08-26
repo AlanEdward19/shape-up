@@ -59,7 +59,7 @@ export const SERVICES = {
         updateServicePlanById: 'v1/ServicePlan/servicePlanId',
         deleteServicePlanById: 'v1/ServicePlan/servicePlanId',
         getProfessionalClients: 'v1/Professional/professionalId/Client',
-        addServicePlanToClient: 'v1/ServicePlan/serviePlanId/Client/clientId',
+        addServicePlanToClient: 'v1/ServicePlan/servicePlanId/Client/clientId',
         createProfessionalReview: 'v1/Professional/professionalId/ServicePlan/servicePlanId/Review',
         deleteProfessionalReview: 'v1/Review/id',
         updateProfessionalReview: 'v1/Review/id',

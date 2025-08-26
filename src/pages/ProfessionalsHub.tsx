@@ -71,8 +71,7 @@ const ProfessionalsHub: React.FC = () => {
         const userData = await ProfessionalManagementService.getClientById(userId);
         setUser(userData);
         setIsProfessional(userData.isNutritionist || userData.isTrainer);
-        setActivePlans((userData.clientServicePlans ?? []).filter(sp => sp.status === 0)); // 0 = Active
-
+        setActivePlans(userData.clientServicePlans);
         // Get recommended professionals
         const professionals = await ProfessionalManagementService.getProfessionals();
         setRecommendedProfessionals(professionals);
@@ -250,8 +249,8 @@ const ProfessionalsHub: React.FC = () => {
     setCancelLoading(true);
     setCancelError(null);
     try {
-      await ProfessionalManagementService.deactivateServicePlanFromClient(userId, planToCancel.servicePlan.id, '');
-      setActivePlans((prev) => prev.filter(p => p.id !== planToCancel.id));
+      const userData = await ProfessionalManagementService.deactivateServicePlanFromClient(userId, planToCancel.servicePlan.id, '');
+      setActivePlans(userData.clientServicePlans)
       setShowCancelModal(false);
       setPlanToCancel(null);
     } catch (err: any) {
@@ -262,6 +261,23 @@ const ProfessionalsHub: React.FC = () => {
   };
 
   const navigate = useNavigate();
+
+  // State for reactivate plan
+  const [reactivateLoading, setReactivateLoading] = useState(false);
+  const [reactivateError, setReactivateError] = useState<string | null>(null);
+
+  const handleReactivatePlan = async (plan: clientServicePlanResponse) => {
+    setReactivateLoading(true);
+    setReactivateError(null);
+    try {
+      const userData = await ProfessionalManagementService.activateServicePlanToClient(user.id,plan.servicePlan.id);
+      setActivePlans(userData.clientServicePlans);
+    } catch (err: any) {
+      setReactivateError(err.message || 'Erro ao reativar plano.');
+    } finally {
+      setReactivateLoading(false);
+    }
+  };
 
   if (loading) return <div className="text-center py-12 text-[#8b93a7]">Carregando dados...</div>;
   if (error) return <div className="text-center py-12 text-red-400">{error}</div>;
@@ -286,15 +302,27 @@ const ProfessionalsHub: React.FC = () => {
                     <div className="text-[#8b93a7]">Duração: {plan.servicePlan.durationInDays} dias • Preço: R$ {plan.servicePlan.price.toFixed(2).replace('.', ',')} • Tipo: {getServiceTypeLabel(plan.servicePlan.type)}</div>
                     <div className="text-[#8b93a7]">Status: {getStatusLabel(plan.status)}</div>
                     <div className="flex gap-2 mt-2">
-                      <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1"
-                        onClick={() => openCancelModal(plan)}
-                        disabled={cancelLoading}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <circle cx="12" cy="12" r="10"/>
-                          <line x1="15" y1="9" x2="9" y2="15"/>
-                        </svg> Cancelar
-                      </button>
+                      {plan.status === 1 ? (
+                        <button className="btn small success px-3 py-1 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347] flex items-center gap-1"
+                          onClick={() => handleReactivatePlan(plan)}
+                          disabled={reactivateLoading}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 8v4l3 3"/>
+                          </svg> Reativar
+                        </button>
+                      ) : (
+                        <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1"
+                          onClick={() => openCancelModal(plan)}
+                          disabled={cancelLoading}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                          </svg> Cancelar
+                        </button>
+                      )}
                       <button
                         className="btn small primary px-3 py-1 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347] flex items-center gap-1"
                         onClick={() => navigate(`/profissional/${plan.servicePlan.professionalId}`, { state: { user } })}
@@ -305,6 +333,7 @@ const ProfessionalsHub: React.FC = () => {
                         </svg> Ver perfil do profissional
                       </button>
                     </div>
+                    {reactivateError && <div className="text-red-500 text-sm mt-2">{reactivateError}</div>}
                   </div>
                 ))
               )}
