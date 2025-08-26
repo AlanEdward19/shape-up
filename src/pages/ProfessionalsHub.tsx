@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from "react";
 import { ProfessionalManagementService } from "@/services/professionalManagementService";
+import { SocialService } from "@/services/socialService";
 import { clientResponse, professionalResponse, servicePlanResponse, clientServicePlanResponse, clientProfessionalReviewResponse, professionalScoreResponse } from "@/types/professionalManagementService";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -52,7 +53,12 @@ const ProfessionalsHub: React.FC = () => {
   const [activateLoading, setActivateLoading] = useState(false);
   const [activateError, setActivateError] = useState<string | null>(null);
 
-  // Replace with actual user id logic
+  // State for client plan status filter
+  const [clientPlanStatusFilter, setClientPlanStatusFilter] = useState<string>("all");
+
+  const [professionalImages, setProfessionalImages] = useState<{[id: string]: string}>({});
+  const [clientImages, setClientImages] = useState<{[id: string]: string}>({});
+
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId') || '';
 
   useEffect(() => {
@@ -64,11 +70,22 @@ const ProfessionalsHub: React.FC = () => {
         const userData = await ProfessionalManagementService.getClientById(userId);
         setUser(userData);
         setIsProfessional(userData.isNutritionist || userData.isTrainer);
-        setActivePlans((userData.servicePlans ?? []).filter(sp => sp.status === 0)); // 0 = Active
+        setActivePlans((userData.clientServicePlans ?? []).filter(sp => sp.status === 0)); // 0 = Active
 
         // Get recommended professionals
         const professionals = await ProfessionalManagementService.getProfessionals();
         setRecommendedProfessionals(professionals);
+        // Fetch professional images
+        const profImagePromises = professionals.map(async (p) => {
+          try {
+            const profile = await SocialService.viewProfileSimplified(p.id);
+            return { id: p.id, imageUrl: profile.imageUrl };
+          } catch {
+            return { id: p.id, imageUrl: '' };
+          }
+        });
+        const profImages = await Promise.all(profImagePromises);
+        setProfessionalImages(Object.fromEntries(profImages.map(p => [p.id, p.imageUrl])));
 
         if (userData.isNutritionist || userData.isTrainer) {
           // Get professional services
@@ -78,6 +95,17 @@ const ProfessionalsHub: React.FC = () => {
           // Get professional clients
           const profClients = await ProfessionalManagementService.getProfessionalClients(userId);
           setClients(profClients ?? []);
+          // Fetch client images
+          const clientImagePromises = (profClients ?? []).map(async (c) => {
+            try {
+              const profile = await SocialService.viewProfileSimplified(c.id);
+              return { id: c.id, imageUrl: profile.imageUrl };
+            } catch {
+              return { id: c.id, imageUrl: '' };
+            }
+          });
+          const clientImagesArr = await Promise.all(clientImagePromises);
+          setClientImages(Object.fromEntries(clientImagesArr.map(c => [c.id, c.imageUrl])));
 
           // Get professional score
           const profScore = await ProfessionalManagementService.getProfessionalScoreById(userId);
@@ -172,7 +200,7 @@ const ProfessionalsHub: React.FC = () => {
     setDeactivateError(null);
     try {
       // Find the clientId from the clients array
-      const client = clients.find(c => c.servicePlans.some(sp => sp.id === selectedClientPlan.id));
+      const client = clients.find(c => c.clientServicePlans.some(sp => sp.id === selectedClientPlan.id));
       if (!client) throw new Error('Cliente não encontrado.');
       const updatedClient = await ProfessionalManagementService.deactivateServicePlanFromClient(client.id, selectedClientPlan.servicePlan.id, deactivateReason);
       setShowDeactivateModal(false);
@@ -192,7 +220,7 @@ const ProfessionalsHub: React.FC = () => {
     setActivateError(null);
     try {
       // Find the clientId from the clients array
-      const client = clients.find(c => c.servicePlans.some(sp => sp.id === selectedClientPlan.id));
+      const client = clients.find(c => c.clientServicePlans.some(sp => sp.id === selectedClientPlan.id));
       if (!client) throw new Error('Cliente não encontrado.');
       const updatedClient = await ProfessionalManagementService.activateServicePlanToClient(client.id, selectedClientPlan.servicePlan.id);
       setShowActivateModal(false);
@@ -202,6 +230,33 @@ const ProfessionalsHub: React.FC = () => {
       setActivateError((err as Error).message || "Erro ao ativar plano do cliente.");
     } finally {
       setActivateLoading(false);
+    }
+  };
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [planToCancel, setPlanToCancel] = useState<clientServicePlanResponse | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const openCancelModal = (plan: clientServicePlanResponse) => {
+    setPlanToCancel(plan);
+    setShowCancelModal(true);
+    setCancelError(null);
+  };
+
+  const handleConfirmCancelPlan = async () => {
+    if (!planToCancel) return;
+    setCancelLoading(true);
+    setCancelError(null);
+    try {
+      await ProfessionalManagementService.deactivateServicePlanFromClient(userId, planToCancel.servicePlan.id, '');
+      setActivePlans((prev) => prev.filter(p => p.id !== planToCancel.id));
+      setShowCancelModal(false);
+      setPlanToCancel(null);
+    } catch (err: any) {
+      setCancelError(err.message || 'Erro ao cancelar plano.');
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -228,7 +283,10 @@ const ProfessionalsHub: React.FC = () => {
                     <div className="text-[#8b93a7]">Duração: {plan.servicePlan.durationInDays} dias • Preço: R$ {plan.servicePlan.price.toFixed(2).replace('.', ',')} • Tipo: {getServiceTypeLabel(plan.servicePlan.type)}</div>
                     <div className="text-[#8b93a7]">Status: {getStatusLabel(plan.status)}</div>
                     <div className="flex gap-2 mt-2">
-                      <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1">
+                      <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1"
+                        onClick={() => openCancelModal(plan)}
+                        disabled={cancelLoading}
+                      >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                           <circle cx="12" cy="12" r="10"/>
                           <line x1="15" y1="9" x2="9" y2="15"/>
@@ -249,10 +307,9 @@ const ProfessionalsHub: React.FC = () => {
                 recommendedProfessionals.map((professional) => (
                   <button key={professional.id} className="bg-[#161b28] border border-[#222737] rounded-xl p-4 shadow flex flex-col gap-2 w-full text-left cursor-pointer">
                     <div className="flex gap-3 items-center">
-                      <div className="avatar w-10 h-10 rounded-full bg-[#2b3347]" />
+                      <img src={professionalImages[professional.id] || '/placeholder.svg'} alt="avatar" className="avatar w-10 h-10 rounded-full bg-[#2b3347] object-cover" />
                       <div>
                         <div className="font-semibold">{professional.name}</div>
-                        {/* Rating and reviewsCount removed, not present in type */}
                       </div>
                     </div>
                     <div className="flex gap-2 mt-2">
@@ -263,10 +320,11 @@ const ProfessionalsHub: React.FC = () => {
               )}
             </div>
           </section>
-          <section className="bg-[#161b28] border border-[#222737] rounded-[14px] p-5 shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-base font-semibold">Serviços Oferecidos</h2>
-              {isProfessional && (
+          {/* Serviços Oferecidos - only for professionals */}
+          {isProfessional && (
+            <section className="bg-[#161b28] border border-[#222737] rounded-[14px] p-5 shadow">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-base font-semibold">Serviços Oferecidos</h2>
                 <button
                   className="text-base font-semibold h-8 px-3 rounded-md bg-gradient-to-br from-[#6ea8fe] to-[#7ef0c1] text-[#0b1222] shadow flex items-center"
                   style={{border:'none'}}
@@ -274,92 +332,123 @@ const ProfessionalsHub: React.FC = () => {
                 >
                   + Novo serviço
                 </button>
-              )}
-            </div>
-            <div className="space-y-3">
-              {offeredServices.length === 0 ? (
-                <div className="text-center text-[#8b93a7] py-4">Nenhum serviço oferecido encontrado.</div>
-              ) : (
-                offeredServices.map((service) => (
-                  <div key={service.id} className="bg-[#161b28] border border-[#222737] rounded-xl p-4 shadow flex flex-col gap-2">
-                    <div className="font-semibold">{service.title}</div>
-                    <div className="text-[#8b93a7]">{service.description}</div>
-                    <div className="text-[#8b93a7]">Duração: {service.durationInDays} dias • Preço: R$ {service.price.toFixed(2).replace('.', ',')} • Tipo: {getServiceTypeLabel(service.type)}</div>
-                    <div className="flex gap-2 mt-2">
-                      <button className="btn small px-3 py-1 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent flex items-center gap-1" onClick={() => { setSelectedServicePlan(service); setEditForm({ title: service.title, description: service.description, durationInDays: service.durationInDays, price: service.price, type: service.type }); setShowEditModal(true); }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <path d="M12 20h9"/>
-                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+              </div>
+              <div className="space-y-3">
+                {offeredServices.length === 0 ? (
+                  <div className="text-center text-[#8b93a7] py-4">Nenhum serviço oferecido encontrado.</div>
+                ) : (
+                  offeredServices.map((service) => (
+                    <div key={service.id} className="bg-[#161b28] border border-[#222737] rounded-xl p-4 shadow flex flex-col gap-2">
+                      <div className="font-semibold">{service.title}</div>
+                      <div className="text-[#8b93a7]">{service.description}</div>
+                      <div className="text-[#8b93a7]">Duração: {service.durationInDays} dias • Preço: R$ {service.price.toFixed(2).replace('.', ',')} • Tipo: {getServiceTypeLabel(service.type)}</div>
+                      <div className="flex gap-2 mt-2">
+                        <button className="btn small px-3 py-1 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent flex items-center gap-1" onClick={() => { setSelectedServicePlan(service); setEditForm({ title: service.title, description: service.description, durationInDays: service.durationInDays, price: service.price, type: service.type }); setShowEditModal(true); }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 20h9"/>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
                         </svg> Editar
-                      </button>
-                      <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1" onClick={() => { setSelectedServicePlan(service); setShowDeleteModal(true); }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <polyline points="3 6 5 6 21 6"/>
-                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                          <path d="M10 11v6"/>
-                          <path d="M14 11v6"/>
-                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                        </svg> Remover
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-          <section className="bg-[#161b28] border border-[#222737] rounded-[14px] p-5 shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-base font-semibold">Clientes</h2>
-              <select className="bg-[#1b2233] border border-[#222737] rounded-full px-3 py-1 text-xs text-[#e8ecf8]">
-                <option value="all">Sem filtro</option>
-                <option value="ativo">Ativo</option>
-                <option value="cancelado">Cancelado</option>
-                <option value="expirado">Expirado</option>
-              </select>
-            </div>
-            <div className="space-y-3">
-              {clients.length === 0 ? (
-                <div className="text-center text-[#8b93a7] py-4">Nenhum cliente encontrado.</div>
-              ) : (
-                clients.map((client) => (
-                  <div key={client.id} className="bg-[#161b28] border border-[#222737] rounded-xl p-4 shadow">
-                    <div className="flex gap-3 items-center">
-                      <div className="avatar w-10 h-10 rounded-full bg-[#2b3347]" />
-                      <div>
-                        <div className="font-semibold">{client.name}</div>
-                        <div className="text-[#8b93a7]">{client.email}</div>
+                        </button>
+                        <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1" onClick={() => { setSelectedServicePlan(service); setShowDeleteModal(true); }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            <path d="M10 11v6"/>
+                            <path d="M14 11v6"/>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                          </svg> Remover
+                        </button>
                       </div>
                     </div>
-                    {/* List all service plans for this client */}
-                    {(client.servicePlans ?? []).map((plan) => (
-                      <div key={plan.id} className="mt-2 text-[#8b93a7] border-t border-[#222737] pt-2">
+                  ))
+                )}
+              </div>
+            </section>
+          )}
+          {/* Clientes - only for professionals */}
+          {isProfessional && (
+            <section className="bg-[#161b28] border border-[#222737] rounded-[14px] p-5 shadow">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-base font-semibold">Clientes</h2>
+                <select
+                  className="bg-[#1b2233] border border-[#222737] rounded-full px-3 py-1 text-xs text-[#e8ecf8]"
+                  value={clientPlanStatusFilter}
+                  onChange={e => setClientPlanStatusFilter(e.target.value)}
+                >
+                  <option value="all">Sem filtro</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="cancelado">Cancelado</option>
+                  <option value="expirado">Expirado</option>
+                </select>
+              </div>
+              <div className="space-y-3">
+                {(() => {
+                  const filteredClients = clients.filter(client => {
+                    if (clientPlanStatusFilter === "all") return true;
+                    return (client.clientServicePlans).some(plan => {
+                      if (clientPlanStatusFilter === "ativo") return plan.status === 0;
+                      if (clientPlanStatusFilter === "cancelado") return plan.status === 1;
+                      if (clientPlanStatusFilter === "expirado") return plan.status === 2;
+                      return true;
+                    });
+                  });
+                  if (filteredClients.length === 0) {
+                    return <div className="text-center text-[#8b93a7] py-4">Nenhum cliente encontrado.</div>;
+                  }
+                  return filteredClients.map((client) => (
+                    <div key={client.id} className="bg-[#161b28] border border-[#222737] rounded-xl p-4 shadow">
+                      <div className="flex gap-3 items-center">
+                        <img src={clientImages[client.id] || '/placeholder.svg'} alt="avatar" className="avatar w-10 h-10 rounded-full bg-[#2b3347] object-cover" />
                         <div>
-                          Plano: {plan.servicePlan.title} • Período: {new Date(plan.startDate).toLocaleDateString()} - {new Date(plan.endDate).toLocaleDateString()} • Tipo: {getServiceTypeLabel(plan.servicePlan.type)}
-                        </div>
-                        <div>Status: {getStatusLabel(plan.status)}</div>
-                        <div className="flex gap-2 mt-2">
-                          <button className="btn small px-3 py-1 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent flex items-center gap-1">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
-                            </svg> Mensagem
-                          </button>
-                          {plan.status === 0 ? (
-                            <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1" onClick={() => { setSelectedClientPlan(plan); setShowDeactivateModal(true); }}>
-                              Desativar
-                            </button>
-                          ) : (
-                            <button className="btn small primary px-3 py-1 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-transparent flex items-center gap-1" onClick={() => { setSelectedClientPlan(plan); setShowActivateModal(true); }}>
-                              Ativar
-                            </button>
-                          )}
+                          <div className="font-semibold">{client.name}</div>
+                          <div className="text-[#8b93a7]">{client.email}</div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
+                      {/* List all service plans for this client */}
+                      {(client.clientServicePlans ?? [])
+                        .filter(plan => {
+                          if (clientPlanStatusFilter === "all") return true;
+                          if (clientPlanStatusFilter === "ativo") return plan.status === 0;
+                          if (clientPlanStatusFilter === "cancelado") return plan.status === 1;
+                          if (clientPlanStatusFilter === "expirado") return plan.status === 2;
+                          return true;
+                        })
+                        .map((plan) => (
+                          <div key={plan.id} className="mt-2 text-[#8b93a7] border-t border-[#222737] pt-2">
+                            <div>
+                              Plano: {plan.servicePlan.title}
+                            </div>
+                            <div>
+                              Período: {new Date(plan.startDate).toLocaleDateString()} - {new Date(plan.endDate).toLocaleDateString()}
+                            </div>
+                            <div>
+                              Tipo: {getServiceTypeLabel(plan.servicePlan.type)}
+                            </div>
+                            <div>Status: {getStatusLabel(plan.status)}</div>
+                            <div className="flex gap-2 mt-2">
+                              <button className="btn small px-3 py-1 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent flex items-center gap-1">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                  <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                                </svg> Mensagem
+                              </button>
+                              {plan.status === 0 ? (
+                                <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1" onClick={() => { setSelectedClientPlan(plan); setShowDeactivateModal(true); }}>
+                                  Desativar
+                                </button>
+                              ) : (
+                                <button className="btn small primary px-3 py-1 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-transparent flex items-center gap-1" onClick={() => { setSelectedClientPlan(plan); setShowActivateModal(true); }}>
+                                  Ativar
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  ));
+                })()}
+              </div>
+            </section>
+          )}
         </div>
         {/* RIGHT */}
         <div className="sticky top-24 h-fit space-y-6">
@@ -367,15 +456,15 @@ const ProfessionalsHub: React.FC = () => {
             <h2 className="text-base font-semibold mb-2">Resumo</h2>
             <div className="space-y-2">
               <div className="flex justify-between"><span>Planos Ativos</span><strong>{activePlans.length}</strong></div>
-              <div className="flex justify-between"><span>Serviços Oferecidos</span><strong>{offeredServices.length}</strong></div>
-              <div className="flex justify-between"><span>Clientes (ativos)</span><strong>{clients.reduce((acc, client) => acc + (client.servicePlans ?? []).filter(sp => sp.status === 0).length, 0)}</strong></div>
+              {isProfessional && <div className="flex justify-between"><span>Serviços Oferecidos</span><strong>{offeredServices.length}</strong></div>}
+              {isProfessional && <div className="flex justify-between"><span>Clientes (ativos)</span><strong>{clients.reduce((acc, client) => acc + (client.clientServicePlans ?? []).filter(sp => sp.status === 0).length, 0)}</strong></div>}
               <div className="flex justify-between"><span>Recomendados</span><strong>{recommendedProfessionals.length}</strong></div>
             </div>
           </section>
           <section className="bg-[#161b28] border border-[#222737] rounded-[14px] p-5 shadow">
             <h2 className="text-base font-semibold mb-2">Dicas</h2>
             <div className="text-[#8b93a7] bg-[#1b2233] rounded-xl p-4 border border-dashed border-[#222737]">
-              Clique em um profissional para abrir o perfil lateral. Edite ou crie serviços, filtre a lista de clientes e cancele planos ativos.
+              {isProfessional ? "Clique em um profissional para abrir seu perfil. Edite ou crie serviços, filtre a lista de clientes e cancele planos ativos." : "Clique em um profissional para abrir seu perfil. Veja os seus planos ativos e cancele-os se necessário."}
             </div>
           </section>
         </div>
@@ -442,12 +531,43 @@ const ProfessionalsHub: React.FC = () => {
               </div>
             </div>
             {createError && <div className="text-red-400 text-sm">{createError}</div>}
-            <div className="flex justify-end gap-4 mt-2">
-              <button className="btn ghost" onClick={() => setShowCreateModal(false)} disabled={createLoading}>Cancelar</button>
-              <button className="btn primary" onClick={handleCreateServicePlan} disabled={createLoading}>
+            <div className="flex justify-end gap-2 mt-2">
+              <button className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent" onClick={() => setShowCreateModal(false)} disabled={createLoading}>Cancelar</button>
+              <button className="btn primary px-4 py-2 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347]" onClick={handleCreateServicePlan} disabled={createLoading}>
                 {createLoading ? "Salvando..." : "Salvar"}
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Modal de confirmação de cancelamento de plano */}
+      <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar cancelamento</DialogTitle>
+          </DialogHeader>
+          {planToCancel && (
+            <div className="space-y-2">
+              <div>Tem certeza que deseja cancelar o plano <strong>{planToCancel.servicePlan.title}</strong>?</div>
+              <div>Período: {new Date(planToCancel.startDate).toLocaleDateString()} - {new Date(planToCancel.endDate).toLocaleDateString()}</div>
+            </div>
+          )}
+          {cancelError && <div className="text-red-500 text-sm mt-2">{cancelError}</div>}
+          <div className="flex gap-2 mt-4">
+            <button
+              className="btn danger px-4 py-2 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-[#2b3347]"
+              onClick={handleConfirmCancelPlan}
+              disabled={cancelLoading}
+            >
+              {cancelLoading ? 'Cancelando...' : 'Confirmar'}
+            </button>
+            <button
+              className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent"
+              onClick={() => setShowCancelModal(false)}
+              disabled={cancelLoading}
+            >
+              Cancelar
+            </button>
           </div>
         </DialogContent>
       </Dialog>
@@ -513,9 +633,9 @@ const ProfessionalsHub: React.FC = () => {
               </div>
             </div>
             {editError && <div className="text-red-400 text-sm">{editError}</div>}
-            <div className="flex justify-end gap-6 mt-2">
-              <button className="btn ghost" onClick={() => setShowEditModal(false)} disabled={editLoading}>Cancelar</button>
-              <button className="btn primary" onClick={handleEditServicePlan} disabled={editLoading}>
+            <div className="flex justify-end gap-2 mt-2">
+              <button className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent" onClick={() => setShowEditModal(false)} disabled={editLoading}>Cancelar</button>
+              <button className="btn primary px-4 py-2 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347]" onClick={handleEditServicePlan} disabled={editLoading}>
                 {editLoading ? "Salvando..." : "Salvar"}
               </button>
             </div>
@@ -532,8 +652,8 @@ const ProfessionalsHub: React.FC = () => {
             Tem certeza que deseja excluir este serviço? Esta ação não pode ser desfeita.
           </div>
           <div className="flex justify-center gap-2">
-            <button className="btn ghost" onClick={() => setShowDeleteModal(false)} disabled={deleteLoading}>Cancelar</button>
-            <button className="btn danger" onClick={handleDeleteServicePlan} disabled={deleteLoading}>
+            <button className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent" onClick={() => setShowDeleteModal(false)} disabled={deleteLoading}>Cancelar</button>
+            <button className="btn danger px-4 py-2 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-[#2b3347]" onClick={handleDeleteServicePlan} disabled={deleteLoading}>
               {deleteLoading ? "Excluindo..." : "Excluir serviço"}
             </button>
           </div>
@@ -556,8 +676,8 @@ const ProfessionalsHub: React.FC = () => {
             />
             {deactivateError && <div className="text-red-400 text-sm">{deactivateError}</div>}
             <div className="flex justify-end gap-2 mt-2">
-              <button className="btn ghost" onClick={() => setShowDeactivateModal(false)} disabled={deactivateLoading}>Cancelar</button>
-              <button className="btn danger" onClick={handleDeactivateClientPlan} disabled={deactivateLoading}>
+              <button className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent" onClick={() => setShowDeactivateModal(false)} disabled={deactivateLoading}>Cancelar</button>
+              <button className="btn danger px-4 py-2 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-[#2b3347]" onClick={handleDeactivateClientPlan} disabled={deactivateLoading}>
                 {deactivateLoading ? "Desativando..." : "Desativar plano"}
               </button>
             </div>
@@ -574,8 +694,8 @@ const ProfessionalsHub: React.FC = () => {
             Tem certeza que deseja ativar este plano de cliente?
           </div>
           <div className="flex justify-center gap-2">
-            <button className="btn ghost" onClick={() => setShowActivateModal(false)} disabled={activateLoading}>Cancelar</button>
-            <button className="btn primary" onClick={handleActivateClientPlan} disabled={activateLoading}>
+            <button className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent" onClick={() => setShowActivateModal(false)} disabled={activateLoading}>Cancelar</button>
+            <button className="btn primary px-4 py-2 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347]" onClick={handleActivateClientPlan} disabled={activateLoading}>
               {activateLoading ? "Ativando..." : "Ativar plano"}
             </button>
           </div>

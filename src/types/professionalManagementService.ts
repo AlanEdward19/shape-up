@@ -69,8 +69,8 @@ export interface clientResponse {
     name: string;
     isNutritionist: boolean;
     isTrainer: boolean;
-    servicePlans: clientServicePlanResponse[];
-    reviews: clientProfessionalReviewResponse[];
+    clientServicePlans: clientServicePlanResponse[];
+    clientProfessionalReviews: clientProfessionalReviewResponse[];
 }
 
 export interface updateServicePlanRequest {
