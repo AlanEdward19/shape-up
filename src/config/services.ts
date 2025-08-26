@@ -36,8 +36,11 @@ export const SERVICES = {
     baseUrl: import.meta.env.VITE_CHAT_API_BASE_URL,
     endpoints: {
       getRecentMessages: 'v1/Chat/messages/getRecentMessages',
+      getProfessionalRecentMessages: 'v1/Professional/Chat/messages/getRecentMessages',
       getMessages: 'v1/Chat/messages/getMessages/id',
-      sendMessage: 'v1/Chat/messages/send'
+      getProfessionalMessages: 'v1/Professional/Chat/messages/getMessages/id',
+      sendMessage: 'v1/Chat/messages/send',
+      sendProfessionalMessage: 'v1/Professional/Chat/messages/send'
     }
   },
   NOTIFICATION: {
@@ -59,7 +62,7 @@ export const SERVICES = {
         updateServicePlanById: 'v1/ServicePlan/servicePlanId',
         deleteServicePlanById: 'v1/ServicePlan/servicePlanId',
         getProfessionalClients: 'v1/Professional/professionalId/Client',
-        addServicePlanToClient: 'v1/ServicePlan/serviePlanId/Client/clientId',
+        addServicePlanToClient: 'v1/ServicePlan/servicePlanId/Client/clientId',
         createProfessionalReview: 'v1/Professional/professionalId/ServicePlan/servicePlanId/Review',
         deleteProfessionalReview: 'v1/Review/id',
         updateProfessionalReview: 'v1/Review/id',

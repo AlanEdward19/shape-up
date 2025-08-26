@@ -16,7 +16,7 @@ const SidebarItem = ({ icon: Icon, label, onClick }: SidebarItemProps) => {
           variant="ghost"
           size="icon"
           onClick={onClick}
-          className="flex flex-col items-center gap-1 h-auto p-2 w-full hover:bg-secondary-foreground/10"
+          className="flex flex-col items-center gap-1 h-auto p-2 w-full hover:bg-[#222737]/60 active:bg-[#222737]/80 transition-colors"
         >
           <Icon className="h-10 w-10 text-primary" />
           <span className="text-xs text-primary">{label}</span>

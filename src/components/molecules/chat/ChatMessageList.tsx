@@ -12,6 +12,7 @@ import { format, parseISO } from "date-fns";
 
 interface ChatMessageListProps {
   profileId: string;
+  isProfessionalChat?: boolean;
 }
 
 interface GroupedMessages {
@@ -19,15 +20,16 @@ interface GroupedMessages {
   messages: any[];
 }
 
-const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
+const ChatMessageList = ({ profileId, isProfessionalChat = false }: ChatMessageListProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const connectionRef = useRef<signalR.HubConnection | null>(null);
   const queryClient = useQueryClient();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ["messages", profileId],
+    queryKey: ["messages", profileId, isProfessionalChat],
     queryFn: async ({ pageParam = 1 }) => {
-      return ChatService.getMessages(profileId, pageParam);
+      console.log("isProfessionalChat", isProfessionalChat)
+      return ChatService.getMessages(isProfessionalChat, profileId, pageParam);
     },
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.length === 0 ? undefined : allPages.length + 1;
@@ -42,62 +44,75 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
 
   useEffect(() => {
     const startConnection = async () => {
-      try {
-        if (connectionRef.current) {
-          await connectionRef.current.stop();
-          connectionRef.current.off("ReceiveMessage");
-          connectionRef.current = null;
-        }
-
-        const connection = new signalR.HubConnectionBuilder()
-          .withUrl(`${SERVICES.CHAT.baseUrl}chat?ProfileId=${profileId}`, {
-            accessTokenFactory: () => getAuthToken() || ''
-          })
-          .withAutomaticReconnect()
-          .build();
-
-        connectionRef.current = connection;
-
-        connection.on("ReceiveMessage", (message) => {
-          queryClient.setQueryData(
-            ["messages", profileId],
-            (oldData: any) => {
-              if (!oldData) return { pages: [[message]], pageParams: [1] };
-              
-              // Verifica se a mensagem já existe em qualquer página
-              const messageExists = oldData.pages.some((page: any[]) => 
-                page.some((msg: any) => 
-                  msg.id === message.id || 
-                  (msg.encryptedMessage === message.encryptedMessage && 
-                   msg.timestamp === message.timestamp)
-                )
-              );
-              
-              if (messageExists) return oldData;
-
-              // Adiciona a nova mensagem apenas se ela não existir
-              const newPages = [...oldData.pages];
-              const lastPageIndex = newPages.length - 1;
-              newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
-              
-              return {
-                ...oldData,
-                pages: newPages
-              };
-            }
-          );
-
-          if (scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+      let attempts = 0;
+      const maxAttempts = 3;
+      let lastError = null;
+      while (attempts < maxAttempts) {
+        try {
+          if (connectionRef.current) {
+            await connectionRef.current.stop();
+            connectionRef.current.off("ReceiveMessage");
+            connectionRef.current = null;
           }
-        });
 
-        await connection.start();
-        console.log("SignalR Connected");
-      } catch (err) {
-        console.error("SignalR Connection Error: ", err);
-        toast.error("Falha ao conectar ao serviço de mensagens em tempo real");
+          console.log(isProfessionalChat)
+          const chatUrl = `${SERVICES.CHAT.baseUrl}chat?ProfileId=${profileId}${isProfessionalChat ? "&isProfessionalChat=true" : ""}`;
+          const connection = new signalR.HubConnectionBuilder()
+            .withUrl(chatUrl, {
+              accessTokenFactory: () => getAuthToken() || ''
+            })
+            .withAutomaticReconnect()
+            .build();
+
+          connectionRef.current = connection;
+
+          connection.on("ReceiveMessage", (message) => {
+            queryClient.setQueryData(
+              ["messages", profileId, isProfessionalChat],
+              (oldData: any) => {
+                if (!oldData) return { pages: [[message]], pageParams: [1] };
+
+                // Verifica se a mensagem já existe em qualquer página
+                const messageExists = oldData.pages.some((page: any[]) =>
+                  page.some((msg: any) =>
+                    msg.id === message.id ||
+                    (msg.encryptedMessage === message.encryptedMessage &&
+                     msg.timestamp === message.timestamp)
+                  )
+                );
+
+                if (messageExists) return oldData;
+
+                // Adiciona a nova mensagem apenas se ela não existir
+                const newPages = [...oldData.pages];
+                const lastPageIndex = newPages.length - 1;
+                newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
+
+                return {
+                  ...oldData,
+                  pages: newPages
+                };
+              }
+            );
+
+            if (scrollRef.current) {
+              scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+          });
+
+          await connection.start();
+          return;
+        } catch (err) {
+          lastError = err;
+          attempts++;
+          if (attempts < maxAttempts) {
+            await new Promise(res => setTimeout(res, 1000));
+          }
+        }
       }
+
+      console.error("SignalR Connection Error: ", lastError);
+      toast.error("Falha ao conectar ao serviço de mensagens em tempo real");
     };
 
     startConnection();
@@ -109,7 +124,7 @@ const ChatMessageList = ({ profileId }: ChatMessageListProps) => {
         connectionRef.current = null;
       }
     };
-  }, [profileId, queryClient]);
+  }, [profileId, isProfessionalChat, queryClient]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

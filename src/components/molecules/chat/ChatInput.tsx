@@ -1,4 +1,3 @@
-
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +10,10 @@ import { getUserId } from "@/services/authService.ts";
 
 interface ChatInputProps {
   profileId: string;
+  isProfessionalChat?: boolean;
 }
 
-const ChatInput = ({ profileId }: ChatInputProps) => {
+const ChatInput = ({ profileId, isProfessionalChat = false }: ChatInputProps) => {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const queryClient = useQueryClient();
@@ -23,7 +23,7 @@ const ChatInput = ({ profileId }: ChatInputProps) => {
     
     setIsSending(true);
     try {
-      await ChatService.sendMessage(profileId, message);
+      await ChatService.sendMessage(isProfessionalChat, profileId, message);
       setMessage("");
     } catch (error) {
       toast.error("Erro ao enviar mensagem");

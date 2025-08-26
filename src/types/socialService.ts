@@ -65,6 +65,13 @@ export interface ViewProfileResponse {
     posts: number;
 }
 
+export interface ViewProfileSimplifiedResponse {
+    id: string;
+    firstName: string;
+    lastName: string;
+    imageUrl: string;
+}
+
 export interface Friend {
     profileId: string;
     firstName: string;

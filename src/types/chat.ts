@@ -5,10 +5,3 @@ export interface ChatMessage {
   encryptedMessage: string;
   timestamp: string;
 }
-
-export interface SimplifiedProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  imageUrl: string;
-}

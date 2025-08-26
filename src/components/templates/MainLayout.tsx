@@ -1,4 +1,3 @@
-
 import Sidebar from "@/components/organisms/Sidebar";
 import Chat from "@/components/organisms/Chat";
 import SearchBar from "../molecules/SearchBar";
@@ -9,10 +8,12 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="min-h-screen w-full text-[#e8ecf8]" style={{
+      background: "radial-gradient(1200px 600px at 10% -10%, #1b2437 0, transparent 60%), #0f1420"
+    }}>
       <Sidebar />
       <div className="flex-1 ml-20">
-        <div className="fixed top-0 left-20 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-20">
+        <div className="fixed top-0 left-20 right-0 bg-[#0f1420]/95 backdrop-blur-md border-b border-[#222737] z-20">
           <div className="flex items-center justify-between h-16">
             <div className="flex-1 hidden sm:block" />
             <div className="flex-1 w-full sm:max-w-xl px-4">

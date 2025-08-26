@@ -1,11 +1,30 @@
 import { SERVICES, STORAGE } from '@/config/services';
-import { Post, PostReaction, PostComment, ViewProfileResponse, Friend, FriendRequest, FollowUser, ProfileSearchResult } from '@/types/socialService.ts';
+import {
+    Post,
+    PostReaction,
+    PostComment,
+    ViewProfileResponse,
+    Friend,
+    FriendRequest,
+    FollowUser,
+    ProfileSearchResult,
+    ViewProfileSimplifiedResponse
+} from '@/types/socialService.ts';
 import { createHeaders } from '@/services/utils/serviceUtils.ts';
 
 export const SocialService = {
     viewProfile: async (id: string): Promise<ViewProfileResponse> => {
         const response = await fetch(
             `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfile.replace('id', id)}`,
+            { headers: await createHeaders() }
+        );
+        if (!response.ok) throw new Error('Failed to fetch profile');
+        return response.json();
+    },
+
+    viewProfileSimplified: async (id: string): Promise<ViewProfileSimplifiedResponse> => {
+        const response = await fetch(
+            `${SERVICES.SOCIAL.baseUrl}${SERVICES.SOCIAL.endpoints.viewProfileSimplified.replace('id', id)}`,
             { headers: await createHeaders() }
         );
         if (!response.ok) throw new Error('Failed to fetch profile');

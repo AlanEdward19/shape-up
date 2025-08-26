@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PostReaction } from "@/types/socialService.ts";
 import { ReactionType, reactionEmojis, getReactionEmoji } from "@/types/reactions";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -13,19 +13,25 @@ interface PostReactionsProps {
 
 const PostReactions = ({ reactions, userReaction, onReact, defaultOpen = false }: PostReactionsProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const LIKE_TYPE = "0"; // Use string for getReactionEmoji
+
+  // Garante que o popup sempre comece fechado ao abrir o modal
+  useEffect(() => {
+    setIsOpen(false);
+  }, [defaultOpen]);
+
+  const LIKE_TYPE = "0";
 
   const handleReactionClick = (reactionType: number) => {
     if (userReaction) {
       if (userReaction.reactionType === reactionType.toString()) {
-        // If clicking the same reaction, delete it
+        // Se estiver clicando na mesma reação, remova-a
         onReact(reactionType);
       } else {
-        // If clicking a different reaction, update it
+        // Se estiver clicando em uma reação diferente, atualize-a
         onReact(reactionType);
       }
     } else {
-      // If no reaction exists, create new one
+      // Se não houver reação, adicione a nova reação
       onReact(reactionType);
     }
     setIsOpen(false);

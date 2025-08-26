@@ -9,7 +9,9 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import PostPage from "./pages/PostPage";
+import ProfessionalsHub from "./pages/ProfessionalsHub";
 import MainLayout from "./components/templates/MainLayout";
+import ProfessionalProfile from "./pages/ProfessionalProfile";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/index" element={<MainLayout><Index /></MainLayout>} />
           <Route path="/profile/:id" element={<MainLayout><Profile /></MainLayout>} />
           <Route path="/post/:id" element={<MainLayout><PostPage /></MainLayout>} />
+          <Route path="/hub" element={<MainLayout><ProfessionalsHub /></MainLayout>} />
+          <Route path="/profissional/:id" element={<MainLayout><ProfessionalProfile /></MainLayout>} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

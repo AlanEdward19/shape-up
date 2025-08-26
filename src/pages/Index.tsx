@@ -20,12 +20,24 @@ const Index = () => {
 
   useEffect(() => {
     const initializeNotifications = async () => {
-      try {
-        await notificationService.startConnection();
-      } catch (error) {
-        console.error("Failed to connect to SignalR:", error);
-        toast.error("Falha ao conectar ao serviço de notificações");
+      let attempts = 0;
+      const maxAttempts = 3;
+      let lastError = null;
+      while (attempts < maxAttempts) {
+        try {
+          await notificationService.startConnection();
+          return;
+        } catch (error) {
+          lastError = error;
+          attempts++;
+          if (attempts < maxAttempts) {
+            await new Promise(res => setTimeout(res, 1000));
+          }
+        }
       }
+
+      console.error("Failed to connect to SignalR:", lastError);
+      toast.error("Falha ao conectar ao serviço de notificações");
     };
 
     initializeNotifications();
@@ -52,7 +64,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen w-full text-[#e8ecf8] bg-transparent">
       <Sidebar />
       
       <main className="ml-20 flex gap-6 p-6">
