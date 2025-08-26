@@ -5,6 +5,7 @@ import { clientResponse, professionalResponse, servicePlanResponse, clientServic
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
 
 const ProfessionalsHub: React.FC = () => {
   const [user, setUser] = useState<clientResponse | null>(null);
@@ -260,6 +261,8 @@ const ProfessionalsHub: React.FC = () => {
     }
   };
 
+  const navigate = useNavigate();
+
   if (loading) return <div className="text-center py-12 text-[#8b93a7]">Carregando dados...</div>;
   if (error) return <div className="text-center py-12 text-red-400">{error}</div>;
 
@@ -292,6 +295,15 @@ const ProfessionalsHub: React.FC = () => {
                           <line x1="15" y1="9" x2="9" y2="15"/>
                         </svg> Cancelar
                       </button>
+                      <button
+                        className="btn small primary px-3 py-1 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347] flex items-center gap-1"
+                        onClick={() => navigate(`/profissional/${plan.servicePlan.professionalId}`, { state: { user } })}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 8v4l3 3"/>
+                        </svg> Ver perfil do profissional
+                      </button>
                     </div>
                   </div>
                 ))
@@ -305,7 +317,11 @@ const ProfessionalsHub: React.FC = () => {
                 <div className="text-center text-[#8b93a7] py-4">Nenhum profissional recomendado encontrado.</div>
               ) : (
                 recommendedProfessionals.map((professional) => (
-                  <button key={professional.id} className="bg-[#161b28] border border-[#222737] rounded-xl p-4 shadow flex flex-col gap-2 w-full text-left cursor-pointer">
+                  <button
+                    key={professional.id}
+                    className="bg-[#161b28] border border-[#222737] rounded-xl p-4 shadow flex flex-col gap-2 w-full text-left cursor-pointer"
+                    onClick={() => navigate(`/profissional/${professional.id}`, { state: { user } })}
+                  >
                     <div className="flex gap-3 items-center">
                       <img src={professionalImages[professional.id] || '/placeholder.svg'} alt="avatar" className="avatar w-10 h-10 rounded-full bg-[#2b3347] object-cover" />
                       <div>

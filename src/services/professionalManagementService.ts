@@ -7,6 +7,7 @@
 } from "@/types/professionalManagementService.ts";
 import {SERVICES} from "@/config/services.ts";
 import {createHeaders} from "@/services/utils/serviceUtils.ts";
+import {SocialService} from "@/services/socialService.ts";
 
 export const ProfessionalManagementService = {
     createServicePlan: async (planDetails: createServicePlanRequest): Promise<servicePlanResponse> => {
@@ -200,3 +201,44 @@ export const ProfessionalManagementService = {
         return response.json();
     },
 }
+
+export const getProfessionalProfile = async (professionalId: string, client?: clientResponse) => {
+    const professional = await ProfessionalManagementService.getProfessionalById(professionalId);
+    const plans = professional.servicePlans || [];
+    const feedbacksRaw = await ProfessionalManagementService.getProfessionalReviewsById(professionalId);
+    const score = await ProfessionalManagementService.getProfessionalScoreById(professionalId);
+
+    const typeLabels = ['Personal Trainer', 'Nutricionista', 'Personal Trainer e Nutricionista'];
+    const tags = [typeLabels[professional.type] || 'Profissional'];
+
+    // Prepare feedbacks
+    const feedbacks = feedbacksRaw.map(f => ({
+        by: f.clientName,
+        score: f.rating || 0,
+        text: f.comment || '',
+        updated: f.lastUpdatedAt || ''
+    }));
+
+    let hasActiveContract = false;
+    if (client) {
+        hasActiveContract = (client.clientServicePlans).some(plan =>
+            plan.status === 0 && plan.servicePlan.professionalId === professionalId
+        );
+    }
+
+    const simplifiedProfile = await SocialService.viewProfileSimplified(professionalId);
+
+    return {
+        professional: {
+            id: professional.id,
+            name: professional.name,
+            avatar: simplifiedProfile.imageUrl,
+            rating: score?.averageScore || 0,
+            reviews: score?.totalReviews || 0,
+            tags,
+            plans,
+            feedbacks
+        },
+        hasActiveContract
+    };
+};
