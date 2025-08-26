@@ -290,6 +290,49 @@ const ProfessionalsHub: React.FC = () => {
     }
   };
 
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [planToReview, setPlanToReview] = useState<clientServicePlanResponse | null>(null);
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewComment, setReviewComment] = useState<string>("");
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
+
+  const openReviewModal = (plan: clientServicePlanResponse) => {
+    setPlanToReview(plan);
+    setShowReviewModal(true);
+    setReviewRating(5);
+    setReviewComment("");
+    setReviewError(null);
+    setReviewSuccess(null);
+  };
+
+  const handleConfirmReview = async () => {
+    if (!planToReview) return;
+    setReviewLoading(true);
+    setReviewError(null);
+    setReviewSuccess(null);
+    try {
+      await ProfessionalManagementService.createProfessionalReview(
+        planToReview.servicePlan.professionalId,
+        planToReview.servicePlan.id,
+        { rating: reviewRating, comment: reviewComment }
+      );
+      setReviewSuccess("Avaliação enviada com sucesso!");
+      setTimeout(() => {
+        setShowReviewModal(false);
+        setPlanToReview(null);
+        setReviewComment("");
+        setReviewRating(5);
+        setReviewSuccess(null);
+      }, 1200);
+    } catch (err: any) {
+      setReviewError(err.message || "Erro ao enviar avaliação.");
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
   if (loading) return <div className="text-center py-12 text-[#8b93a7]">Carregando dados...</div>;
   if (error) return <div className="text-center py-12 text-red-400">{error}</div>;
 
@@ -342,6 +385,16 @@ const ProfessionalsHub: React.FC = () => {
                           <circle cx="12" cy="12" r="10"/>
                           <path d="M12 8v4l3 3"/>
                         </svg> Ver perfil do profissional
+                      </button>
+                      <button
+                        className="btn small px-3 py-1 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#1b2233] flex items-center gap-1"
+                        onClick={() => openReviewModal(plan)}
+                        disabled={reviewLoading}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 8v4l3 3"/>
+                        </svg> Fazer avaliação
                       </button>
                     </div>
                     {reactivateError && <div className="text-red-500 text-sm mt-2">{reactivateError}</div>}
@@ -782,6 +835,61 @@ const ProfessionalsHub: React.FC = () => {
               className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent"
               onClick={() => setShowReactivateModal(false)}
               disabled={reactivateLoading}
+            >
+              Cancelar
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Modal de avaliação de plano */}
+      <Dialog open={showReviewModal} onOpenChange={setShowReviewModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Avaliar plano prescrito</DialogTitle>
+          </DialogHeader>
+          {planToReview && (
+            <div className="space-y-2">
+              <div>Plano: <strong>{planToReview.servicePlan.title}</strong></div>
+              <div className="flex items-center gap-2 mt-2">
+                <label htmlFor="rating" className="text-sm">Nota:</label>
+                <input
+                  id="rating"
+                  type="number"
+                  min={1}
+                  max={5}
+                  value={reviewRating}
+                  onChange={e => setReviewRating(Number(e.target.value))}
+                  className="w-16 px-2 py-1 rounded border border-[#222737] bg-[#161b28] text-[#e8ecf8]"
+                  disabled={reviewLoading}
+                />
+              </div>
+              <div className="mt-2">
+                <label htmlFor="comment" className="text-sm">Comentário (opcional):</label>
+                <textarea
+                  id="comment"
+                  value={reviewComment}
+                  onChange={e => setReviewComment(e.target.value)}
+                  className="w-full px-2 py-1 rounded border border-[#222737] bg-[#161b28] text-[#e8ecf8]"
+                  rows={3}
+                  disabled={reviewLoading}
+                />
+              </div>
+            </div>
+          )}
+          {reviewError && <div className="text-red-500 text-sm mt-2">{reviewError}</div>}
+          {reviewSuccess && <div className="text-green-500 text-sm mt-2">{reviewSuccess}</div>}
+          <div className="flex gap-2 mt-4">
+            <button
+              className="btn primary px-4 py-2 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347]"
+              onClick={handleConfirmReview}
+              disabled={reviewLoading || !planToReview}
+            >
+              {reviewLoading ? "Enviando..." : "Enviar avaliação"}
+            </button>
+            <button
+              className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent"
+              onClick={() => setShowReviewModal(false)}
+              disabled={reviewLoading}
             >
               Cancelar
             </button>
