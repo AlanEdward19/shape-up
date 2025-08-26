@@ -44,63 +44,77 @@ const ChatMessageList = ({ profileId, isProfessionalChat = false }: ChatMessageL
 
   useEffect(() => {
     const startConnection = async () => {
-      try {
-        if (connectionRef.current) {
-          await connectionRef.current.stop();
-          connectionRef.current.off("ReceiveMessage");
-          connectionRef.current = null;
-        }
-
-        console.log(isProfessionalChat)
-        const chatUrl = `${SERVICES.CHAT.baseUrl}chat?ProfileId=${profileId}${isProfessionalChat ? "&isProfessionalChat=true" : ""}`;
-        const connection = new signalR.HubConnectionBuilder()
-          .withUrl(chatUrl, {
-            accessTokenFactory: () => getAuthToken() || ''
-          })
-          .withAutomaticReconnect()
-          .build();
-
-        connectionRef.current = connection;
-
-        connection.on("ReceiveMessage", (message) => {
-          queryClient.setQueryData(
-            ["messages", profileId, isProfessionalChat],
-            (oldData: any) => {
-              if (!oldData) return { pages: [[message]], pageParams: [1] };
-              
-              // Verifica se a mensagem já existe em qualquer página
-              const messageExists = oldData.pages.some((page: any[]) => 
-                page.some((msg: any) => 
-                  msg.id === message.id || 
-                  (msg.encryptedMessage === message.encryptedMessage && 
-                   msg.timestamp === message.timestamp)
-                )
-              );
-              
-              if (messageExists) return oldData;
-
-              // Adiciona a nova mensagem apenas se ela não existir
-              const newPages = [...oldData.pages];
-              const lastPageIndex = newPages.length - 1;
-              newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
-              
-              return {
-                ...oldData,
-                pages: newPages
-              };
-            }
-          );
-
-          if (scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+      let attempts = 0;
+      const maxAttempts = 3;
+      let lastError = null;
+      while (attempts < maxAttempts) {
+        try {
+          if (connectionRef.current) {
+            await connectionRef.current.stop();
+            connectionRef.current.off("ReceiveMessage");
+            connectionRef.current = null;
           }
-        });
 
-        await connection.start();
-      } catch (err) {
-        console.error("SignalR Connection Error: ", err);
-        toast.error("Falha ao conectar ao serviço de mensagens em tempo real");
+          console.log(isProfessionalChat)
+          const chatUrl = `${SERVICES.CHAT.baseUrl}chat?ProfileId=${profileId}${isProfessionalChat ? "&isProfessionalChat=true" : ""}`;
+          const connection = new signalR.HubConnectionBuilder()
+            .withUrl(chatUrl, {
+              accessTokenFactory: () => getAuthToken() || ''
+            })
+            .withAutomaticReconnect()
+            .build();
+
+          connectionRef.current = connection;
+
+          connection.on("ReceiveMessage", (message) => {
+            queryClient.setQueryData(
+              ["messages", profileId, isProfessionalChat],
+              (oldData: any) => {
+                if (!oldData) return { pages: [[message]], pageParams: [1] };
+
+                // Verifica se a mensagem já existe em qualquer página
+                const messageExists = oldData.pages.some((page: any[]) =>
+                  page.some((msg: any) =>
+                    msg.id === message.id ||
+                    (msg.encryptedMessage === message.encryptedMessage &&
+                     msg.timestamp === message.timestamp)
+                  )
+                );
+
+                if (messageExists) return oldData;
+
+                // Adiciona a nova mensagem apenas se ela não existir
+                const newPages = [...oldData.pages];
+                const lastPageIndex = newPages.length - 1;
+                newPages[lastPageIndex] = [...newPages[lastPageIndex], message];
+
+                return {
+                  ...oldData,
+                  pages: newPages
+                };
+              }
+            );
+
+            if (scrollRef.current) {
+              scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+          });
+
+          await connection.start();
+          // Success, exit loop
+          return;
+        } catch (err) {
+          lastError = err;
+          attempts++;
+          if (attempts < maxAttempts) {
+            // Wait a bit before retrying (e.g., 1s)
+            await new Promise(res => setTimeout(res, 1000));
+          }
+        }
       }
+      // If we reach here, all attempts failed
+      console.error("SignalR Connection Error: ", lastError);
+      toast.error("Falha ao conectar ao serviço de mensagens em tempo real");
     };
 
     startConnection();
