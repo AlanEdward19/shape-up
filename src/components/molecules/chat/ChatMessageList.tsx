@@ -97,7 +97,6 @@ const ChatMessageList = ({ profileId, isProfessionalChat = false }: ChatMessageL
         });
 
         await connection.start();
-        console.log("SignalR Connected");
       } catch (err) {
         console.error("SignalR Connection Error: ", err);
         toast.error("Falha ao conectar ao serviço de mensagens em tempo real");

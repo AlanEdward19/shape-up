@@ -50,6 +50,7 @@ const ChatWindow = ({ profileId, firstName, lastName, imageUrl, isProfessionalCh
             firstName={firstName}
             lastName={lastName}
             imageUrl={imageUrl}
+            isProfessionalChat={isProfessionalChat}
           />
         </div>
         <button

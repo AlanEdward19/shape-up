@@ -51,11 +51,20 @@ const ProfessionalProfile: React.FC = () => {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      let currentUser = user;
-      if (!currentUser && location.state?.user) {
-        currentUser = location.state.user;
-        setUser(currentUser);
+      let currentUser;
+
+      if(!user){
+        const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+        currentUser = await ProfessionalManagementService.getClientById(userId);
       }
+      else {
+        currentUser = user;
+        if (!currentUser && location.state?.user) {
+          currentUser = location.state.user;
+        }
+      }
+
+      setUser(currentUser);
       const data = await getProfessionalProfile(id, currentUser);
       setProfessional(data.professional);
       setHasActiveContract(data.hasActiveContract);
