@@ -24,14 +24,14 @@ const PostReactions = ({ reactions, userReaction, onReact, defaultOpen = false }
   const handleReactionClick = (reactionType: number) => {
     if (userReaction) {
       if (userReaction.reactionType === reactionType.toString()) {
-        // If clicking the same reaction, delete it
+        // Se estiver clicando na mesma reação, remova-a
         onReact(reactionType);
       } else {
-        // If clicking a different reaction, update it
+        // Se estiver clicando em uma reação diferente, atualize-a
         onReact(reactionType);
       }
     } else {
-      // If no reaction exists, create new one
+      // Se não houver reação, adicione a nova reação
       onReact(reactionType);
     }
     setIsOpen(false);
