@@ -224,7 +224,6 @@ export default function Training() {
 	return (
 		<div>
 			<header>
-				<h1>Treino — Web (Gerenciamento)</h1>
 				<div className="role" title="Alternar modo do usuário">
 					<span>{isPro ? "Usuário profissional" : "Usuário comum"}</span>
 					<label className="switch">
