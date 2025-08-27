@@ -75,13 +75,15 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
+      const now = new Date();
       const result = await signInWithGoogle(rememberMe);
       if (result.success) {
         const user = result.user;
         const token = await user?.getIdToken();
         setGoogleUser(user);
-        // Check if user is new using metadata
-        if (user && user.metadata.creationTime === user.metadata.lastSignInTime) {
+        if ( user &&
+            user.metadata.creationTime &&
+            now.getTime() - new Date(user.metadata.creationTime).getTime() < 30000) {
           // User is new, show modal
           setShowClaimsModal(true);
         } else {
@@ -185,7 +187,7 @@ const Login = () => {
           variant="outline" 
           className="w-full" 
           onClick={handleFacebookLogin}
-          disabled={isLoading}
+          disabled={true}
         >
           <Facebook className="mr-2 h-5 w-5" />
           Continuar com Facebook
