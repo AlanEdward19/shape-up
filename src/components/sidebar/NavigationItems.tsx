@@ -13,7 +13,7 @@ const NavigationItems = () => {
   const userId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
   const [showFriends, setShowFriends] = useState(false);
   const [friendsPage, setFriendsPage] = useState(1);
-  const [friendsPerPage, setFriendsPerPage] = useState("10");
+  const [friendsPerPage, setFriendsPerPage] = useState(10);
 
   const { data: friends, isLoading: isLoadingFriends } = useQuery({
     queryKey: ['friends', userId, friendsPage, friendsPerPage],
@@ -25,7 +25,7 @@ const NavigationItems = () => {
     setFriendsPage(page);
   };
 
-  const handleFriendsRowsChange = (rows: string) => {
+  const handleFriendsRowsChange = (rows: number) => {
     setFriendsPerPage(rows);
     setFriendsPage(1);
   };
