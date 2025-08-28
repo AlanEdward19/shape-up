@@ -1,139 +1,163 @@
-﻿import React, { useState, useRef } from "react";
+﻿import React, { useState, useEffect } from "react";
 import "./training.css";
+import { TrainingService } from "@/services/trainingService";
+import { ProfessionalManagementService } from "@/services/professionalManagementService";
+import { MuscleGroup, exerciseResponse, workoutResponse, WorkoutVisibility } from "@/types/trainingService";
 
-// ====== MOCK DATA ======
-const currentUser = { id: "u1", name: "Você" };
-const clients = [
-	{ id: "c1", name: "Alan Edward" },
-	{ id: "c2", name: "Alan BDS" },
-];
+// Helper: Format rest time from seconds
+function fmtRest(seconds?: number) {
+  if (!seconds) return "0m 0s";
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}m ${s}s`;
+}
+// Helper: Get user name from id
+function ownerName(userId: string, clients: {id: string, name: string}[], currentUserId: string) {
+  if (userId === currentUserId) return "Você";
+  const c = clients.find(c => c.id === userId);
+  return c ? c.name : "—";
+}
+// Helper: Get selected workout for current mode
+function getCurrentWorkout(workouts: workoutResponse[], groupedWorkouts: {client: {id: string, name: string}, workouts: workoutResponse[]}[], selectedWorkoutId: string | null, isPro: boolean, proTab: string): workoutResponse | null {
+  if (!selectedWorkoutId) return null;
+  if (isPro && proTab === "clientes") {
+    for (const group of groupedWorkouts) {
+      const found = group.workouts.find(w => w.id === selectedWorkoutId);
+      if (found) return found;
+    }
+    return null;
+  }
+  return workouts.find(w => w.id === selectedWorkoutId) || null;
+}
+// Helper: Get exercise by id
+function getExerciseById(exercises: exerciseResponse[], id: string) {
+  return exercises.find(e => e.id === id) || null;
+}
+// Helper: Get muscle areas for SVG
+// MUSCLE_TO_AREAS: add all enum keys with empty arrays for missing ones
+const MUSCLE_TO_AREAS: Record<MuscleGroup, string[]> = {
+  [MuscleGroup.Chest]: [],
+  [MuscleGroup.MiddleChest]: ["area-peitoral-medio-esq", "area-peitoral-medio-dir"],
+  [MuscleGroup.UpperChest]: ["area-peitoral-superior-esq", "area-peitoral-superior-dir"],
+  [MuscleGroup.LowerChest]: [],
+  [MuscleGroup.Arms]: [],
+  [MuscleGroup.Triceps]: ["area-triceps-esq", "area-triceps-dir"],
+  [MuscleGroup.Biceps]: ["area-biceps-esq", "area-biceps-dir"],
+  [MuscleGroup.Forearms]: [],
+  [MuscleGroup.Shoulders]: [],
+  [MuscleGroup.DeltoidAnterior]: ["area-deltoide-esq", "area-deltoide-dir"],
+  [MuscleGroup.DeltoidLateral]: ["area-deltoide-esq", "area-deltoide-dir"],
+  [MuscleGroup.DeltoidPosterior]: ["area-deltoide-esq", "area-deltoide-dir"],
+  [MuscleGroup.Back]: [],
+  [MuscleGroup.Traps]: [],
+  [MuscleGroup.UpperBack]: [],
+  [MuscleGroup.MiddleBack]: [],
+  [MuscleGroup.LowerBack]: [],
+  [MuscleGroup.Lats]: [],
+  [MuscleGroup.Abs]: [],
+  [MuscleGroup.AbsUpper]: ["area-abdomen-superior"],
+  [MuscleGroup.AbsLower]: ["area-abdomen-inferior"],
+  [MuscleGroup.AbsObliques]: ["area-obliquo-esq", "area-obliquo-dir"],
+  [MuscleGroup.Legs]: [],
+  [MuscleGroup.Quadriceps]: ["area-quadriceps-esq", "area-quadriceps-dir"],
+  [MuscleGroup.Hamstrings]: [],
+  [MuscleGroup.Glutes]: [],
+  [MuscleGroup.Calves]: ["area-panturrilha-esq", "area-panturrilha-dir"],
+  [MuscleGroup.HipFlexors]: [],
+  [MuscleGroup.FullBody]: [],
+};
+function collectMuscleAreas(exercises: exerciseResponse[]) {
+  const set = new Set<string>();
+  exercises.forEach(ex => {
+    const muscleArr = ex.muscleGroups ?? [];
+    muscleArr.forEach(m => (MUSCLE_TO_AREAS[m] || []).forEach(a => set.add(a)));
+  });
+  return Array.from(set);
+}
+
+// Define missing constants for muscle groups and filter chips
 const EX_GROUPS = [
-	"Peitoral",
-	"Braços",
-	"Ombros",
-	"Costas",
-	"Abdômen",
-	"Pernas",
-	"Corpo Inteiro",
+  "Peitoral", "Costas", "Pernas", "Braços", "Abdômen", "Ombros", "Glúteos", "Panturrilhas"
 ];
 const EX_MUSCLES = [
-	"Peitoral Superior",
-	"Peitoral Médio",
-	"Peitoral Inferior",
-	"Tríceps",
-	"Bíceps",
-	"Deltoide Anterior",
-	"Deltoide Lateral",
-	"Deltoide Posterior",
-	"Oblíquos",
-	"Abdômen Superior",
-	"Abdômen Inferior",
-	"Quadríceps",
-	"Panturrilhas",
+  "Peitoral Superior", "Peitoral Médio", "Tríceps", "Bíceps", "Deltoide Anterior", "Deltoide Lateral", "Deltoide Posterior", "Abdômen Superior", "Abdômen Inferior", "Oblíquos", "Quadríceps", "Panturrilhas"
 ];
-const catalog = [
-	{ id: "ex1", name: "Supino Reto", groups: ["Peitoral"], muscles: ["Peitoral Médio"] },
-	{ id: "ex2", name: "Supino Inclinado", groups: ["Peitoral"], muscles: ["Peitoral Superior"] },
-	{ id: "ex3", name: "Crucifixo com Halteres", groups: ["Peitoral"], muscles: ["Peitoral Médio", "Peitoral Superior"] },
-	{ id: "ex4", name: "Flexão de Braço", groups: ["Corpo Inteiro", "Peitoral"], muscles: ["Peitoral Médio", "Tríceps", "Deltoide Anterior", "Abdômen Superior"] },
-	{ id: "ex5", name: "Tríceps Corda", groups: ["Braços"], muscles: ["Tríceps"] },
-	{ id: "ex6", name: "Rosca Direta", groups: ["Braços"], muscles: ["Bíceps"] },
-	{ id: "ex7", name: "Elevação Lateral", groups: ["Ombros"], muscles: ["Deltoide Lateral"] },
-	{ id: "ex8", name: "Prancha", groups: ["Abdômen", "Corpo Inteiro"], muscles: ["Abdômen Superior", "Abdômen Inferior", "Oblíquos"] },
-	{ id: "ex9", name: "Agachamento Livre", groups: ["Pernas", "Corpo Inteiro"], muscles: ["Quadríceps", "Abdômen Inferior"] },
-	{ id: "ex10", name: "Panturrilha em Pé", groups: ["Pernas"], muscles: ["Panturrilhas"] },
-];
-function uid() { return Math.random().toString(36).slice(2, 10); }
-function fmtRest([m = 0, s = 0]) { return `${m || 0}m ${s || 0}s`; }
-function ownerName(ownerId) {
-	if (ownerId === currentUser.id) return "Você";
-	const c = clients.find(c => c.id === ownerId);
-	return c ? c.name : "—";
-}
-const MUSCLE_TO_AREAS = {
-	"Peitoral Superior": ["area-peitoral-superior-esq", "area-peitoral-superior-dir"],
-	"Peitoral Médio": ["area-peitoral-medio-esq", "area-peitoral-medio-dir"],
-	"Peitoral Inferior": ["area-peitoral-medio-esq", "area-peitoral-medio-dir"],
-	"Deltoide Anterior": ["area-deltoide-esq", "area-deltoide-dir"],
-	"Deltoide Lateral": ["area-deltoide-esq", "area-deltoide-dir"],
-	"Deltoide Posterior": ["area-deltoide-esq", "area-deltoide-dir"],
-	"Tríceps": ["area-triceps-esq", "area-triceps-dir"],
-	"Bíceps": ["area-biceps-esq", "area-biceps-dir"],
-	"Abdômen Superior": ["area-abdomen-superior"],
-	"Abdômen Inferior": ["area-abdomen-inferior"],
-	"Oblíquos": ["area-obliquo-esq", "area-obliquo-dir"],
-	"Quadríceps": ["area-quadriceps-esq", "area-quadriceps-dir"],
-	"Panturrilhas": ["area-panturrilha-esq", "area-panturrilha-dir"],
-};
-function collectMuscleAreas(exerciseIds) {
-	const set = new Set();
-	exerciseIds.map(id => catalog.find(x => x.id === id)).filter(Boolean).forEach(ex => {
-		ex.muscles.forEach(m => (MUSCLE_TO_AREAS[m] || []).forEach(a => set.add(a)));
-	});
-	return Array.from(set);
-}
-function byId(id) { return catalog.find(x => x.id === id); }
-function isMine(w) { return w.owner === currentUser.id && w.createdBy === currentUser.id; }
-function assignedToMe(w) { return w.owner === currentUser.id && w.createdBy !== currentUser.id; }
-function isClientsMode(isPro, proTab) { return isPro && proTab === "clientes"; }
 
-// ====== MAIN COMPONENT ======
 export default function Training() {
 	// State
 	const [isPro, setIsPro] = useState(false);
 	const [proTab, setProTab] = useState("meus");
 	const [search, setSearch] = useState("");
-	const [workouts, setWorkouts] = useState([
-		{ id: "w1", name: "Treino de Peito", owner: currentUser.id, createdBy: currentUser.id, rest: [1, 0], exercises: ["ex1", "ex2"], history: [{ date: "15/08/2025", dur: "1h 11m", status: "Finalizado" }] },
-		{ id: "w2", name: "Peito + Core (Coach)", owner: currentUser.id, createdBy: "coachX", rest: [0, 45], exercises: ["ex4", "ex8"], history: [{ date: "07/08/2025", dur: "42m", status: "Finalizado" }] },
-		{ id: "w3", name: "Treino de Peitoral BDS", owner: "c2", createdBy: currentUser.id, rest: [1, 30], exercises: ["ex1"], history: [] },
-	]);
-	const [selectedWorkoutId, setSelectedWorkoutId] = useState(null);
+	const [exercises, setExercises] = useState<exerciseResponse[]>([]);
+	const [workouts, setWorkouts] = useState<workoutResponse[]>([]);
+	const [clients, setClients] = useState<{id: string, name: string}[]>([]);
+	const [groupedWorkouts, setGroupedWorkouts] = useState<{client: {id: string, name: string}, workouts: workoutResponse[]}[]>([]);
+	const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
 	const [showForm, setShowForm] = useState(false);
 	const [formMode, setFormMode] = useState("create");
-	const [formData, setFormData] = useState({ name: "", restMin: 0, restSec: 0, client: clients[0]?.id || "", exercises: [] });
+	const [formData, setFormData] = useState<{ name: string; restMin: number; restSec: number; client: string; exercises: string[] }>({ name: "", restMin: 0, restSec: 0, client: "", exercises: [] });
 	const [showModal, setShowModal] = useState(false);
-	const [modalSelected, setModalSelected] = useState([]);
-	const [modalFilter, setModalFilter] = useState({ q: "", groups: new Set(), muscles: new Set() });
+	const [modalSelected, setModalSelected] = useState<string[]>([]);
+	const [modalFilter, setModalFilter] = useState({ q: "", groups: new Set<string>(), muscles: new Set<string>() });
+	const [currentUserId, setCurrentUserId] = useState<string>("");
 
-	// Derived
-	const isClients = isClientsMode(isPro, proTab);
-	let filteredWorkouts = workouts.filter(w => {
-		if (isClients) return clients.some(c => c.id === w.owner);
-		return w.owner === currentUser.id;
-	}).filter(w => w.name.toLowerCase().includes(search.toLowerCase()));
+	// Fetch user info and exercises on mount
+	useEffect(() => {
+		async function fetchInitial() {
+			// Get logged user info
+			// Replace with your auth logic if needed
+			const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId") || "";
+			setCurrentUserId(userId);
+			// Check if user is professional
+			try {
+				const client = await ProfessionalManagementService.getClientById(userId);
+				setIsPro(client.isTrainer);
+			} catch (err) {
+				// Could not fetch client info, assume not pro
+				setIsPro(false);
+			}
+			// Get all exercises
+			const exs = await TrainingService.getExercisesByMuscleGroup();
+			setExercises(exs);
+		}
+		fetchInitial();
+	}, []);
 
-	// Group by client if pro/clients mode
-	let groupedWorkouts = null;
-	if (isClients) {
-		groupedWorkouts = clients.map(client => ({
-			client,
-			workouts: filteredWorkouts.filter(w => w.owner === client.id)
-		})).filter(g => g.workouts.length);
-	}
+	// Fetch workouts for user or clients
+	useEffect(() => {
+		async function fetchWorkouts() {
+			if (!currentUserId) return;
+			if (isPro && proTab === "clientes") {
+				// Get clients and their workouts
+				const profClients = await ProfessionalManagementService.getProfessionalClients(currentUserId);
+				setClients(profClients);
+				const grouped = await Promise.all(profClients.map(async (client: {id: string, name: string}) => {
+					const ws = await TrainingService.getWorkoutsByUserId(client.id);
+					return { client, workouts: ws };
+				}));
+				setGroupedWorkouts(grouped.filter(g => g.workouts.length));
+				setWorkouts([]);
+			} else {
+				// Get workouts for current user
+				const ws = await TrainingService.getWorkoutsByUserId(currentUserId);
+				setWorkouts(ws);
+				setGroupedWorkouts([]);
+			}
+		}
+		fetchWorkouts();
+	}, [isPro, proTab, currentUserId]);
 
-	// Selected workout
-	const workout = workouts.find(w => w.id === selectedWorkoutId);
+	// Filtered workouts
+	const filteredWorkouts = workouts.filter(w => w.name.toLowerCase().includes(search.toLowerCase()));
+	const workout = getCurrentWorkout(workouts, groupedWorkouts, selectedWorkoutId, isPro, proTab);
 
-	// ====== Handlers ======
-	function handleRoleSwitch(e) {
-		setIsPro(e.target.checked);
-		setProTab("meus");
-		setSelectedWorkoutId(null);
-		setShowForm(false);
-	}
-	function handleTab(tab) {
-		setProTab(tab);
-		setSelectedWorkoutId(null);
-		setShowForm(false);
-	}
-	function handleSearch(e) {
+	function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
 		setSearch(e.target.value);
 	}
 	function handleClearSearch() {
 		setSearch("");
 	}
-	function handleSelectWorkout(id) {
+	function handleSelectWorkout(id: string) {
 		setSelectedWorkoutId(id);
 		setShowForm(false);
 	}
@@ -148,10 +172,10 @@ export default function Training() {
 		setFormMode("edit");
 		setFormData({
 			name: workout.name,
-			restMin: workout.rest[0],
-			restSec: workout.rest[1],
-			client: workout.owner,
-			exercises: workout.exercises,
+			restMin: Math.floor((workout.restingTimeInSeconds || 0) / 60),
+			restSec: (workout.restingTimeInSeconds || 0) % 60,
+			client: workout.userId,
+			exercises: workout.exercises.map(e => e.id),
 		});
 		setShowForm(true);
 	}
@@ -162,35 +186,49 @@ export default function Training() {
 		setSelectedWorkoutId(null);
 		setShowForm(false);
 	}
-	function handleFormChange(e) {
+	function handleFormChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
 		const { name, value } = e.target;
 		setFormData(fd => ({ ...fd, [name]: value }));
 	}
-	function handleFormExerciseRemove(id) {
+	function handleFormExerciseRemove(id: string) {
 		setFormData(fd => ({ ...fd, exercises: fd.exercises.filter(x => x !== id) }));
 	}
-	function handleFormSubmit(e) {
+	async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		const data = {
 			name: formData.name.trim() || "Treino",
-			rest: [Number(formData.restMin || 0), Number(formData.restSec || 0)],
+			restingTimeInSeconds: Number(formData.restMin || 0) * 60 + Number(formData.restSec || 0),
 			exercises: formData.exercises,
-			owner: isClients ? (formData.client || clients[0]?.id) : currentUser.id,
-			createdBy: currentUser.id,
-			history: workout?.history || [],
 		};
+		let newWorkout: workoutResponse | null = null;
 		if (formMode === "edit" && workout) {
-			setWorkouts(ws => ws.map(w => w.id === workout.id ? { ...w, ...data } : w));
+			// Update workout via API
+			newWorkout = await TrainingService.updateWorkout(workout.id, {
+				...data,
+				visibility: workout.visibility,
+			});
+			setWorkouts(ws => ws.map(w => w.id === workout.id ? newWorkout! : w));
 			setSelectedWorkoutId(workout.id);
 			setShowForm(false);
 		} else {
-			const newW = { ...data, id: uid(), history: [] };
-			setWorkouts(ws => [newW, ...ws]);
-			setSelectedWorkoutId(newW.id);
+			// Create workout via API
+			if (isPro && proTab === "clientes") {
+				newWorkout = await TrainingService.createWorkoutForClient(formData.client, {
+					...data,
+					visibility: WorkoutVisibility.Private,
+				});
+			} else {
+				newWorkout = await TrainingService.createWorkout({
+					...data,
+					visibility: WorkoutVisibility.Private,
+				});
+			}
+			setWorkouts(ws => [newWorkout!, ...ws]);
+			setSelectedWorkoutId(newWorkout!.id);
 			setShowForm(false);
 		}
 	}
-	function handleOpenModal(selected) {
+	function handleOpenModal(selected: string[]) {
 		setModalSelected(selected);
 		setModalFilter({ q: "", groups: new Set(), muscles: new Set() });
 		setShowModal(true);
@@ -199,39 +237,39 @@ export default function Training() {
 		if (showForm) {
 			setFormData(fd => ({ ...fd, exercises: modalSelected }));
 		} else if (workout) {
-			setWorkouts(ws => ws.map(w => w.id === workout.id ? { ...w, exercises: modalSelected } : w));
+			// Update workout exercises via API
+			TrainingService.updateWorkout(workout.id, {
+				name: workout.name,
+				restingTimeInSeconds: workout.restingTimeInSeconds,
+				exercises: modalSelected,
+				visibility: workout.visibility,
+			}).then(updated => {
+				setWorkouts(ws => ws.map(w => w.id === workout.id ? updated : w));
+			});
 		}
 		setShowModal(false);
 	}
-	function handleModalFilterChange(type, key) {
+	function handleModalFilterChange(type: string, key: string) {
 		setModalFilter(f => {
 			const set = new Set(f[type]);
-			set.has(key) ? set.delete(key) : set.add(key);
+			if (set.has(key)) set.delete(key); else set.add(key);
 			return { ...f, [type]: set };
 		});
 	}
-	function handleModalSearch(e) {
+	function handleModalSearch(e: React.ChangeEvent<HTMLInputElement>) {
 		setModalFilter(f => ({ ...f, q: e.target.value }));
 	}
 	function handleModalClearFilters() {
 		setModalFilter({ q: "", groups: new Set(), muscles: new Set() });
 	}
-	function handleModalSelect(id, checked) {
+	function handleModalSelect(id: string, checked: boolean) {
 		setModalSelected(sel => checked ? [...sel, id] : sel.filter(x => x !== id));
 	}
 
 	// ====== Render ======
+	const isClients = isPro && proTab === "clientes";
 	return (
 		<div>
-			<header>
-				<div className="role" title="Alternar modo do usuário">
-					<span>{isPro ? "Usuário profissional" : "Usuário comum"}</span>
-					<label className="switch">
-						<input type="checkbox" checked={isPro} onChange={handleRoleSwitch} />
-						<span className="slider"></span>
-					</label>
-				</div>
-			</header>
 			<div className="training-main">
 				{/* LEFT COLUMN: LIST */}
 				<section className="col">
@@ -240,8 +278,8 @@ export default function Training() {
 						<span className="row">
 							{isPro && (
 								<div className="tabs" style={{ display: "flex" }} role="tablist" aria-label="Tipo de lista">
-									<button className="tab" role="tab" aria-selected={proTab === "meus"} onClick={() => handleTab("meus")}>Meus Treinos</button>
-									<button className="tab" role="tab" aria-selected={proTab === "clientes"} onClick={() => handleTab("clientes")}>Meus Clientes</button>
+									<button className="tab" role="tab" aria-selected={proTab === "meus"} onClick={() => setProTab("meus")}>Meus Treinos</button>
+									<button className="tab" role="tab" aria-selected={proTab === "clientes"} onClick={() => setProTab("clientes")}>Meus Clientes</button>
 								</div>
 							)}
 							<button className="btn primary" onClick={handleNewWorkout}>+ Novo Treino</button>
@@ -252,20 +290,20 @@ export default function Training() {
 						<button className="btn ghost" onClick={handleClearSearch}>Limpar</button>
 					</div>
 					<div className="list">
-						{isClients ? (
-							groupedWorkouts && groupedWorkouts.length ? groupedWorkouts.map(g => (
+						{isPro && proTab === "clientes" ? (
+							groupedWorkouts.length ? groupedWorkouts.map(g => (
 								<React.Fragment key={g.client.id}>
 									<div style={{ margin: "8px 6px 2px" }}>
 										<div className="muted" style={{ fontWeight: 600 }}>{g.client.name}</div>
 									</div>
-									{g.workouts.map(w => (
-										<WorkoutCard key={w.id} w={w} isPro={isPro} isClients={isClients} onSelect={handleSelectWorkout} />
+									{g.workouts.map((w: workoutResponse) => (
+										<WorkoutCard key={w.id} w={w} isPro={isPro} isClients={true} onSelect={handleSelectWorkout} clients={clients} currentUserId={currentUserId} />
 									))}
 								</React.Fragment>
 							)) : <div className="empty">Nenhum treino encontrado.</div>
 						) : (
 							filteredWorkouts.length ? filteredWorkouts.map(w => (
-								<WorkoutCard key={w.id} w={w} isPro={isPro} isClients={isClients} onSelect={handleSelectWorkout} />
+								<WorkoutCard key={w.id} w={w} isPro={isPro} isClients={isClients} onSelect={handleSelectWorkout} clients={clients} currentUserId={currentUserId} />
 							)) : <div className="empty">Nenhum treino encontrado.</div>
 						)}
 					</div>
@@ -297,11 +335,11 @@ export default function Training() {
 								<div className="split">
 									<div>
 										<label className="muted">Cliente</label>
-										<div style={{ marginTop: 6 }}>{ownerName(workout?.owner)}</div>
+										<div style={{ marginTop: 6 }}>{ownerName(workout?.userId || "", clients, currentUserId)}</div>
 									</div>
 									<div>
 										<label className="muted">Intervalo de descanso</label>
-										<div style={{ marginTop: 6 }}>{fmtRest(workout?.rest || [0, 0])}</div>
+										<div style={{ marginTop: 6 }}>{fmtRest(workout?.restingTimeInSeconds)}</div>
 									</div>
 								</div>
 							</div>
@@ -309,20 +347,12 @@ export default function Training() {
 							<div className="panel">
 								<div className="row" style={{ justifyContent: "space-between" }}>
 									<h3 style={{ margin: 0 }}>Exercícios</h3>
-									<button className="btn" onClick={() => handleOpenModal(workout?.exercises || [])}>+ Adicionar exercícios</button>
+									<button className="btn" onClick={() => handleOpenModal(workout?.exercises.map(e => e.id) || [])}>+ Adicionar exercícios</button>
 								</div>
 								<p className="muted" style={{ display: workout?.exercises?.length ? "none" : "block" }}>Nenhum exercício. Use “Adicionar exercícios”.</p>
 								<div className="tags">
-									{workout?.exercises?.map(exid => {
-										const ex = byId(exid);
-										return <span key={exid} className="pill"><span>{ex?.name}</span><span className="muted">• {ex?.muscles.join(", ")}</span></span>;
-									})}
-								</div>
-								<hr style={{ border: 0, borderTop: "1px solid var(--stroke)", margin: "14px 0" }} />
-								<h3>Execuções anteriores</h3>
-								<div className="tags">
-									{(workout?.history || []).map((h, i) => (
-										<span key={i} className="pill"><span>{h.date}</span><span className="muted">• Duração: {h.dur} • {h.status}</span></span>
+									{workout?.exercises?.map(ex => (
+										<span key={ex.id} className="pill"><span>{ex.name}</span><span className="muted">• {ex.muscleGroups.join(", ")}</span></span>
 									))}
 								</div>
 							</div>
@@ -359,13 +389,13 @@ export default function Training() {
 								<p className="muted" style={{ display: formData.exercises.length ? "none" : "block" }}>Nenhum exercício selecionado.</p>
 								<div className="tags">
 									{formData.exercises.map(exid => {
-										const ex = byId(exid);
-										return <span key={exid} className="pill"><span>{ex?.name}</span><span className="muted">• {ex?.muscles.join(", ")}</span><button type="button" className="rm" title="Remover" onClick={() => handleFormExerciseRemove(exid)}>x</button></span>;
+										const ex = getExerciseById(exercises, exid);
+										return <span key={exid} className="pill"><span>{ex?.name}</span><span className="muted">• {ex?.muscleGroups.join(", ")}</span><button type="button" className="rm" title="Remover" onClick={() => handleFormExerciseRemove(exid)}>x</button></span>;
 									})}
 								</div>
 								<div style={{ height: 12 }}></div>
 								<div className="row" style={{ justifyContent: "flex-end" }}>
-									<button type="button" className="btn ghost" onClick={() => { showForm && workout ? setShowForm(false) : setShowForm(false); setSelectedWorkoutId(workout?.id || null); }}>Cancelar</button>
+									<button type="button" className="btn ghost" onClick={() => { setShowForm(false); setSelectedWorkoutId(workout?.id || null); }}>Cancelar</button>
 									<button className="btn primary" type="submit">Salvar</button>
 								</div>
 							</form>
@@ -405,6 +435,7 @@ export default function Training() {
 							selected={modalSelected}
 							onSelect={handleModalSelect}
 							filter={modalFilter}
+							exercises={exercises}
 						/>
 					</div>
 				</div>
@@ -418,20 +449,21 @@ export default function Training() {
 }
 
 // ====== COMPONENTS ======
-function WorkoutCard({ w, isPro, isClients, onSelect }) {
-	const blue = (isPro && !isClients) || isMine(w);
-	const gray = (!isPro && assignedToMe(w));
-	return (
-		<div className={`card${blue ? " blue" : ""}${gray ? " gray" : ""}`} onClick={() => onSelect(w.id)}>
-			<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-				<div>
-					<div style={{ fontWeight: 700 }}>{w.name}</div>
-					<div className="meta">Dono: {ownerName(w.owner)} • Descanso: {fmtRest(w.rest)}</div>
-				</div>
-				<div className="meta">{byId(w.exercises[0])?.muscles?.[0] || ""}</div>
-			</div>
-		</div>
-	);
+function WorkoutCard({ w, isPro, isClients, onSelect, clients, currentUserId }) {
+  const firstMuscle = Array.isArray(w.exercises) && w.exercises.length > 0 && Array.isArray(w.exercises[0].muscleGroups) && w.exercises[0].muscleGroups.length > 0
+    ? w.exercises[0].muscleGroups[0]
+    : "";
+  return (
+    <div className={`card${isPro && !isClients ? " blue" : ""}${!isPro && isClients ? " gray" : ""}`} onClick={() => onSelect(w.id)}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+        <div>
+          <div style={{ fontWeight: 700 }}>{w.name}</div>
+          <div className="meta">Dono: {ownerName(w.userId, clients, currentUserId)} • Descanso: {fmtRest(w.restingTimeInSeconds)}</div>
+        </div>
+        <div className="meta">{firstMuscle}</div>
+      </div>
+    </div>
+  );
 }
 function MuscleMap({ activeAreas }) {
 	// SVG from HTML, with React logic for active areas
@@ -468,24 +500,25 @@ function MuscleMap({ activeAreas }) {
 		</svg>
 	);
 }
-function ExerciseList({ selected, onSelect, filter }) {
+function ExerciseList({ selected, onSelect, filter, exercises }) {
 	const q = filter.q.trim().toLowerCase();
 	const groups = filter.groups;
 	const muscles = filter.muscles;
-	let data = catalog.filter(ex =>
+	const data = exercises.filter(ex =>
 		(!q || ex.name.toLowerCase().includes(q)) &&
-		(!groups.size || ex.groups.some(g => groups.has(g))) &&
-		(!muscles.size || ex.muscles.some(m => muscles.has(m)))
+		(!groups.size || (ex.muscleGroups ?? []).some(g => groups.has(g))) &&
+		(!muscles.size || (ex.muscleGroups ?? []).some(m => muscles.has(m)))
 	);
 	return (
 		<>
 			{data.length ? data.map(ex => {
 				const ckd = selected.includes(ex.id);
+				const muscleArr = ex.muscleGroups ?? [];
 				return (
 					<div key={ex.id} className="ex-item">
 						<div>
 							<div style={{ fontWeight: 600 }}>{ex.name}</div>
-							<small>{ex.groups.join(" • ")} • {ex.muscles.join(", ")}</small>
+							<small>{muscleArr.join(" • ")}</small>
 						</div>
 						<input type="checkbox" className="check" checked={ckd} onChange={ev => onSelect(ex.id, ev.target.checked)} />
 					</div>

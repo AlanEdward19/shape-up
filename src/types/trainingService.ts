@@ -2,7 +2,7 @@
     Chest,
     MiddleChest,
     UpperChest,
-    lowerChest,
+    LowerChest,
 
     Arms,
     Triceps,
@@ -59,7 +59,7 @@ export interface exerciseResponse {
     id: string;
     name: string;
     description: string;
-    muscleGroup: MuscleGroup[];
+    muscleGroups: MuscleGroup[];
     requiresWeight: boolean;
     imageUrl: string;
     videoUrl: string;
