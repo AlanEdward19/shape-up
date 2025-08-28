@@ -3,6 +3,7 @@ import "./training.css";
 import { TrainingService } from "@/services/trainingService";
 import { ProfessionalManagementService } from "@/services/professionalManagementService";
 import { MuscleGroup, exerciseResponse, workoutResponse, WorkoutVisibility } from "@/types/trainingService";
+import { muscleGroupToPtBr, getMainMuscleGroups, getSecondaryMuscleGroups, getRelatedMuscleGroups } from "@/lib/muscleGroupUtils";
 
 // Helper: Format rest time from seconds
 function fmtRest(seconds?: number) {
@@ -352,7 +353,7 @@ export default function Training() {
 								<p className="muted" style={{ display: workout?.exercises?.length ? "none" : "block" }}>Nenhum exercício. Use “Adicionar exercícios”.</p>
 								<div className="tags">
 									{workout?.exercises?.map(ex => (
-										<span key={ex.id} className="pill"><span>{ex.name}</span><span className="muted">• {ex.muscleGroups.join(", ")}</span></span>
+										<span key={ex.id} className="pill"><span>{ex.name}</span></span>
 									))}
 								</div>
 							</div>
@@ -390,7 +391,7 @@ export default function Training() {
 								<div className="tags">
 									{formData.exercises.map(exid => {
 										const ex = getExerciseById(exercises, exid);
-										return <span key={exid} className="pill"><span>{ex?.name}</span><span className="muted">• {ex?.muscleGroups.join(", ")}</span><button type="button" className="rm" title="Remover" onClick={() => handleFormExerciseRemove(exid)}>x</button></span>;
+										return <span key={exid} className="pill"><span>{ex?.name}</span><button type="button" className="rm" title="Remover" onClick={() => handleFormExerciseRemove(exid)}>x</button></span>;
 									})}
 								</div>
 								<div style={{ height: 12 }}></div>
@@ -451,7 +452,7 @@ export default function Training() {
 // ====== COMPONENTS ======
 function WorkoutCard({ w, isPro, isClients, onSelect, clients, currentUserId }) {
   const firstMuscle = Array.isArray(w.exercises) && w.exercises.length > 0 && Array.isArray(w.exercises[0].muscleGroups) && w.exercises[0].muscleGroups.length > 0
-    ? w.exercises[0].muscleGroups[0]
+    ? muscleGroupToPtBr(w.exercises[0].muscleGroups[0])
     : "";
   return (
     <div className={`card${isPro && !isClients ? " blue" : ""}${!isPro && isClients ? " gray" : ""}`} onClick={() => onSelect(w.id)}>
@@ -518,7 +519,7 @@ function ExerciseList({ selected, onSelect, filter, exercises }) {
 					<div key={ex.id} className="ex-item">
 						<div>
 							<div style={{ fontWeight: 600 }}>{ex.name}</div>
-							<small>{muscleArr.join(" • ")}</small>
+							<small>{muscleArr.map(muscleGroupToPtBr).filter(Boolean).join(" • ")}</small>
 						</div>
 						<input type="checkbox" className="check" checked={ckd} onChange={ev => onSelect(ex.id, ev.target.checked)} />
 					</div>
