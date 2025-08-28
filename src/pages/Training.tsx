@@ -42,7 +42,7 @@ function collectMuscleAreas(exercises: exerciseResponse[]) {
   const set = new Set<string>();
   exercises.forEach(ex => {
     const muscleArr = ex.muscleGroups ?? [];
-    muscleArr.forEach(m => set.add(m.toString()[0].toLowerCase() + m.toString().slice(1)));
+    muscleArr.forEach(m => set.add(m.toString()));
   });
   return Array.from(set);
 }
@@ -484,14 +484,6 @@ function MuscleMap({ activeAreas }) {
   return (
     <div dangerouslySetInnerHTML={{ __html: paintedSvg }} aria-label="Mapa muscular frontal" />
   );
-}
-function ptBrToMuscleGroup(ptBr: string): MuscleGroup | undefined {
-  // Reverse mapping for muscleGroupToPtBr
-  const entries = Object.values(MuscleGroup).filter(v => typeof v === "string").map(v => v as string);
-  for (const key of entries) {
-    if (muscleGroupToPtBr(key) === ptBr) return MuscleGroup[key as keyof typeof MuscleGroup];
-  }
-  return undefined;
 }
 
 function ExerciseList({ selected, onSelect, filter, exercises }) {
