@@ -6,6 +6,7 @@ import { MuscleGroup, exerciseResponse, workoutResponse, WorkoutVisibility } fro
 import { muscleGroupToPtBr, getMainMuscleGroups, getSecondaryMuscleGroups, getRelatedMuscleGroups } from "@/lib/muscleGroupUtils";
 import { paintSvgByIds } from "@/lib/svgPaintUtils";
 import rawSvg from "@/images/FrontViewMuscleMap.svg?raw";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Helper: Format rest time from seconds
 function fmtRest(seconds?: number) {
@@ -63,6 +64,11 @@ export default function Training() {
 	const [modalSelected, setModalSelected] = useState<string[]>([]);
 	const [modalFilter, setModalFilter] = useState({ q: "", groups: new Set<MuscleGroup>(), muscles: new Set<MuscleGroup>() });
 	const [currentUserId, setCurrentUserId] = useState<string>("");
+
+	// Delete workout state
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [deleteLoading, setDeleteLoading] = useState(false);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 
 	// Fetch user info and exercises on mount
 	useEffect(() => {
@@ -144,10 +150,24 @@ export default function Training() {
 	}
 	function handleDeleteWorkout() {
 		if (!workout) return;
-		if (!window.confirm(`Excluir o treino “${workout.name}”?`)) return;
-		setWorkouts(workouts.filter(w => w.id !== workout.id));
-		setSelectedWorkoutId(null);
-		setShowForm(false);
+		setShowDeleteModal(true);
+		setDeleteError(null);
+	}
+	async function handleConfirmDeleteWorkout() {
+		if (!workout) return;
+		setDeleteLoading(true);
+		setDeleteError(null);
+		try {
+			await TrainingService.deleteWorkoutById(workout.id);
+			setWorkouts(workouts.filter(w => w.id !== workout.id));
+			setSelectedWorkoutId(null);
+			setShowForm(false);
+			setShowDeleteModal(false);
+		} catch (err: any) {
+			setDeleteError(err.message || 'Erro ao excluir treino.');
+		} finally {
+			setDeleteLoading(false);
+		}
 	}
 	function handleFormChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
 		const { name, value } = e.target;
@@ -368,46 +388,74 @@ export default function Training() {
 				</section>
 			</div>
 			{/* MODAL: EXERCISE PICKER */}
-			{showModal && (
-				<div className="modal-bg" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.55)", zIndex: 100 }} onClick={() => setShowModal(false)}></div>
-			)}
-			<dialog open={showModal} style={{ zIndex: 101, position: "fixed", left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}>
-				<div className="modal-head">
-					<strong>Selecionar Exercícios</strong>
-					<button className="btn ghost" onClick={() => setShowModal(false)}>Fechar</button>
-				</div>
-				<div className="modal-body">
-					<div className="filter-box">
-						<input className="input" value={modalFilter.q} onChange={handleModalSearch} placeholder="Pesquisar exercício" />
-						<h4>Filtrar por Agrupamento Muscular</h4>
-						<div className="chips">
-							{mainMuscleGroups.map(g => (
-								<button key={g} className="chip" data-active={modalFilter.groups.has(g)} onClick={() => handleModalFilterChange("groups", g)}>{muscleGroupToPtBr(g)}</button>
-							))}
+			<Dialog open={showModal} onOpenChange={setShowModal}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Selecionar Exercícios</DialogTitle>
+					</DialogHeader>
+					<div className="modal-body">
+						<div className="filter-box">
+							<input className="input" value={modalFilter.q} onChange={handleModalSearch} placeholder="Pesquisar exercício" />
+							<h4>Filtrar por Agrupamento Muscular</h4>
+							<div className="chips">
+								{mainMuscleGroups.map(g => (
+									<button key={g} className="chip" data-active={modalFilter.groups.has(g)} onClick={() => handleModalFilterChange("groups", g)}>{muscleGroupToPtBr(g)}</button>
+								))}
+							</div>
+							<h4>Filtrar por Músculo</h4>
+							<div className="chips">
+								{secondaryMuscleGroups.map(m => (
+									<button key={m} className="chip" data-active={modalFilter.muscles.has(m)} onClick={() => handleModalFilterChange("muscles", m)}>{muscleGroupToPtBr(m)}</button>
+								))}
+							</div>
+							<div style={{ height: 10 }}></div>
+							<button className="btn ghost" type="button" onClick={handleModalClearFilters}>Limpar filtros</button>
 						</div>
-						<h4>Filtrar por Músculo</h4>
-						<div className="chips">
-							{secondaryMuscleGroups.map(m => (
-								<button key={m} className="chip" data-active={modalFilter.muscles.has(m)} onClick={() => handleModalFilterChange("muscles", m)}>{muscleGroupToPtBr(m)}</button>
-							))}
+						<div className="exercise-list">
+							<ExerciseList
+								selected={modalSelected}
+								onSelect={handleModalSelect}
+								filter={modalFilter}
+								exercises={exercises}
+							/>
 						</div>
-						<div style={{ height: 10 }}></div>
-						<button className="btn ghost" type="button" onClick={handleModalClearFilters}>Limpar filtros</button>
 					</div>
-					<div className="exercise-list">
-						<ExerciseList
-							selected={modalSelected}
-							onSelect={handleModalSelect}
-							filter={modalFilter}
-							exercises={exercises}
-						/>
+					<div className="flex justify-end gap-2 mt-4">
+						<button className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent" onClick={() => setShowModal(false)}>Cancelar</button>
+						<button className="btn primary px-4 py-2 rounded-lg border border-[#6ea8fe] text-[#e8ecf8] bg-[#2b3347]" onClick={handleModalApply}>Adicionar selecionados</button>
 					</div>
-				</div>
-				<div className="modal-foot">
-					<button className="btn ghost" onClick={() => setShowModal(false)}>Cancelar</button>
-					<button className="btn primary" onClick={handleModalApply}>Adicionar selecionados</button>
-				</div>
-			</dialog>
+				</DialogContent>
+			</Dialog>
+			{/* Modal de confirmação de exclusão de treino */}
+			<Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Confirmar exclusão</DialogTitle>
+					</DialogHeader>
+					{workout && (
+						<div className="space-y-2">
+							<div>Tem certeza que deseja excluir o treino <strong>{workout.name}</strong>?</div>
+						</div>
+					)}
+					{deleteError && <div className="text-red-500 text-sm mt-2">{deleteError}</div>}
+					<div className="flex gap-2 mt-4">
+						<button
+							className="btn danger px-4 py-2 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-[#2b3347]"
+							onClick={handleConfirmDeleteWorkout}
+							disabled={deleteLoading}
+						>
+							{deleteLoading ? 'Excluindo...' : 'Confirmar'}
+						</button>
+						<button
+							className="btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent"
+							onClick={() => setShowDeleteModal(false)}
+							disabled={deleteLoading}
+						>
+							Cancelar
+						</button>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }
