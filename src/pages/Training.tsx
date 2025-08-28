@@ -76,14 +76,6 @@ function collectMuscleAreas(exercises: exerciseResponse[]) {
   return Array.from(set);
 }
 
-// Define missing constants for muscle groups and filter chips
-const EX_GROUPS = [
-  "Peitoral", "Costas", "Pernas", "Braços", "Abdômen", "Ombros", "Glúteos", "Panturrilhas"
-];
-const EX_MUSCLES = [
-  "Peitoral Superior", "Peitoral Médio", "Tríceps", "Bíceps", "Deltoide Anterior", "Deltoide Lateral", "Deltoide Posterior", "Abdômen Superior", "Abdômen Inferior", "Oblíquos", "Quadríceps", "Panturrilhas"
-];
-
 export default function Training() {
 	// State
 	const [isPro, setIsPro] = useState(false);
@@ -99,7 +91,7 @@ export default function Training() {
 	const [formData, setFormData] = useState<{ name: string; restMin: number; restSec: number; client: string; exercises: string[] }>({ name: "", restMin: 0, restSec: 0, client: "", exercises: [] });
 	const [showModal, setShowModal] = useState(false);
 	const [modalSelected, setModalSelected] = useState<string[]>([]);
-	const [modalFilter, setModalFilter] = useState({ q: "", groups: new Set<string>(), muscles: new Set<string>() });
+	const [modalFilter, setModalFilter] = useState({ q: "", groups: new Set<MuscleGroup>(), muscles: new Set<MuscleGroup>() });
 	const [currentUserId, setCurrentUserId] = useState<string>("");
 
 	// Fetch user info and exercises on mount
@@ -250,7 +242,7 @@ export default function Training() {
 		}
 		setShowModal(false);
 	}
-	function handleModalFilterChange(type: string, key: string) {
+	function handleModalFilterChange(type: "groups" | "muscles", key: MuscleGroup) {
 		setModalFilter(f => {
 			const set = new Set(f[type]);
 			if (set.has(key)) set.delete(key); else set.add(key);
@@ -269,6 +261,8 @@ export default function Training() {
 
 	// ====== Render ======
 	const isClients = isPro && proTab === "clientes";
+	const mainMuscleGroups = getMainMuscleGroups();
+	const secondaryMuscleGroups = getSecondaryMuscleGroups();
 	return (
 		<div>
 			<div className="training-main">
@@ -418,14 +412,14 @@ export default function Training() {
 						<input className="input" value={modalFilter.q} onChange={handleModalSearch} placeholder="Pesquisar exercício" />
 						<h4>Filtrar por Agrupamento Muscular</h4>
 						<div className="chips">
-							{EX_GROUPS.map(g => (
-								<button key={g} className="chip" data-active={modalFilter.groups.has(g)} onClick={() => handleModalFilterChange("groups", g)}>{g}</button>
+							{mainMuscleGroups.map(g => (
+								<button key={g} className="chip" data-active={modalFilter.groups.has(g)} onClick={() => handleModalFilterChange("groups", g)}>{muscleGroupToPtBr(g)}</button>
 							))}
 						</div>
 						<h4>Filtrar por Músculo</h4>
 						<div className="chips">
-							{EX_MUSCLES.map(m => (
-								<button key={m} className="chip" data-active={modalFilter.muscles.has(m)} onClick={() => handleModalFilterChange("muscles", m)}>{m}</button>
+							{secondaryMuscleGroups.map(m => (
+								<button key={m} className="chip" data-active={modalFilter.muscles.has(m)} onClick={() => handleModalFilterChange("muscles", m)}>{muscleGroupToPtBr(m)}</button>
 							))}
 						</div>
 						<div style={{ height: 10 }}></div>
@@ -501,30 +495,48 @@ function MuscleMap({ activeAreas }) {
 		</svg>
 	);
 }
+function ptBrToMuscleGroup(ptBr: string): MuscleGroup | undefined {
+  // Reverse mapping for muscleGroupToPtBr
+  const entries = Object.values(MuscleGroup).filter(v => typeof v === "string").map(v => v as string);
+  for (const key of entries) {
+    if (muscleGroupToPtBr(key) === ptBr) return MuscleGroup[key as keyof typeof MuscleGroup];
+  }
+  return undefined;
+}
+
 function ExerciseList({ selected, onSelect, filter, exercises }) {
-	const q = filter.q.trim().toLowerCase();
-	const groups = filter.groups;
-	const muscles = filter.muscles;
-	const data = exercises.filter(ex =>
-		(!q || ex.name.toLowerCase().includes(q)) &&
-		(!groups.size || (ex.muscleGroups ?? []).some(g => groups.has(g))) &&
-		(!muscles.size || (ex.muscleGroups ?? []).some(m => muscles.has(m)))
-	);
-	return (
-		<>
-			{data.length ? data.map(ex => {
-				const ckd = selected.includes(ex.id);
-				const muscleArr = ex.muscleGroups ?? [];
-				return (
-					<div key={ex.id} className="ex-item">
-						<div>
-							<div style={{ fontWeight: 600 }}>{ex.name}</div>
-							<small>{muscleArr.map(muscleGroupToPtBr).filter(Boolean).join(" • ")}</small>
-						</div>
-						<input type="checkbox" className="check" checked={ckd} onChange={ev => onSelect(ex.id, ev.target.checked)} />
-					</div>
-				);
-			}) : <div className="empty">Nenhum exercício encontrado.</div>}
-		</>
-	);
+  const q = filter.q.trim().toLowerCase();
+  const groups = filter.groups;
+  const muscles = filter.muscles;
+
+  // Get all muscle enums for selected groups
+  let groupMuscles: MuscleGroup[] = [];
+  groups.forEach(g => {
+    groupMuscles = groupMuscles.concat(getRelatedMuscleGroups(g));
+  });
+
+  // Combine all selected muscle enums
+  const allSelectedMuscles = new Set([...groupMuscles, ...muscles]);
+
+  const data = exercises.filter(ex =>
+    (!q || ex.name.toLowerCase().includes(q)) &&
+    (!groups.size && !muscles.size || (ex.muscleGroups ?? []).some(g => allSelectedMuscles.has(g as MuscleGroup)))
+  );
+  return (
+    <>
+      {data.length ? data.map(ex => {
+        const ckd = selected.includes(ex.id);
+        const muscleArr = ex.muscleGroups ?? [];
+        return (
+          <div key={ex.id} className="ex-item">
+            <div>
+              <div style={{ fontWeight: 600 }}>{ex.name}</div>
+              <small>{muscleArr.map(muscleGroupToPtBr).filter(Boolean).join(" • ")}</small>
+            </div>
+            <input type="checkbox" className="check" checked={ckd} onChange={ev => onSelect(ex.id, ev.target.checked)} />
+          </div>
+        );
+      }) : <div className="empty">Nenhum exercício encontrado.</div>}
+    </>
+  );
 }
