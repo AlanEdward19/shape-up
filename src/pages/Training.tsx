@@ -389,11 +389,11 @@ export default function Training() {
 			</div>
 			{/* MODAL: EXERCISE PICKER */}
 			<Dialog open={showModal} onOpenChange={setShowModal}>
-				<DialogContent>
+				<DialogContent className="min-w-[400px] max-w-[95vw] p-6">
 					<DialogHeader>
 						<DialogTitle>Selecionar Exercícios</DialogTitle>
 					</DialogHeader>
-					<div className="modal-body">
+					<div className="modal-body space-y-4">
 						<div className="filter-box">
 							<input className="input" value={modalFilter.q} onChange={handleModalSearch} placeholder="Pesquisar exercício" />
 							<h4>Filtrar por Agrupamento Muscular</h4>
@@ -411,7 +411,7 @@ export default function Training() {
 							<div style={{ height: 10 }}></div>
 							<button className="btn ghost" type="button" onClick={handleModalClearFilters}>Limpar filtros</button>
 						</div>
-						<div className="exercise-list">
+						<div className="exercise-list max-h-[350px] overflow-y-auto pr-2 bg-[#161b28] rounded-lg border border-[#222737] p-2">
 							<ExerciseList
 								selected={modalSelected}
 								onSelect={handleModalSelect}
