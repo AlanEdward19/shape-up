@@ -4,6 +4,8 @@ import { TrainingService } from "@/services/trainingService";
 import { ProfessionalManagementService } from "@/services/professionalManagementService";
 import { MuscleGroup, exerciseResponse, workoutResponse, WorkoutVisibility } from "@/types/trainingService";
 import { muscleGroupToPtBr, getMainMuscleGroups, getSecondaryMuscleGroups, getRelatedMuscleGroups } from "@/lib/muscleGroupUtils";
+import { paintSvgByIds } from "@/lib/svgPaintUtils";
+import rawSvg from "@/images/FrontViewMuscleMap.svg?raw";
 
 // Helper: Format rest time from seconds
 function fmtRest(seconds?: number) {
@@ -35,43 +37,11 @@ function getExerciseById(exercises: exerciseResponse[], id: string) {
   return exercises.find(e => e.id === id) || null;
 }
 // Helper: Get muscle areas for SVG
-// MUSCLE_TO_AREAS: add all enum keys with empty arrays for missing ones
-const MUSCLE_TO_AREAS: Record<MuscleGroup, string[]> = {
-  [MuscleGroup.Chest]: [],
-  [MuscleGroup.MiddleChest]: ["area-peitoral-medio-esq", "area-peitoral-medio-dir"],
-  [MuscleGroup.UpperChest]: ["area-peitoral-superior-esq", "area-peitoral-superior-dir"],
-  [MuscleGroup.LowerChest]: [],
-  [MuscleGroup.Arms]: [],
-  [MuscleGroup.Triceps]: ["area-triceps-esq", "area-triceps-dir"],
-  [MuscleGroup.Biceps]: ["area-biceps-esq", "area-biceps-dir"],
-  [MuscleGroup.Forearms]: [],
-  [MuscleGroup.Shoulders]: [],
-  [MuscleGroup.DeltoidAnterior]: ["area-deltoide-esq", "area-deltoide-dir"],
-  [MuscleGroup.DeltoidLateral]: ["area-deltoide-esq", "area-deltoide-dir"],
-  [MuscleGroup.DeltoidPosterior]: ["area-deltoide-esq", "area-deltoide-dir"],
-  [MuscleGroup.Back]: [],
-  [MuscleGroup.Traps]: [],
-  [MuscleGroup.UpperBack]: [],
-  [MuscleGroup.MiddleBack]: [],
-  [MuscleGroup.LowerBack]: [],
-  [MuscleGroup.Lats]: [],
-  [MuscleGroup.Abs]: [],
-  [MuscleGroup.AbsUpper]: ["area-abdomen-superior"],
-  [MuscleGroup.AbsLower]: ["area-abdomen-inferior"],
-  [MuscleGroup.AbsObliques]: ["area-obliquo-esq", "area-obliquo-dir"],
-  [MuscleGroup.Legs]: [],
-  [MuscleGroup.Quadriceps]: ["area-quadriceps-esq", "area-quadriceps-dir"],
-  [MuscleGroup.Hamstrings]: [],
-  [MuscleGroup.Glutes]: [],
-  [MuscleGroup.Calves]: ["area-panturrilha-esq", "area-panturrilha-dir"],
-  [MuscleGroup.HipFlexors]: [],
-  [MuscleGroup.FullBody]: [],
-};
 function collectMuscleAreas(exercises: exerciseResponse[]) {
   const set = new Set<string>();
   exercises.forEach(ex => {
     const muscleArr = ex.muscleGroups ?? [];
-    muscleArr.forEach(m => (MUSCLE_TO_AREAS[m] || []).forEach(a => set.add(a)));
+    muscleArr.forEach(m => set.add(m.toString()[0].toLowerCase() + m.toString().slice(1)));
   });
   return Array.from(set);
 }
@@ -321,7 +291,6 @@ export default function Training() {
 						<div className="body" style={{ display: showForm || !workout ? "none" : "grid" }}>
 							{/* MAP & META */}
 							<div className="panel">
-								<h3>Mapa muscular (frente)</h3>
 								<div className="svg-wrap">
 									<MuscleMap activeAreas={collectMuscleAreas(workout?.exercises || [])} />
 								</div>
@@ -461,39 +430,12 @@ function WorkoutCard({ w, isPro, isClients, onSelect, clients, currentUserId }) 
   );
 }
 function MuscleMap({ activeAreas }) {
-	// SVG from HTML, with React logic for active areas
-	return (
-		<svg viewBox="0 0 280 520" aria-label="Mapa muscular frontal">
-			<ellipse cx="140" cy="60" rx="30" ry="38" className="area soft" />
-			{/* Peitoral superior (L/R) */}
-			<path id="area-peitoral-superior-esq" className={`area${activeAreas.includes("area-peitoral-superior-esq") ? " active" : ""}`} d="M90,120 C75,120 68,135 70,152 L120,150 L120,132 C112,124 102,120 90,120 Z" />
-			<path id="area-peitoral-superior-dir" className={`area${activeAreas.includes("area-peitoral-superior-dir") ? " active" : ""}`} d="M190,120 C205,120 212,135 210,152 L160,150 L160,132 C168,124 178,120 190,120 Z" />
-			{/* Peitoral médio (L/R) */}
-			<path id="area-peitoral-medio-esq" className={`area${activeAreas.includes("area-peitoral-medio-esq") ? " active" : ""}`} d="M70,152 L120,150 L120,188 L82,188 C70,182 66,166 70,152 Z" />
-			<path id="area-peitoral-medio-dir" className={`area${activeAreas.includes("area-peitoral-medio-dir") ? " active" : ""}`} d="M210,152 L160,150 L160,188 L198,188 C210,182 214,166 210,152 Z" />
-			{/* Abdômen superior / inferior */}
-			<rect id="area-abdomen-superior" className={`area${activeAreas.includes("area-abdomen-superior") ? " active" : ""}`} x="120" y="192" width="40" height="44" rx="6" />
-			<rect id="area-abdomen-inferior" className={`area${activeAreas.includes("area-abdomen-inferior") ? " active" : ""}`} x="118" y="240" width="44" height="46" rx="6" />
-			{/* Oblíquos (L/R) */}
-			<path id="area-obliquo-esq" className={`area${activeAreas.includes("area-obliquo-esq") ? " active" : ""}`} d="M100,192 L118,192 L118,286 L96,272 C92,252 92,220 100,192 Z" />
-			<path id="area-obliquo-dir" className={`area${activeAreas.includes("area-obliquo-dir") ? " active" : ""}`} d="M180,192 L162,192 L162,286 L184,272 C188,252 188,220 180,192 Z" />
-			{/* Deltoides (L/R) */}
-			<circle id="area-deltoide-esq" className={`area${activeAreas.includes("area-deltoide-esq") ? " active" : ""}`} cx="72" cy="150" r="22" />
-			<circle id="area-deltoide-dir" className={`area${activeAreas.includes("area-deltoide-dir") ? " active" : ""}`} cx="208" cy="150" r="22" />
-			{/* Bíceps (L/R) */}
-			<rect id="area-biceps-esq" className={`area${activeAreas.includes("area-biceps-esq") ? " active" : ""}`} x="44" y="184" width="26" height="60" rx="12" />
-			<rect id="area-biceps-dir" className={`area${activeAreas.includes("area-biceps-dir") ? " active" : ""}`} x="210" y="184" width="26" height="60" rx="12" />
-			{/* Tríceps (L/R) */}
-			<rect id="area-triceps-esq" className={`area${activeAreas.includes("area-triceps-esq") ? " active" : ""}`} x="30" y="244" width="26" height="56" rx="12" />
-			<rect id="area-triceps-dir" className={`area${activeAreas.includes("area-triceps-dir") ? " active" : ""}`} x="224" y="244" width="26" height="56" rx="12" />
-			{/* Quadríceps (L/R) */}
-			<rect id="area-quadriceps-esq" className={`area${activeAreas.includes("area-quadriceps-esq") ? " active" : ""}`} x="110" y="296" width="34" height="96" rx="14" />
-			<rect id="area-quadriceps-dir" className={`area${activeAreas.includes("area-quadriceps-dir") ? " active" : ""}`} x="136" y="296" width="34" height="96" rx="14" />
-			{/* Panturrilhas (L/R) */}
-			<rect id="area-panturrilha-esq" className={`area${activeAreas.includes("area-panturrilha-esq") ? " active" : ""}`} x="112" y="396" width="30" height="78" rx="12" />
-			<rect id="area-panturrilha-dir" className={`area${activeAreas.includes("area-panturrilha-dir") ? " active" : ""}`} x="138" y="396" width="30" height="78" rx="12" />
-		</svg>
-	);
+  // Convert area ids to SVG ids (first letter lowercase)
+  const ids = activeAreas.map(id => id.charAt(0).toLowerCase() + id.slice(1));
+  const paintedSvg = paintSvgByIds(rawSvg, ids, "#4f82ff");
+  return (
+    <div dangerouslySetInnerHTML={{ __html: paintedSvg }} aria-label="Mapa muscular frontal" />
+  );
 }
 function ptBrToMuscleGroup(ptBr: string): MuscleGroup | undefined {
   // Reverse mapping for muscleGroupToPtBr
