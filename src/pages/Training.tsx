@@ -491,19 +491,26 @@ function ExerciseList({ selected, onSelect, filter, exercises }) {
   const groups = filter.groups;
   const muscles = filter.muscles;
 
-  // Get all muscle enums for selected groups
-  let groupMuscles: MuscleGroup[] = [];
+  // Expand selected groups to their muscles
+  let selectedMuscles: MuscleGroup[] = [];
   groups.forEach(g => {
-    groupMuscles = groupMuscles.concat(getRelatedMuscleGroups(g));
+    selectedMuscles = selectedMuscles.concat(getRelatedMuscleGroups(g));
   });
+  // Add directly selected muscles
+  selectedMuscles = selectedMuscles.concat(Array.from(muscles));
 
-  // Combine all selected muscle enums
-  const allSelectedMuscles = new Set([...groupMuscles, ...muscles]);
+  // Remove duplicates
+  const uniqueSelectedMuscles = Array.from(new Set(selectedMuscles));
 
-  const data = exercises.filter(ex =>
-    (!q || ex.name.toLowerCase().includes(q)) &&
-    (!groups.size && !muscles.size || (ex.muscleGroups ?? []).some(g => allSelectedMuscles.has(g as MuscleGroup)))
-  );
+  const data = exercises.filter(ex => {
+    // Search by name
+    if (q && !ex.name.toLowerCase().includes(q)) return false;
+    // If no muscle filter, show all
+    if (uniqueSelectedMuscles.length === 0) return true;
+    // Show if any muscle in ex.muscleGroups matches selected muscles
+    const exMuscles = ex.muscleGroups ?? [];
+    return exMuscles.some(m => uniqueSelectedMuscles.includes(m));
+  });
   return (
     <>
       {data.length ? data.map(ex => {
