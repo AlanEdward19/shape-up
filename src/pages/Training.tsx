@@ -333,8 +333,8 @@ export default function Training() {
 								</h2>
 							</div>
 							<div className="row" style={{ display: showForm || !workout ? "none" : "flex" }}>
-								<button className="btn" onClick={handleEditWorkout}>Editar</button>
-								<button className="btn danger" onClick={handleDeleteWorkout}>Excluir</button>
+								<button className="btn" onClick={handleEditWorkout} disabled={workout?.creatorId !== currentUserId}>Editar</button>
+								<button className="btn danger" onClick={handleDeleteWorkout} disabled={workout?.creatorId !== currentUserId}>Excluir</button>
 							</div>
 						</div>
 						{/* DETAIL BODY */}
@@ -361,7 +361,7 @@ export default function Training() {
 							<div className="panel">
 								<div className="row" style={{ justifyContent: "space-between" }}>
 									<h3 style={{ margin: 0 }}>Exercícios</h3>
-									<button className="btn" onClick={() => handleOpenModal(workout?.exercises.map(e => e.id) || [])}>+ Adicionar exercícios</button>
+									<button className="btn" onClick={() => handleOpenModal(workout?.exercises.map(e => e.id) || [])} disabled={workout?.creatorId !== currentUserId}>+ Adicionar exercícios</button>
 								</div>
 								<p className="muted" style={{ display: workout?.exercises?.length ? "none" : "block" }}>Nenhum exercício. Use “Adicionar exercícios”.</p>
 								<div className="tags">

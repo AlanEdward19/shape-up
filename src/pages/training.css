@@ -72,6 +72,13 @@ input:checked + .slider:before{left:calc(100% - 25px)}
 .btn.primary{background:var(--primary);border-color:#3650a8}
 .btn.ghost{background:transparent}
 .btn.danger{background:var(--danger);border-color:#8c2f35}
+.btn:disabled {
+  background: #23283a !important;
+  color: #7a7e8b !important;
+  border-color: #23283a !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
 .search{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--stroke)}
 .search input{
   flex:1;border:1px solid var(--stroke);background:#0e1622;color:var(--text);border-radius:10px;padding:10px 12px
