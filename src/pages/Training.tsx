@@ -258,22 +258,19 @@ export default function Training() {
 			<div className="training-main">
 				{/* LEFT COLUMN: LIST */}
 				<section className="col">
-					<h2>
-						<span className="row"><strong>Meus Treinos</strong></span>
-						<span className="row">
-							{isPro && (
-								<div className="tabs" style={{ display: "flex" }} role="tablist" aria-label="Tipo de lista">
-									<button className="tab" role="tab" aria-selected={proTab === "meus"} onClick={() => setProTab("meus")}>Meus Treinos</button>
-									<button className="tab" role="tab" aria-selected={proTab === "clientes"} onClick={() => setProTab("clientes")}>Meus Clientes</button>
-								</div>
-							)}
-							<button className="btn primary" onClick={handleNewWorkout}>+ Novo Treino</button>
-						</span>
-					</h2>
+					<div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+						{isPro && (
+							<div className="tabs" style={{ display: "flex", justifyContent: "center", marginTop: 12 }} role="tablist" aria-label="Tipo de lista">
+								<button className="tab" role="tab" aria-selected={proTab === "meus"} onClick={() => setProTab("meus")}>Meus Treinos</button>
+								<button className="tab" role="tab" aria-selected={proTab === "clientes"} onClick={() => setProTab("clientes")}>Meus Clientes</button>
+							</div>
+						)}
+					</div>
 					<div className="search">
 						<input value={search} onChange={handleSearch} placeholder="Pesquisar treino..." />
 						<button className="btn ghost" onClick={handleClearSearch}>Limpar</button>
 					</div>
+					<button className="btn primary" style={{ margin: "16px 0", alignSelf: "center" }} onClick={handleNewWorkout}>+ Novo Treino</button>
 					<div className="list">
 						{isPro && proTab === "clientes" ? (
 							groupedWorkouts.length ? groupedWorkouts.map(g => (
