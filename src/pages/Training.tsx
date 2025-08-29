@@ -159,7 +159,19 @@ export default function Training() {
 		setDeleteError(null);
 		try {
 			await TrainingService.deleteWorkoutById(workout.id);
-			setWorkouts(workouts.filter(w => w.id !== workout.id));
+			if (isPro && proTab === "clientes") {
+				// Remove workout from groupedWorkouts locally
+				const updatedGroups = groupedWorkouts
+					.map(group => ({
+						client: group.client,
+						workouts: group.workouts.filter(w => w.id !== workout.id)
+					}))
+					.filter(group => group.workouts.length > 0);
+				setGroupedWorkouts(updatedGroups);
+				setWorkouts([]);
+			} else {
+				setWorkouts(workouts.filter(w => w.id !== workout.id));
+			}
 			setSelectedWorkoutId(null);
 			setShowForm(false);
 			setShowDeleteModal(false);
@@ -467,7 +479,7 @@ function WorkoutCard({ w, isPro, isClients, onSelect, clients, currentUserId }) 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
         <div>
           <div style={{ fontWeight: 700 }}>{w.name}</div>
-          <div className="meta">Dono: {ownerName(w.userId, clients, currentUserId)} • Descanso: {fmtRest(w.restingTimeInSeconds)}</div>
+          <div className="meta">Dono: {ownerName(w.creatorId, clients, currentUserId)} • Descanso: {fmtRest(w.restingTimeInSeconds)}</div>
         </div>
         <div className="meta">{firstMuscle}</div>
       </div>
