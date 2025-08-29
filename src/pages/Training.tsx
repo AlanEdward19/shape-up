@@ -537,17 +537,29 @@ function ExerciseList({ selected, onSelect, filter, exercises }) {
   // Add directly selected muscles
   selectedMuscles = selectedMuscles.concat(Array.from(muscles));
 
-  // Remove duplicates
-  const uniqueSelectedMuscles = Array.from(new Set(selectedMuscles));
+  // Remove duplicates and convert
+  const uniqueSelectedMuscles = Array.from(new Set(selectedMuscles)).map(String);
+
+  // Build lookup: number (as string) -> text name
+  const muscleGroupEnum = MuscleGroup;
+  const muscleNumberToText: Record<string, string> = {};
+  Object.keys(muscleGroupEnum)
+    .filter(k => !isNaN(Number(k)))
+    .forEach(num => {
+      muscleNumberToText[num] = muscleGroupEnum[num];
+    });
+
+  // Map selected muscles (numbers as strings) to text names
+  const selectedMuscleTexts = uniqueSelectedMuscles.map(num => muscleNumberToText[num]).filter(Boolean);
 
   const data = exercises.filter(ex => {
     // Search by name
     if (q && !ex.name.toLowerCase().includes(q)) return false;
     // If no muscle filter, show all
-    if (uniqueSelectedMuscles.length === 0) return true;
+    if (selectedMuscleTexts.length === 0) return true;
     // Show if any muscle in ex.muscleGroups matches selected muscles
     const exMuscles = ex.muscleGroups ?? [];
-    return exMuscles.some(m => uniqueSelectedMuscles.includes(m));
+    return exMuscles.some(m => selectedMuscleTexts.includes(m));
   });
   return (
     <>
