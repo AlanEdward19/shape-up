@@ -375,6 +375,12 @@ export default function Training() {
 						<div className="body" style={{ display: showForm ? "grid" : "none" }}>
 							<form className="panel" onSubmit={handleFormSubmit}>
 								<h3>{formMode === "edit" ? "Editar Treino" : "Criar Novo Treino"}</h3>
+								{/* SVG Muscle Map for form */}
+								<div className="svg-wrap" style={{ marginBottom: 16 }}>
+									<MuscleMap activeAreas={collectMuscleAreas(formData.exercises.map(exid => getExerciseById(exercises, exid)).filter(Boolean))} />
+								</div>
+								<div className="legend"><span className="box"></span><small>Áreas ativadas pelos exercícios selecionados</small></div>
+								<div style={{ height: 10 }}></div>
 								<div className="split">
 									<div>
 										<label>Nome do Treino</label>
