@@ -129,8 +129,13 @@ export default function Training() {
 		setSearch("");
 	}
 	function handleSelectWorkout(id: string) {
-		setSelectedWorkoutId(id);
-		setShowForm(false);
+		if (selectedWorkoutId === id) {
+			setSelectedWorkoutId(null);
+			setShowForm(false);
+		} else {
+			setSelectedWorkoutId(id);
+			setShowForm(false);
+		}
 	}
 	function handleNewWorkout() {
 		setFormMode("create");
