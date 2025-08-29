@@ -1,12 +1,24 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, {useEffect, useState} from "react";
 import "./training.css";
-import { TrainingService } from "@/services/trainingService";
-import { ProfessionalManagementService } from "@/services/professionalManagementService";
-import { MuscleGroup, exerciseResponse, workoutResponse, WorkoutVisibility } from "@/types/trainingService";
-import { muscleGroupToPtBr, getMainMuscleGroups, getSecondaryMuscleGroups, getRelatedMuscleGroups } from "@/lib/muscleGroupUtils";
-import { paintSvgByIds } from "@/lib/svgPaintUtils";
+import {TrainingService} from "@/services/trainingService";
+import {ProfessionalManagementService} from "@/services/professionalManagementService";
+import {
+	exerciseResponse,
+	MeasurementUnit,
+	MuscleGroup,
+	workoutResponse,
+	workoutSessionResponse,
+	WorkoutVisibility
+} from "@/types/trainingService";
+import {
+	getMainMuscleGroups,
+	getRelatedMuscleGroups,
+	getSecondaryMuscleGroups,
+	muscleGroupToPtBr
+} from "@/lib/muscleGroupUtils";
+import {paintSvgByIds} from "@/lib/svgPaintUtils";
 import rawSvg from "@/images/FrontViewMuscleMap.svg?raw";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 
 // Helper: Format rest time from seconds
 function fmtRest(seconds?: number) {
@@ -70,6 +82,11 @@ export default function Training() {
 	const [deleteLoading, setDeleteLoading] = useState(false);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 
+	// Workout sessions state
+	const [workoutSessions, setWorkoutSessions] = useState<workoutSessionResponse[]>([]);
+	const [sessionsLoading, setSessionsLoading] = useState(false);
+	const [selectedSession, setSelectedSession] = useState<workoutSessionResponse | null>(null);
+
 	// Fetch user info and exercises on mount
 	useEffect(() => {
 		async function fetchInitial() {
@@ -117,6 +134,27 @@ export default function Training() {
 		}
 		fetchWorkouts();
 	}, [isPro, proTab, currentUserId]);
+
+	// Fetch workout sessions when a workout is selected and not in form mode
+	useEffect(() => {
+	  async function fetchSessions() {
+	    if (!selectedWorkoutId || showForm) {
+	      setWorkoutSessions([]);
+	      setSessionsLoading(false);
+	      return;
+	    }
+	    setSessionsLoading(true);
+	    try {
+	      const sessions = await TrainingService.getWorkoutSessionsByWorkoutId(selectedWorkoutId);
+	      setWorkoutSessions(sessions);
+	    } catch (err) {
+	      setWorkoutSessions([]);
+	    } finally {
+	      setSessionsLoading(false);
+	    }
+	  }
+	  fetchSessions();
+	}, [selectedWorkoutId, showForm]);
 
 	// Filtered workouts
 	const filteredWorkouts = workouts.filter(w => w.name.toLowerCase().includes(search.toLowerCase()));
@@ -258,14 +296,20 @@ export default function Training() {
 		if (showForm) {
 			setFormData(fd => ({ ...fd, exercises: modalSelected }));
 		} else if (workout) {
-			// Update workout exercises via API
 			TrainingService.updateWorkout(workout.id, {
 				name: workout.name,
 				restingTimeInSeconds: workout.restingTimeInSeconds,
 				exercises: modalSelected,
 				visibility: workout.visibility,
 			}).then(updated => {
-				setWorkouts(ws => ws.map(w => w.id === workout.id ? updated : w));
+				if (isPro && proTab === "clientes") {
+					setGroupedWorkouts(groups => groups.map(group => ({
+						...group,
+						workouts: group.workouts.map(w => w.id === updated.id ? updated : w)
+					})));
+				} else {
+					setWorkouts(ws => ws.map(w => w.id === workout.id ? updated : w));
+				}
 			});
 		}
 		setShowModal(false);
@@ -330,7 +374,7 @@ export default function Training() {
 				</section>
 				{/* RIGHT COLUMN: DETAIL/FORM */}
 				<section className="col">
-					<div className="detail">
+					<div className="detail" style={{ overflowY: "auto" }}>
 						<div className="head">
 							<div className="row">
 								<h2 style={{ padding: 0, border: 0, margin: 0 }}>
@@ -373,6 +417,35 @@ export default function Training() {
 									{workout?.exercises?.map(ex => (
 										<span key={ex.id} className="pill"><span>{ex.name}</span></span>
 									))}
+								</div>
+								{/* HISTÓRICO DE EXECUÇÕES */}
+								<div style={{ marginTop: 24 }}>
+									<h4>Execuções anteriores</h4>
+									{sessionsLoading ? (
+										<div className="muted">Carregando...</div>
+									) : workoutSessions.length === 0 ? (
+										<div className="muted">Nenhuma execução registrada.</div>
+									) : (
+										<ul style={{ listStyle: "none", padding: 0 }}>
+											{workoutSessions.map(session => {
+  let sessionInfo = `Início: ${new Date(session.startedAt).toLocaleString()}`;
+  if (session.endedAt) {
+    const durationMs = new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime();
+    const durationSec = Math.floor(durationMs / 1000);
+    const min = Math.floor(durationSec / 60);
+    const sec = durationSec % 60;
+    sessionInfo = `Duração: ${min}m ${sec}s`;
+  }
+  return (
+    <li key={session.sessionId} style={{ marginBottom: 8 }}>
+      <button className="btn ghost" style={{ width: "100%", textAlign: "left" }} onClick={() => setSelectedSession(session)}>
+        {sessionInfo} - {session.status.toString() === "Finished" ? "Finalizado" : session.status.toString() === "InProgress" ? "Em progresso" : "Cancelado"}
+      </button>
+    </li>
+  );
+})}
+										</ul>
+									)}
 								</div>
 							</div>
 						</div>
@@ -499,6 +572,31 @@ export default function Training() {
 					</div>
 				</DialogContent>
 			</Dialog>
+			{/* MODAL DE DETALHES DA SESSÃO */}
+			{selectedSession && (
+  <Dialog open={!!selectedSession} onOpenChange={open => !open && setSelectedSession(null)}>
+    <DialogContent style={{ maxWidth: 480 }}>
+      <DialogHeader>
+        <DialogTitle>Detalhes da Execução</DialogTitle>
+      </DialogHeader>
+      <div>
+        <div><b>Início:</b> {new Date(selectedSession.startedAt).toLocaleString()}</div>
+        <div><b>Status:</b> {selectedSession.status.toString() === "Finished" ? "Finalizado" : selectedSession.status.toString() === "InProgress" ? "Em progresso" : "Cancelado"}</div>
+        {selectedSession.endedAt && <div><b>Fim:</b> {new Date(selectedSession.endedAt).toLocaleString()}</div>}
+        <div style={{ marginTop: 12 }}>
+          <b>Exercícios:</b>
+          <ul style={{ paddingLeft: 16 }}>
+            {selectedSession.exercises.map((ex, idx) => (
+              <li key={idx}>
+                {ex.metadata.name} - {ex.repetitions ? `${ex.repetitions} reps` : ""} {ex.weight ? `${ex.weight} ${ex.measureUnit.toString() === "Kilogram" ? "kg" : "lb"}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </DialogContent>
+  </Dialog>
+)}
 		</div>
 	);
 }
