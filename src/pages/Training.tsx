@@ -373,52 +373,54 @@ export default function Training() {
 						</div>
 						{/* FORM BODY */}
 						<div className="body" style={{ display: showForm ? "grid" : "none" }}>
-							<form className="panel" onSubmit={handleFormSubmit}>
-								<h3>{formMode === "edit" ? "Editar Treino" : "Criar Novo Treino"}</h3>
-								{/* SVG Muscle Map for form */}
-								<div className="svg-wrap" style={{ marginBottom: 16 }}>
-									<MuscleMap activeAreas={collectMuscleAreas(formData.exercises.map(exid => getExerciseById(exercises, exid)).filter(Boolean))} />
-								</div>
-								<div className="legend"><span className="box"></span><small>Áreas ativadas pelos exercícios selecionados</small></div>
-								<div style={{ height: 10 }}></div>
-								<div className="split">
-									<div>
-										<label>Nome do Treino</label>
-										<input name="name" className="input" value={formData.name} onChange={handleFormChange} placeholder="Digite o nome do treino" required />
-									</div>
-									<div>
-										<label>Intervalo de descanso</label>
-										<div className="split" style={{ gridTemplateColumns: "1fr 1fr" }}>
-											<input name="restMin" className="input" type="number" min="0" value={formData.restMin} onChange={handleFormChange} placeholder="min" />
-											<input name="restSec" className="input" type="number" min="0" max="59" value={formData.restSec} onChange={handleFormChange} placeholder="sec" />
-										</div>
-									</div>
-								</div>
-								<div style={{ height: 10 }}></div>
-								<div id="clientFieldWrap" style={{ display: isClients ? "block" : "none" }}>
-									<label>Selecione o Cliente</label>
-									<select name="client" className="input" value={formData.client} onChange={handleFormChange}>
-										{clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-									</select>
-									<div style={{ height: 10 }}></div>
-								</div>
-								<div className="row" style={{ justifyContent: "space-between" }}>
-									<h3 style={{ margin: 0 }}>Exercícios</h3>
-									<button type="button" className="btn" onClick={() => handleOpenModal(formData.exercises)}>+ Selecionar exercícios</button>
-								</div>
-								<p className="muted" style={{ display: formData.exercises.length ? "none" : "block" }}>Nenhum exercício selecionado.</p>
-								<div className="tags">
-									{formData.exercises.map(exid => {
-										const ex = getExerciseById(exercises, exid);
-										return <span key={exid} className="pill"><span>{ex?.name}</span><button type="button" className="rm" title="Remover" onClick={() => handleFormExerciseRemove(exid)}>x</button></span>;
-									})}
-								</div>
-								<div style={{ height: 12 }}></div>
-								<div className="row" style={{ justifyContent: "flex-end" }}>
-									<button type="button" className="btn ghost" onClick={() => { setShowForm(false); setSelectedWorkoutId(workout?.id || null); }}>Cancelar</button>
-									<button className="btn primary" type="submit">Salvar</button>
-								</div>
-							</form>
+						  {/* LEFT: SVG Muscle Map */}
+						  <div className="panel">
+						    <div className="svg-wrap" style={{ marginBottom: 16 }}>
+						      <MuscleMap activeAreas={collectMuscleAreas(formData.exercises.map(exid => getExerciseById(exercises, exid)).filter(Boolean))} />
+						    </div>
+						    <div className="legend"><span className="box"></span><small>Áreas ativadas pelos exercícios selecionados</small></div>
+						  </div>
+						  {/* RIGHT: Form Fields & Actions */}
+						  <form className="panel" onSubmit={handleFormSubmit} style={{ minWidth: 340 }}>
+						    <h3>{formMode === "edit" ? "Editar Treino" : "Criar Novo Treino"}</h3>
+						    <div className="split">
+						      <div>
+						        <label>Nome do Treino</label>
+						        <input name="name" className="input" value={formData.name} onChange={handleFormChange} placeholder="Digite o nome do treino" required />
+						      </div>
+						      <div>
+						        <label>Intervalo de descanso</label>
+						        <div className="split" style={{ gridTemplateColumns: "1fr 1fr" }}>
+						          <input name="restMin" className="input" type="number" min="0" value={formData.restMin} onChange={handleFormChange} placeholder="min" />
+						          <input name="restSec" className="input" type="number" min="0" max="59" value={formData.restSec} onChange={handleFormChange} placeholder="sec" />
+						        </div>
+						      </div>
+						    </div>
+						    <div style={{ height: 10 }}></div>
+						    <div id="clientFieldWrap" style={{ display: isClients ? "block" : "none" }}>
+						      <label>Selecione o Cliente</label>
+						      <select name="client" className="input" value={formData.client} onChange={handleFormChange}>
+						        {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+						      </select>
+						      <div style={{ height: 10 }}></div>
+						    </div>
+						    <div className="row" style={{ justifyContent: "space-between" }}>
+						      <h3 style={{ margin: 0 }}>Exercícios</h3>
+						      <button type="button" className="btn" onClick={() => handleOpenModal(formData.exercises)}>+ Selecionar exercícios</button>
+						    </div>
+						    <p className="muted" style={{ display: formData.exercises.length ? "none" : "block" }}>Nenhum exercício selecionado.</p>
+						    <div className="tags">
+						      {formData.exercises.map(exid => {
+						        const ex = getExerciseById(exercises, exid);
+						        return <span key={exid} className="pill"><span>{ex?.name}</span><button type="button" className="rm" title="Remover" onClick={() => handleFormExerciseRemove(exid)}>x</button></span>;
+						      })}
+						    </div>
+						    <div style={{ height: 12 }}></div>
+						    <div className="row" style={{ justifyContent: "flex-end" }}>
+						      <button type="button" className="btn ghost" onClick={() => { setShowForm(false); setSelectedWorkoutId(workout?.id || null); }}>Cancelar</button>
+						      <button className="btn primary" type="submit">Salvar</button>
+						    </div>
+						  </form>
 						</div>
 					</div>
 				</section>
