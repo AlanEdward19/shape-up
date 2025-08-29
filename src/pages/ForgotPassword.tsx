@@ -4,14 +4,29 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { sendPasswordReset } from "@/services/authService";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Password reset requested for:", email);
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+    const result = await sendPasswordReset(email);
+    setLoading(false);
+    if (result.success) {
+      setMessage(
+        "Instruções de recuperação de senha foram enviadas para seu email."
+      );
+    } else {
+      setError("Erro ao enviar instruções. Verifique o email informado.");
+    }
   };
 
   return (
@@ -49,11 +64,20 @@ const ForgotPassword = () => {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Enviar instruções de recuperação
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading
+                  ? "Enviando..."
+                  : "Enviar instruções de recuperação"}
               </Button>
+              {message && (
+                <div className="text-green-600 text-sm mt-2">{message}</div>
+              )}
+              {error && (
+                <div className="text-red-600 text-sm mt-2">{error}</div>
+              )}
             </form>
           </CardContent>
         </Card>

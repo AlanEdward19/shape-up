@@ -11,7 +11,8 @@ import {
   isSignInWithEmailLink,
   sendEmailVerification,
   applyActionCode,
-  checkActionCode
+  checkActionCode,
+  sendPasswordResetEmail
 } from "firebase/auth";
 import { getDoc } from "firebase/firestore";
 import { auth } from "@/config/firebase.ts";
@@ -262,6 +263,16 @@ export const signUp = async (email: string, password: string, userData?: any) =>
     return { success: true, user: userCredential.user };
   } catch (error) {
     console.error('Signup error:', error);
+    return { success: false, error };
+  }
+};
+
+export const sendPasswordReset = async (email: string): Promise<{ success: boolean; error?: any }> => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
     return { success: false, error };
   }
 };

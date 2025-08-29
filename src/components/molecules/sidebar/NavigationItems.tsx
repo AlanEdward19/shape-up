@@ -33,7 +33,7 @@ const NavigationItems = () => {
   const items = [
     { icon: Home, label: "Início", onClick: () => navigate('/index') },
     { icon: Users, label: "Amigos", onClick: () => setShowFriends(true) },
-    { icon: Dumbbell, label: "Treinos" },
+    { icon: Dumbbell, label: "Treinos", onClick: () => navigate('/training') },
     { icon: Utensils, label: "Nutrição" },
     { icon: UserCircle, label: "Perfil", onClick: () => navigate(`/profile/${userId}`) },
     { icon: ListTodo, label: "Planos", onClick: () => navigate('/hub') },

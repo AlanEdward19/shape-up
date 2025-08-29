@@ -12,6 +12,7 @@ import PostPage from "./pages/PostPage";
 import ProfessionalsHub from "./pages/ProfessionalsHub";
 import MainLayout from "./components/templates/MainLayout";
 import ProfessionalProfile from "./pages/ProfessionalProfile";
+import Training from "./pages/Training.tsx";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/post/:id" element={<MainLayout><PostPage /></MainLayout>} />
           <Route path="/hub" element={<MainLayout><ProfessionalsHub /></MainLayout>} />
           <Route path="/profissional/:id" element={<MainLayout><ProfessionalProfile /></MainLayout>} />
+          <Route path="/training" element={<MainLayout><Training /></MainLayout>} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
