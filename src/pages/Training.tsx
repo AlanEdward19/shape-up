@@ -102,7 +102,9 @@ export default function Training() {
 				setClients(profClients);
 				const grouped = await Promise.all(profClients.map(async (client: {id: string, name: string}) => {
 					const ws = await TrainingService.getWorkoutsByUserId(client.id);
-					return { client, workouts: ws };
+					// Filter workouts to only those created by current user
+					const filteredWs = ws.filter(w => w.creatorId === currentUserId);
+					return { client, workouts: filteredWs };
 				}));
 				setGroupedWorkouts(grouped.filter(g => g.workouts.length));
 				setWorkouts([]);
@@ -212,13 +214,32 @@ export default function Training() {
 					...data,
 					visibility: WorkoutVisibility.Private,
 				});
+				// Add to groupedWorkouts locally
+				setGroupedWorkouts(prev => {
+					const idx = prev.findIndex(g => g.client.id === formData.client);
+					if (idx !== -1) {
+						// Client exists, add workout
+						const updated = [...prev];
+						updated[idx] = {
+							client: updated[idx].client,
+							workouts: [newWorkout!, ...updated[idx].workouts]
+						};
+						return updated;
+					} else {
+						// New client group
+						const clientObj = clients.find(c => c.id === formData.client);
+						if (!clientObj) return prev;
+						return [{ client: clientObj, workouts: [newWorkout!] }, ...prev];
+					}
+				});
+				setWorkouts([]);
 			} else {
 				newWorkout = await TrainingService.createWorkout({
 					...data,
 					visibility: WorkoutVisibility.Private,
 				});
+				setWorkouts(ws => [newWorkout!, ...ws]);
 			}
-			setWorkouts(ws => [newWorkout!, ...ws]);
 			setSelectedWorkoutId(newWorkout!.id);
 			setShowForm(false);
 		}
@@ -475,11 +496,11 @@ function WorkoutCard({ w, isPro, isClients, onSelect, clients, currentUserId }) 
     ? muscleGroupToPtBr(w.exercises[0].muscleGroups[0])
     : "";
   return (
-    <div className={`card${isPro && !isClients ? " blue" : ""}${!isPro && isClients ? " gray" : ""}`} onClick={() => onSelect(w.id)}>
+    <div className={`card${w.creatorId == currentUserId && !isClients? " blue" : " gray"}`} onClick={() => onSelect(w.id)}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
         <div>
           <div style={{ fontWeight: 700 }}>{w.name}</div>
-          <div className="meta">Dono: {ownerName(w.creatorId, clients, currentUserId)} • Descanso: {fmtRest(w.restingTimeInSeconds)}</div>
+          <div className="meta"> Descanso: {fmtRest(w.restingTimeInSeconds)}</div>
         </div>
         <div className="meta">{firstMuscle}</div>
       </div>
