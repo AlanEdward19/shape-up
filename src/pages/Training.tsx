@@ -1,5 +1,5 @@
 ﻿import React, {useEffect, useState} from "react";
-import "./training.css";
+import "../styles/training.css";
 import {TrainingService} from "@/services/trainingService";
 import {ProfessionalManagementService} from "@/services/professionalManagementService";
 import {
