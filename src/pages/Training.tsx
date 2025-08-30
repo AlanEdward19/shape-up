@@ -527,7 +527,7 @@ export default function Training() {
 							<div style={{ height: 10 }}></div>
 							<button className="btn ghost" type="button" onClick={handleModalClearFilters}>Limpar filtros</button>
 						</div>
-						<div className="exercise-list max-h-[350px] overflow-y-auto pr-2 bg-[#161b28] rounded-lg border border-[#222737] p-2">
+						<div className="exercise-list h-[600px] overflow-y-auto pr-2 bg-[#161b28] rounded-lg border border-[#222737] p-2">
 							<ExerciseList
 								selected={modalSelected}
 								onSelect={handleModalSelect}

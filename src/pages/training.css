@@ -8,12 +8,28 @@
   --primary:#4f82ff;
   --assigned:#656d78;
   --danger:#ff5a63;
-  --ok:#7c4dff;
-  --chip:#efe6ff;
-  --chip-text:#3f2c7f;
+  --ok:#4f82ff; /* azul principal */
+  --chip:#e6f0ff; /* azul claro */
+  --chip-text:#243a5a; /* azul escuro */
   --stroke:#243041;
   --shadow:0 10px 25px rgba(0,0,0,.35);
   --radius:14px;
+}
+.chip {
+  background: var(--chip); /* azul claro */
+  color: var(--chip-text); /* azul escuro */
+  border: 1px solid var(--ok); /* azul */
+  border-radius: 16px;
+  padding: 8px 10px;
+  margin: 2px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.chip[data-active="true"] {
+  background: var(--ok); /* azul escuro */
+  color: var(--chip); /* azul claro */
+  border-color: var(--ok); /* azul */
+  outline: 2px solid var(--ok);
 }
 *{box-sizing:border-box}
 body{
@@ -105,10 +121,6 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .filter-box{background:var(--panel-2);border:1px solid var(--stroke);border-radius:12px;padding:12px;height:520px;overflow:auto}
 .filter-box h4{margin:10px 0 8px 0;font-size:13px;color:#cfd6dd}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{
-  background:var(--chip);color:var(--chip-text);border:0;padding:8px 10px;border-radius:999px;cursor:pointer
-}
-.chip[data-active="true"]{outline:2px solid var(--ok)}
 .exercise-list{background:var(--panel-2);border:1px solid var(--stroke);border-radius:12px;padding:8px;height:520px;overflow:auto}
 .ex-item{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--stroke);border-radius:10px;padding:10px;margin:8px 4px;background:#0e1622}
 .ex-item small{color:var(--muted)}
