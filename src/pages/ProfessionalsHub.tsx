@@ -333,6 +333,16 @@ const ProfessionalsHub: React.FC = () => {
     }
   };
 
+  // Helper for allowed service types
+  const getAllowedServiceTypes = () => {
+    if (user?.isNutritionist && user?.isTrainer) return [0, 1];
+    if (user?.isNutritionist) return [1];
+    if (user?.isTrainer) return [0];
+    return [];
+  };
+
+  const allowedServiceTypes = getAllowedServiceTypes();
+
   if (loading) return <div className="text-center py-12 text-[#8b93a7]">Carregando dados...</div>;
   if (error) return <div className="text-center py-12 text-red-400">{error}</div>;
 
@@ -625,18 +635,26 @@ const ProfessionalsHub: React.FC = () => {
               </div>
               <div className="flex-1">
                 <label className="block mb-1 text-sm font-medium text-[#e8ecf8]">Tipo</label>
-                <Select
-                  value={String(createForm.type)}
-                  onValueChange={v => setCreateForm(f => ({ ...f, type: Number(v) }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">Treino</SelectItem>
-                    <SelectItem value="1">Dieta</SelectItem>
-                  </SelectContent>
-                </Select>
+                {allowedServiceTypes.length === 1 ? (
+                  <Input
+                    value={allowedServiceTypes[0] === 0 ? 'Treino' : 'Dieta'}
+                    disabled
+                    className="bg-[#1b2233] border border-[#222737] rounded-full px-3 py-1 text-xs text-[#e8ecf8]"
+                  />
+                ) : (
+                  <Select
+                    value={String(createForm.type)}
+                    onValueChange={v => setCreateForm(f => ({ ...f, type: Number(v) }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">Treino</SelectItem>
+                      <SelectItem value="1">Dieta</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
             {createError && <div className="text-red-400 text-sm">{createError}</div>}
@@ -727,18 +745,26 @@ const ProfessionalsHub: React.FC = () => {
               </div>
               <div className="flex-1">
                 <label className="block mb-1 text-sm font-medium text-[#e8ecf8]">Tipo</label>
-                <Select
-                  value={String(editForm.type)}
-                  onValueChange={v => setEditForm(f => ({ ...f, type: Number(v) }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">Treino</SelectItem>
-                    <SelectItem value="1">Dieta</SelectItem>
-                  </SelectContent>
-                </Select>
+                {allowedServiceTypes.length === 1 ? (
+                  <Input
+                    value={allowedServiceTypes[0] === 0 ? 'Treino' : 'Dieta'}
+                    disabled
+                    className="bg-[#1b2233] border border-[#222737] rounded-full px-3 py-1 text-xs text-[#e8ecf8]"
+                  />
+                ) : (
+                  <Select
+                    value={String(editForm.type)}
+                    onValueChange={v => setEditForm(f => ({ ...f, type: Number(v) }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">Treino</SelectItem>
+                      <SelectItem value="1">Dieta</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
             {editError && <div className="text-red-400 text-sm">{editError}</div>}
