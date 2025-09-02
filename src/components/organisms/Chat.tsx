@@ -120,7 +120,6 @@ const Chat = () => {
           firstName={chat.firstName}
           lastName={chat.lastName}
           imageUrl={chat.imageUrl}
-          isProfessionalChat={chat.isProfessionalChat}
           onClose={() => removeChat(chat.profileId, chat.isProfessionalChat)}
         />
       ))}
