@@ -14,7 +14,7 @@ const ChatHeader = ({ profileId, firstName, lastName, imageUrl, isProfessionalCh
   return (
     <div 
       className="p-4 border-b flex items-center gap-3 cursor-pointer hover:bg-secondary/50"
-      onClick={() => navigate(isProfessionalChat ? `/profissional/${profileId}` : `/profile/${profileId}`)}
+      onClick={() => navigate(`/profile/${profileId}`)}
     >
       <div className="w-10 h-10 rounded-full bg-primary/20">
         {imageUrl && <img src={imageUrl} alt={firstName} className="w-full h-full rounded-full object-cover" />}
