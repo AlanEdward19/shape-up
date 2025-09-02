@@ -18,7 +18,6 @@ import FriendRequestButtons from "./friend-actions/FriendRequestButtons";
 interface ProfileHeaderProps {
   profile: ViewProfileResponse;
   isOwnProfile: boolean;
-  isFollowing?: boolean;
   onFollowAction: () => void;
   onShowFollowers: () => void;
   onShowFollowing: () => void;
@@ -35,7 +34,6 @@ interface EditProfileForm {
 const ProfileHeader = ({
   profile,
   isOwnProfile,
-  isFollowing,
   onFollowAction,
   onShowFollowers,
   onShowFollowing,
@@ -245,10 +243,10 @@ const ProfileHeader = ({
               <>
                 <Button
                   onClick={onFollowAction}
-                  variant={isFollowing ? "destructive" : "default"}
+                  variant={profile.isFollowing ? "destructive" : "default"}
                   disabled={followActionPending}
                 >
-                  {isFollowing ? "Deixar de Seguir" : "Seguir"}
+                  {profile.isFollowing ? "Deixar de Seguir" : "Seguir"}
                 </Button>
 
                 <FriendRequestButtons

@@ -74,7 +74,6 @@ const Profile = () => {
     enabled: !!currentUserId && !isOwnProfile,
   });
 
-  const isFollowing = followData?.following?.some(f => f.profileId === id);
   const hasReceivedRequest = followData?.friendRequests?.some(
     request => request.profileId === id && request.status === 1
   );
@@ -104,7 +103,7 @@ const Profile = () => {
   });
 
   const handleFollowAction = () => {
-    if (isFollowing) {
+    if (profile.isFollowing) {
       unfollowMutation.mutate();
     } else {
       followMutation.mutate();
@@ -163,7 +162,6 @@ const Profile = () => {
               <ProfileHeader
                 profile={profile}
                 isOwnProfile={isOwnProfile}
-                isFollowing={isFollowing}
                 onFollowAction={handleFollowAction}
                 onShowFollowers={() => setShowFollowers(true)}
                 onShowFollowing={() => setShowFollowing(true)}

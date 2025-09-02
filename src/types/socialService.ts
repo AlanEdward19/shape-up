@@ -63,6 +63,8 @@ export interface ViewProfileResponse {
     followers: number;
     following: number;
     posts: number;
+    isFriend: boolean;
+    isFollowing: boolean;
 }
 
 export interface ViewProfileSimplifiedResponse {

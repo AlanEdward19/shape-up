@@ -78,6 +78,7 @@ const FriendRequestButtons = ({
       firstName,
       lastName,
       imageUrl,
+      isProfessionalChat:false
     });
   };
 
