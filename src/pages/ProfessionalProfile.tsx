@@ -195,7 +195,9 @@ const ProfessionalProfile: React.FC = () => {
               <Button
                 disabled={!hasActiveContract}
                 title={!hasActiveContract ? 'Disponível quando houver um plano ativo' : ''}
-                className={hasActiveContract ? 'btn primary px-4 py-2 rounded-lg border-none bg-gradient-to-br from-[#6ea8fe] to-[#7ef0c1] text-[#0b1222]' : 'btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent'}
+                className={hasActiveContract
+                  ? 'btn px-4 py-2 rounded-lg border-none bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors'
+                  : 'btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent'}
                 onClick={() => {
                   if (!professional || !hasActiveContract) return;
                   if (!isProfileChatOpen(professional.id, true)) {
@@ -231,7 +233,9 @@ const ProfessionalProfile: React.FC = () => {
                     <div>
                       <Button
                         disabled={isContracted || !!contractLoading}
-                        className={isContracted ? 'btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent' : 'btn primary px-4 py-2 rounded-lg border-none bg-gradient-to-br from-[#6ea8fe] to-[#7ef0c1] text-[#0b1222]'}
+                        className={isContracted
+                          ? 'btn px-4 py-2 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent'
+                          : 'btn px-4 py-2 rounded-lg border-none bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors'}
                         onClick={() => handleContractPlan(p.id)}
                       >
                         {contractLoading === p.id ? 'Contratando...' : isContracted ? 'Já contratado' : 'Contratar'}
