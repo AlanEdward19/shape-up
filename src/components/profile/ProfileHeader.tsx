@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getUserId } from "@/services/authService.ts";
 import FriendRequestButtons from "./friend-actions/FriendRequestButtons";
 
@@ -69,6 +69,14 @@ const ProfileHeader = ({
       bio: profile.bio || "",
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      gender: profile.gender?.toString() ?? "",
+      birthDate: profile.birthDate?.split('T')[0] ?? "",
+      bio: profile.bio || "",
+    });
+  }, [profile]);
 
   const editProfileMutation = useMutation({
     mutationFn: async (data: Partial<EditProfileForm>) => {
