@@ -116,15 +116,16 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl p-0 bg-background border-none grid grid-cols-[2fr,400px] overflow-hidden">
-                <div className="flex items-center justify-center pl-4 pt-4">
-                    <div className="w-full">
-                        <PostMedia media={post.images} />
+            <DialogContent className={`${post.images && post.images.length > 0 ? 'max-w-4xl max-h-[90vh] grid-cols-[2fr,400px]' : 'max-w-2xl max-h-[90vh] grid-cols-1'} p-0 bg-background border-none grid overflow-hidden`}>
+                {post.images && post.images.length > 0 && (
+                    <div className="flex items-center justify-center pl-4 pt-4">
+                        <div className="w-full">
+                            <PostMedia media={post.images} />
+                        </div>
                     </div>
-                </div>
-
-                <div className="flex flex-col h-full w-[400px]">
-                    <div className="p-4 border-b">
+                )}
+                <div className={`flex flex-col h-full ${post.images && post.images.length > 0 ? 'w-[400px]' : 'w-full items-center justify-center'}`}>
+                    <div className="p-4 border-b w-full">
                         <div className="flex items-center gap-3">
                             <Avatar className="w-8 h-8">
                                 <AvatarImage src={post.publisherImageUrl} />
@@ -135,7 +136,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                         <p className="mt-3 text-sm text-muted-foreground">{post.content}</p>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 w-full">
                         {comments.map((comment) => (
                             <div key={comment.id} className="flex gap-3 items-start">
                                 <div
@@ -204,9 +205,9 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                         ))}
                     </div>
 
-                    <div className="p-4 border-t bg-background">
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="flex gap-4">
+                    <div className="p-4 border-t bg-background w-full">
+                        <div className={`flex mb-4 ${post.images && post.images.length > 0 ? 'justify-between items-center' : 'justify-end items-center'}`}>
+                            <div className={`flex gap-4 ${post.images && post.images.length > 0 ? '' : 'ml-auto'}`}>
                                 <PostReactions
                                     reactions={reactions}
                                     userReaction={reactions.find(r => r.profileId === userId)}
