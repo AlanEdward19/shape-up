@@ -15,10 +15,13 @@ import {
   setAuthData,
   getAuthToken,
   enhanceToken,
-  refreshIdToken
+  refreshIdToken,
+  resendEmailVerification
 } from "@/services/authService.ts";
+import { auth } from "@/config/firebase.ts";
 import { User } from "firebase/auth";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -30,6 +33,8 @@ const Login = () => {
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
   const [googleUser, setGoogleUser] = useState<User | null>(null);
+  const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,6 +59,11 @@ const Login = () => {
       const result = await signInWithEmail(email, password, rememberMe);
       
       if (result.success) {
+        if (!result.user.emailVerified) {
+          setShowVerifyEmailDialog(true);
+          setIsLoading(false);
+          return;
+        }
         const token = await result.user?.getIdToken();
 
         console.log(`Token: ${token}`);
@@ -150,6 +160,28 @@ const Login = () => {
       toast.error("Falha ao salvar dados adicionais. Tente novamente.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerificationLink = async () => {
+    setIsResendingVerification(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error("Usuário não encontrado. Faça login novamente.");
+        setIsResendingVerification(false);
+        return;
+      }
+      const result = await resendEmailVerification(user);
+      if (result.success) {
+        toast.success("Link de verificação reenviado para seu email.");
+      } else {
+        toast.error("Erro ao reenviar link de verificação. Tente novamente.");
+      }
+    } catch (error) {
+      toast.error("Erro ao reenviar link de verificação.");
+    } finally {
+      setIsResendingVerification(false);
     }
   };
 
@@ -287,6 +319,29 @@ const Login = () => {
           </Button>
         </DialogContent>
       </Dialog>
+
+      {/* Email verification dialog */}
+      <AlertDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog}>
+        <AlertDialogContent className="bg-transparent text-white">
+          <div className="flex flex-col items-center">
+            <span className="text-lg font-semibold mb-4">Verifique seu email</span>
+            <span className="mb-6">Por favor, acesse seu email e clique no link de verificação para ativar sua conta.</span>
+            <div className="flex gap-2">
+              <AlertDialogAction className="bg-[#0FA0CE] text-white px-6 py-2 rounded hover:bg-[#0FA0CE] focus:bg-[#0FA0CE]" onClick={() => setShowVerifyEmailDialog(false)}>
+                OK
+              </AlertDialogAction>
+              <Button
+                className="bg-[#0FA0CE] text-white px-6 py-2 rounded hover:bg-[#0FA0CE] focus:bg-[#0FA0CE]"
+                onClick={handleResendVerificationLink}
+                disabled={isResendingVerification}
+                type="button"
+              >
+                {isResendingVerification ? "Reenviando..." : "Reenviar link de verificação"}
+              </Button>
+            </div>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </AuthLayout>
   );
 };

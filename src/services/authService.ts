@@ -276,3 +276,13 @@ export const sendPasswordReset = async (email: string): Promise<{ success: boole
     return { success: false, error };
   }
 };
+
+export const resendEmailVerification = async (user: User): Promise<{ success: boolean; error?: any }> => {
+  try {
+    await sendEmailVerification(user);
+    return { success: true };
+  } catch (error) {
+    console.error('Error resending email verification:', error);
+    return { success: false, error };
+  }
+};
