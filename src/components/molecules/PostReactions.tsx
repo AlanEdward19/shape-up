@@ -100,7 +100,12 @@ const PostReactions = ({ reactions, userReaction, onReact, defaultOpen = false }
           {totalReactions > 0 && <span>{totalReactions}</span>}
         </button>
       </HoverCardTrigger>
-      <HoverCardContent side="top" sideOffset={0} className="w-auto p-2 bg-secondary border border-muted">
+      <HoverCardContent
+        side={reactions.length > 0 ? "top" : undefined}
+        sideOffset={16}
+        align="end"
+        className="bg-background z-[9999]"
+      >
         <div className="grid grid-cols-5 gap-2">
           {Object.entries(reactionEmojis).map(([type, emoji]) => (
             <Button
