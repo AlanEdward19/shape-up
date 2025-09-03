@@ -22,7 +22,6 @@ interface ProfileHeaderProps {
   onShowFollowers: () => void;
   onShowFollowing: () => void;
   followActionPending: boolean;
-  hasReceivedRequest?: boolean;
 }
 
 interface EditProfileForm {
@@ -37,9 +36,7 @@ const ProfileHeader = ({
   onFollowAction,
   onShowFollowers,
   onShowFollowing,
-  followActionPending,
-  hasReceivedRequest = false,
-}: ProfileHeaderProps) => {
+  followActionPending}: ProfileHeaderProps) => {
   const [open, setOpen] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,11 +53,6 @@ const ProfileHeader = ({
     queryFn: () => SocialService.checkFriendRequestStatus(),
     enabled: !isOwnProfile,
   });
-
-  const isFriend = friends.some(friend => friend.profileId === getUserId());
-  const hasSentRequest = friendRequests.some(request => 
-    request.profileId === profile.id && request.status === 0
-  );
 
   const form = useForm<EditProfileForm>({
     defaultValues: {
@@ -259,9 +251,7 @@ const ProfileHeader = ({
 
                 <FriendRequestButtons
                   profileId={profile.id}
-                  isFriend={isFriend}
-                  hasSentRequest={hasSentRequest}
-                  hasReceivedRequest={hasReceivedRequest}
+                  isFriend={profile.isFriend}
                   firstName={profile.firstName}
                   lastName={profile.lastName}
                   imageUrl={profile.imageUrl}
