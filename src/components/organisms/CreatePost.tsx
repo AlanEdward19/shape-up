@@ -121,6 +121,14 @@ const CreatePost = () => {
             }
           }}
         />
+        <button
+          type="button"
+          className="ml-2 px-6 py-2 bg-primary text-white rounded-full shadow-sm hover:bg-primary/90 transition disabled:opacity-50"
+          onClick={handleSubmit}
+          disabled={isSubmitting || !content.trim()}
+        >
+          Postar
+        </button>
       </div>
 
       {/* Preview Section */}
