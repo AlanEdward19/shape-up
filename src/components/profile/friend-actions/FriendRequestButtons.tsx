@@ -10,6 +10,7 @@ interface FriendRequestButtonsProps {
   firstName: string;
   lastName: string;
   imageUrl?: string;
+  hasSentRequest?: boolean;
 }
 
 const FriendRequestButtons = ({
@@ -18,6 +19,7 @@ const FriendRequestButtons = ({
   firstName,
   lastName,
   imageUrl,
+  hasSentRequest = false,
 }: FriendRequestButtonsProps) => {
   const queryClient = useQueryClient();
   const { addChat } = useChatStore();
@@ -26,10 +28,22 @@ const FriendRequestButtons = ({
     mutationFn: () => SocialService.unfriend(profileId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Amizade desfeita!");
     },
     onError: () => {
       toast.error("Erro ao desfazer amizade");
+    },
+  });
+
+  const sendFriendRequestMutation = useMutation({
+    mutationFn: () => SocialService.sendFriendRequest(profileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
+      toast.success("Solicitação de amizade enviada!");
+    },
+    onError: () => {
+      toast.error("Erro ao enviar solicitação de amizade");
     },
   });
 
@@ -60,7 +74,24 @@ const FriendRequestButtons = ({
     );
   }
 
-  return null;
+  // Show add friend button if not friends and no request sent
+  if (hasSentRequest) {
+    return (
+      <Button variant="outline" disabled>
+        Solicitação enviada
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="default"
+      onClick={() => sendFriendRequestMutation.mutate()}
+      disabled={sendFriendRequestMutation.isPending}
+    >
+      {sendFriendRequestMutation.isPending ? "Enviando..." : "Adicionar Amigo"}
+    </Button>
+  );
 };
 
 export default FriendRequestButtons;

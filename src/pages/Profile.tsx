@@ -166,7 +166,6 @@ const Profile = () => {
                 onShowFollowers={() => setShowFollowers(true)}
                 onShowFollowing={() => setShowFollowing(true)}
                 followActionPending={followMutation.isPending || unfollowMutation.isPending}
-                hasReceivedRequest={hasReceivedRequest}
               />
             </CardHeader>
             <CardContent>
