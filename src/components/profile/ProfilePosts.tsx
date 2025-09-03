@@ -85,27 +85,54 @@ const ProfilePosts = ({ profileId }: ProfilePostsProps) => {
                 onClick={() => handlePostClick(post)}
               >
                 {post.images && post.images.length > 0 ? (
-                  <>
-                    <img
-                      src={post.images[0]}
-                      alt="Post thumbnail"
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105 group-hover:opacity-50"
-                    />
-                    {hoveredPostId === post.id && (
-                      <div className="absolute inset-0 flex items-center justify-center opacity-100 transition-opacity bg-black/40">
-                        <div className="flex gap-6 text-white">
-                          <div className="flex items-center gap-2">
-                            <Heart className="w-6 h-6 fill-white" />
-                            <span className="font-semibold">{reactions[post.id]?.length || 0}</span>
+                  (() => {
+                    const videoExtensions = ['.mp4', '.webm', '.mov', '.ogg'];
+                    const isVideo = (url: string) => {
+                      const cleanUrl = url.split('?')[0].split('#')[0];
+                      return videoExtensions.some(ext => cleanUrl.toLowerCase().endsWith(ext));
+                    };
+                    const firstMedia = post.images[0];
+                    const isFirstMediaVideo = isVideo(firstMedia);
+                    return (
+                      <>
+                        {isFirstMediaVideo ? (
+                          <video
+                            src={firstMedia}
+                            width="100%"
+                            height="100%"
+                            preload="auto"
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105 group-hover:opacity-50 bg-black"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                        ) : (
+                          <img
+                            src={firstMedia}
+                            alt="Post thumbnail"
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105 group-hover:opacity-50"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                        )}
+                        {hoveredPostId === post.id && (
+                          <div className="absolute inset-0 flex items-center justify-center opacity-100 transition-opacity bg-black/40">
+                            <div className="flex gap-6 text-white">
+                              <div className="flex items-center gap-2">
+                                <Heart className="w-6 h-6 fill-white" />
+                                <span className="font-semibold">{reactions[post.id]?.length || 0}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <MessageCircle className="w-6 h-6" />
+                                <span className="font-semibold">{comments[post.id]?.length || 0}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <MessageCircle className="w-6 h-6" />
-                            <span className="font-semibold">{comments[post.id]?.length || 0}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </>
+                        )}
+                      </>
+                    );
+                  })()
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-secondary text-muted-foreground p-4 text-sm group-hover:bg-secondary/80">
                     {post.content.slice(0, 100)}{post.content.length > 100 ? '...' : ''}

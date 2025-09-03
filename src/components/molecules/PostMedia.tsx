@@ -43,7 +43,7 @@ const PostMedia = ({ media }: PostMediaProps) => {
                                     controls
                                     width="100%"
                                     height="auto"
-                                    poster="/placeholder.svg"
+                                    preload="auto"
                                     className="w-full h-auto bg-black"
                                     onError={(e) => {
                                         e.currentTarget.src = '/placeholder.svg';
