@@ -28,7 +28,6 @@ const ChatMessageList = ({ profileId, isProfessionalChat = false }: ChatMessageL
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["messages", profileId, isProfessionalChat],
     queryFn: async ({ pageParam = 1 }) => {
-      console.log("isProfessionalChat", isProfessionalChat)
       return ChatService.getMessages(isProfessionalChat, profileId, pageParam);
     },
     getNextPageParam: (lastPage, allPages) => {

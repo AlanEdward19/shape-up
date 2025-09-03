@@ -18,3 +18,11 @@ export interface Notification {
     commentId?: string;
   };
 }
+
+export const topicToNotificationType: Record<number, NotificationType> = {
+  1: NotificationType.Message,
+  2: NotificationType.FriendRequest,
+  3: NotificationType.NewFollower,
+  4: NotificationType.Comment,
+  5: NotificationType.Reaction,
+};

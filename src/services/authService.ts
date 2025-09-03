@@ -200,21 +200,11 @@ export const sendVerificationCode = async (email: string): Promise<{ success: bo
       return { success: false, error: { code: 'auth/email-already-in-use' } };
     }
     
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    sessionStorage.setItem(`verification_code_${email}`, verificationCode);
-    console.log(`Verification code for ${email}: ${verificationCode}`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
     return { success: true };
   } catch (error) {
     console.error('Error sending verification code:', error);
     return { success: false, error };
   }
-};
-
-export const verifyCode = (email: string, code: string): boolean => {
-  const storedCode = sessionStorage.getItem(`verification_code_${email}`);
-  return storedCode === code;
 };
 
 export const enhanceToken = async (userData: any): Promise<boolean> => {

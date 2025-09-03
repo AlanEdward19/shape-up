@@ -1,8 +1,7 @@
-
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { SERVICES } from "@/config/services";
 import { useNotificationStore } from "@/stores/useNotificationStore";
-import { Notification, NotificationType } from "@/types/notifications";
+import { Notification, NotificationType, topicToNotificationType } from "@/types/notifications";
 import { getAuthToken, getUserId } from "@/services/authService.ts";
 import { useChatStore } from "@/stores/useChatStore";
 
@@ -32,18 +31,17 @@ class NotificationService {
     }
   }
 
-  private async handleNotification(type: string, message: string): Promise<void> {
-    console.log("Received notification:", type, message);
+  private async handleNotification(type: number, message: string, senderId: string): Promise<void> {
     const { addNotification } = useNotificationStore.getState();
     const { isProfileChatOpen } = useChatStore.getState();
     let notification: Notification | null = null;
 
+    const parsedType = topicToNotificationType[type];
+
     try {
-      switch (type) {
+      switch (parsedType) {
         case NotificationType.Message:
-          { 
-            const senderIdMatch = message.match(/mensagem de\s*([a-f0-9-]{36})/i);
-            const senderId = senderIdMatch ? senderIdMatch[1].trim() : '';
+          {
 
           // Se o chat com o remetente estiver aberto, não criamos notificação
           if (senderId && isProfileChatOpen(senderId, false) || isProfileChatOpen(senderId, true))
@@ -107,7 +105,6 @@ class NotificationService {
       }
 
       if (notification) {
-        console.log("Adding notification:", notification);
         addNotification(notification);
       }
     } catch (error) {
@@ -119,13 +116,19 @@ class NotificationService {
     if (!this.connection) return;
 
     this.connection.on("ReceiveNotification", (content: string) => {
-      const typeMatch = content.match(/Topic:\s*(.*)/);
-      const messageMatch = content.match(/Message:\s*(.*)/);
+      let notificationData;
+      try {
+        notificationData = JSON.parse(content);
+      } catch (e) {
+        console.error("Failed to parse notification content as JSON:", content);
+        return;
+      }
 
-      const type = typeMatch ? typeMatch[1].trim() : '';
-      const message = messageMatch ? messageMatch[1].trim() : '';
+      const type = notificationData.topic?.toString() || '';
+      const message = notificationData.body || '';
+      const senderId = notificationData.metadata.userId;
 
-      this.handleNotification(type, message);
+      this.handleNotification(type, message, senderId);
     });
   }
 
