@@ -24,21 +24,33 @@ const PostMedia = ({ media }: PostMediaProps) => {
         }
     };
 
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.ogg'];
+
+    const isVideo = (url: string) => {
+        const cleanUrl = url.split('?')[0].split('#')[0];
+        return videoExtensions.some(ext => cleanUrl.toLowerCase().endsWith(ext));
+    };
+
     return (
         <div className="mb-4 rounded-lg overflow-hidden relative" onClick={handleCarouselClick}>
             <Carousel className="w-full">
                 <CarouselContent>
                     {media.map((url, index) => (
                         <CarouselItem key={index}>
-                            {url.toLowerCase().endsWith('.mp4') ? (
+                            {isVideo(url) ? (
                                 <video
                                     src={url}
                                     controls
-                                    className="w-full h-auto"
+                                    width="100%"
+                                    height="auto"
+                                    poster="/placeholder.svg"
+                                    className="w-full h-auto bg-black"
                                     onError={(e) => {
                                         e.currentTarget.src = '/placeholder.svg';
                                     }}
-                                />
+                                >
+                                    Seu navegador não suporta a reprodução de vídeo.
+                                </video>
                             ) : (
                                 <img
                                     src={url}

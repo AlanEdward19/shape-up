@@ -61,6 +61,9 @@ const CreatePost = () => {
 
   const handleRemoveFile = (index: number) => {
     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSubmit = async () => {
