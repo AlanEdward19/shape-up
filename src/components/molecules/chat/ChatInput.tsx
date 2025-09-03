@@ -1,7 +1,7 @@
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { format } from 'date-fns';
 import { ChatService, decryptMessage, encryptMessage } from "@/services/chatService";
 import { toast } from "sonner";
@@ -17,6 +17,14 @@ const ChatInput = ({ profileId, isProfessionalChat = false }: ChatInputProps) =>
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const queryClient = useQueryClient();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when message is cleared and not sending
+  useEffect(() => {
+    if (message === "" && !isSending) {
+      inputRef.current?.focus();
+    }
+  }, [message, isSending]);
 
   const handleSend = async () => {
     if (!message.trim() || isSending) return;
@@ -42,7 +50,8 @@ const ChatInput = ({ profileId, isProfessionalChat = false }: ChatInputProps) =>
   return (
     <div className="p-4 border-t flex gap-2">
       <Input 
-        placeholder="Digite sua mensagem..." 
+        ref={inputRef}
+        placeholder="Digite sua mensagem..."
         className="flex-1"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
