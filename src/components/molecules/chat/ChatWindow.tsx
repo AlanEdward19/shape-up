@@ -36,8 +36,8 @@ const ChatWindow = ({ profileId, firstName, lastName, imageUrl, isProfessionalCh
 
   return (
     <div
-      className="fixed bottom-0 right-0 w-80 bg-background border border-border rounded-t-lg shadow-lg flex flex-col"
-      style={{ height: "500px", transform: "translateX(-20px)" }}
+      className="fixed bottom-12 right-8 w-80 bg-background border border-border rounded-t-lg shadow-lg flex flex-col"
+      style={{ height: "500px", transform: "translateX(-40px)" }}
       draggable
       onDragStart={handleDragStart}
       onDrag={handleDrag}
