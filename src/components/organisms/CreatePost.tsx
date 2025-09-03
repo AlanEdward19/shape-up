@@ -32,7 +32,7 @@ const CreatePost = () => {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [currentAction, setCurrentAction] = useState<string>("");
   
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
@@ -54,9 +54,13 @@ const CreatePost = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      setSelectedFiles(files);
+      setSelectedFiles(Array.from(files));
       toast.success(`${files.length} arquivo(s) selecionado(s)`);
     }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -72,17 +76,16 @@ const CreatePost = () => {
         visibility: parseInt(visibility)
       });
 
-      if (selectedFiles && selectedFiles.length > 0) {
+      if (selectedFiles.length > 0) {
         const formData = new FormData();
-        Array.from(selectedFiles).forEach(file => {
+        selectedFiles.forEach(file => {
           formData.append('files', file);
         });
-
         await SocialService.uploadPostImages(postResponse.id, formData);
       }
 
       setContent("");
-      setSelectedFiles(null);
+      setSelectedFiles([]);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -119,7 +122,35 @@ const CreatePost = () => {
           }}
         />
       </div>
-      
+
+      {/* Preview Section */}
+      {selectedFiles.length > 0 && (
+        <div className="flex gap-2 mt-2 flex-wrap">
+          {selectedFiles.map((file, idx) => {
+            const isImage = file.type.startsWith('image/');
+            const isVideo = file.type.startsWith('video/');
+            const url = URL.createObjectURL(file);
+            return (
+              <div key={idx} className="relative w-20 h-20 rounded overflow-hidden border bg-muted flex items-center justify-center">
+                <button
+                  type="button"
+                  className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-5 h-5 flex items-center justify-center z-10"
+                  onClick={() => handleRemoveFile(idx)}
+                  aria-label="Remover arquivo"
+                  disabled={isSubmitting}
+                >
+                  ×
+                </button>
+                {isImage && <img src={url} alt={file.name} className="object-cover w-full h-full" />}
+                {isVideo && (
+                  <video src={url} className="object-cover w-full h-full" controls />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <div className="flex gap-4">
           <input
