@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
-import { signUp, sendVerificationCode, resendEmailVerification } from "@/services/authService.ts";
+import { signUp, sendVerificationCode, resendEmailVerification, enhanceToken } from "@/services/authService.ts";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -118,6 +118,8 @@ const Signup = () => {
       if (result.success) {
         // Use the new reusable function to send the verification link
         await resendEmailVerification(result.user);
+        // Call enhanceToken with userData after sending verification email
+        await enhanceToken(userData);
         setShowConfirmationModal(true);
       } else {
         toast.error("Erro ao criar conta");
