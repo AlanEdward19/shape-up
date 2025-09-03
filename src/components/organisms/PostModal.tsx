@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { getUserId } from "@/services/authService.ts";
 import PostReactions from "@/components/molecules/PostReactions.tsx";
 import PostMedia from "../molecules/PostMedia";
+import { useNavigate } from "react-router-dom";
 
 interface PostModalProps {
     post: PostType | null;
@@ -24,6 +25,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
     const [editingComment, setEditingComment] = useState<string | null>(null);
     const [editContent, setEditContent] = useState("");
     const userId = getUserId();
+    const navigate = useNavigate();
 
     const fetchPostData = async () => {
         if (!post) return;
@@ -135,13 +137,22 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
 
                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
                         {comments.map((comment) => (
-                            <div key={comment.id} className="flex items-start gap-3">
-                                <Avatar className="w-8 h-8">
-                                    <AvatarImage src={comment.profileImageUrl} />
-                                    <AvatarFallback>{comment.profileFirstName[0]}{comment.profileLastName[0]}</AvatarFallback>
-                                </Avatar>
+                            <div key={comment.id} className="flex gap-3 items-start">
+                                <div
+                                    className="flex items-center gap-2 cursor-pointer group"
+                                    onClick={() => navigate(`/profile/${comment.profileId}`)}
+                                    title={`Ver perfil de ${comment.profileFirstName} ${comment.profileLastName}`}
+                                    style={{ minWidth: 0 }}
+                                >
+                                    <Avatar className="w-8 h-8 group-hover:ring-2 group-hover:ring-primary transition">
+                                        <AvatarImage src={comment.profileImageUrl} />
+                                        <AvatarFallback>{comment.profileFirstName[0]}{comment.profileLastName[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-medium group-hover:text-primary transition truncate">
+                                        {comment.profileFirstName} {comment.profileLastName}
+                                    </span>
+                                </div>
                                 <div className="flex-1">
-                                    <span className="font-medium">{comment.profileFirstName} {comment.profileLastName}</span>
                                     {editingComment === comment.id ? (
                                         <div className="flex gap-2 mt-1">
                                             <Input
@@ -167,7 +178,7 @@ const PostModal = ({ post, isOpen, onClose }: PostModalProps) => {
                                             </Button>
                                         </div>
                                     ) : (
-                                        <p className="text-sm">{comment.content}</p>
+                                        <p className="text-sm mt-1 break-words">{comment.content}</p>
                                     )}
                                 </div>
                                 {comment.profileId === userId && !editingComment && (

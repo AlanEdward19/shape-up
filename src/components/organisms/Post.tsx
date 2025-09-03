@@ -228,16 +228,21 @@ const Post = ({ post, expandComments = false, onImageClick }: PostProps) => {
                     <div className="space-y-2">
                         {comments.map((comment) => (
                             <div key={comment.id} className="flex items-start gap-3 p-3 rounded-lg bg-background">
-                                <Avatar className="w-8 h-8">
-                                    <AvatarImage src={comment.profileImageUrl} alt={`${comment.profileFirstName} ${comment.profileLastName}`} />
-                                    <AvatarFallback>{(comment.profileFirstName?.[0] || '') + (comment.profileLastName?.[0] || 'U')}</AvatarFallback>
-                                </Avatar>
-
-                                <div className="flex-1">
-                                    <div className="font-medium text-sm mb-1">
+                                <div
+                                    className="flex items-center gap-2 cursor-pointer group"
+                                    onClick={() => navigate(`/profile/${comment.profileId}`)}
+                                    title={`Ver perfil de ${comment.profileFirstName} ${comment.profileLastName}`}
+                                >
+                                    <Avatar className="w-8 h-8 group-hover:ring-2 group-hover:ring-primary transition">
+                                        <AvatarImage src={comment.profileImageUrl} alt={`${comment.profileFirstName} ${comment.profileLastName}`} />
+                                        <AvatarFallback>{(comment.profileFirstName?.[0] || '') + (comment.profileLastName?.[0] || 'U')}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="font-medium text-sm mb-1 group-hover:text-primary transition">
                                         {`${comment.profileFirstName} ${comment.profileLastName}`}
                                     </div>
+                                </div>
 
+                                <div className="flex-1">
                                     {editingComment === comment.id ? (
                                         <div className="flex gap-2">
                                             <Input
@@ -292,4 +297,3 @@ const Post = ({ post, expandComments = false, onImageClick }: PostProps) => {
 };
 
 export default Post;
-
