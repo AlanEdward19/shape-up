@@ -54,7 +54,6 @@ const ChatMessageList = ({ profileId, isProfessionalChat = false }: ChatMessageL
             connectionRef.current = null;
           }
 
-          console.log(isProfessionalChat)
           const chatUrl = `${SERVICES.CHAT.baseUrl}chat?ProfileId=${profileId}${isProfessionalChat ? "&isProfessionalChat=true" : ""}`;
           const connection = new signalR.HubConnectionBuilder()
             .withUrl(chatUrl, {

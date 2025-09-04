@@ -137,8 +137,6 @@ class NotificationService {
         return;
       }
 
-      console.log("Received notification content as JSON:", notificationData);
-
       const type = notificationData.topic?.toString() || '';
       const message = notificationData.body || '';
 

@@ -80,7 +80,6 @@ const NotificationIcon = () => {
               ) : (
                 generalNotifications.map((notification) => {
                   const handleClick = () => {
-                    console.log('Notification clicked:', notification);
                     setOpen(false); // Close popover before navigating
                     if (
                       (notification.type === NotificationType.NewFollower ||

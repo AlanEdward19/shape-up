@@ -43,9 +43,6 @@ const InputOTPSlot = React.forwardRef<
   const displayChar = char !== undefined ? char : slot.char
   const { hasFakeCaret, isActive } = slot
 
-  // Debug para verificar o valor do dígito
-  // console.log('InputOTPSlot', { index, displayChar })
-
   return (
       <div
           ref={ref}

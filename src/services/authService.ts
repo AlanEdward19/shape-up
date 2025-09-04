@@ -40,7 +40,6 @@ export const decodeJwt = (token: string) => {
 const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
 
 export const refreshIdToken = async (refreshToken: string) => {
-  console.log(`Refresh token: ${refreshToken}`);
 
   const url = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`;
   const body = new URLSearchParams({
@@ -100,8 +99,6 @@ export const setAuthData = async (userOrToken: User | string, rememberMe: boolea
   let token: string;
   let userId: string;
   let refreshToken: string | undefined;
-
-  console.log("setAuthData called with:", userOrToken);
 
   if (typeof userOrToken === 'string') {
     token = userOrToken;

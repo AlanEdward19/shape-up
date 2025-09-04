@@ -6,12 +6,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
+import {useChatStore} from "@/stores/useChatStore.ts";
 
 const ProfessionalsHub: React.FC = () => {
   const [user, setUser] = useState<clientResponse | null>(null);
   const [isProfessional, setIsProfessional] = useState(false);
   const [activePlans, setActivePlans] = useState<clientServicePlanResponse[]>([]);
   const [recommendedProfessionals, setRecommendedProfessionals] = useState<professionalResponse[]>([]);
+  const { addChat, isProfileChatOpen, openChats, removeChat } = useChatStore();
   const [offeredServices, setOfferedServices] = useState<servicePlanResponse[]>([]);
   const [clients, setClients] = useState<clientResponse[]>([]);
   const [score, setScore] = useState<professionalScoreResponse | null>(null);
@@ -514,6 +516,7 @@ const ProfessionalsHub: React.FC = () => {
                   if (filteredClients.length === 0) {
                     return <div className="text-center text-[#8b93a7] py-4">Nenhum cliente encontrado.</div>;
                   }
+
                   return filteredClients.map((client) => (
                     <div key={client.id} className="bg-[#161b28] border border-[#222737] rounded-xl p-4 shadow">
                       <div className="flex gap-3 items-center">
@@ -545,11 +548,21 @@ const ProfessionalsHub: React.FC = () => {
                             </div>
                             <div>Status: {getStatusLabel(plan.status)}</div>
                             <div className="flex gap-2 mt-2">
-                              <button className="btn small px-3 py-1 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent flex items-center gap-1">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                  <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
-                                </svg> Mensagem
-                              </button>
+                              <button
+                                  className={'btn small px-3 py-1 rounded-lg border border-[#222737] text-[#e8ecf8] bg-transparent flex items-center gap-1'}
+                                  disabled={isProfileChatOpen(client.id, true)}
+                                  onClick={() => {
+                                    if (!isProfileChatOpen(client.id, true)) {
+                                      addChat({
+                                        profileId: client.id,
+                                        firstName: client.name.split(' ')[0],
+                                        lastName: client.name.split(' ')[1] || '',
+                                        imageUrl: clientImages[client.id] || '',
+                                        isProfessionalChat: true
+                                      });
+                                    }
+                                  }}
+                              >Mensagem</button>
                               {plan.status === 0 ? (
                                 <button className="btn small danger px-3 py-1 rounded-lg border border-[#ff5d6c] text-[#ffc7cd] bg-transparent flex items-center gap-1" onClick={() => { setSelectedClientPlan(plan); setShowDeactivateModal(true); }}>
                                   Desativar
