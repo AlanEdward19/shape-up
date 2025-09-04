@@ -11,6 +11,7 @@ interface FriendRequestButtonsProps {
   lastName: string;
   imageUrl?: string;
   hasSentRequest?: boolean;
+  hasReceivedRequest?: boolean;
 }
 
 const FriendRequestButtons = ({
@@ -20,6 +21,7 @@ const FriendRequestButtons = ({
   lastName,
   imageUrl,
   hasSentRequest = false,
+  hasReceivedRequest = false,
 }: FriendRequestButtonsProps) => {
   const queryClient = useQueryClient();
   const { addChat } = useChatStore();
@@ -74,7 +76,7 @@ const FriendRequestButtons = ({
     );
   }
 
-  // Show add friend button if not friends and no request sent
+  // Show add friend button if not friends, no request sent, and no request received
   if (hasSentRequest) {
     return (
       <Button variant="outline" disabled>
@@ -83,13 +85,17 @@ const FriendRequestButtons = ({
     );
   }
 
+  if (hasReceivedRequest) {
+    return null;
+  }
+
   return (
     <Button
       variant="default"
       onClick={() => sendFriendRequestMutation.mutate()}
       disabled={sendFriendRequestMutation.isPending}
     >
-      {sendFriendRequestMutation.isPending ? "Enviando..." : "Adicionar Amigo"}
+      Adicionar amigo
     </Button>
   );
 };

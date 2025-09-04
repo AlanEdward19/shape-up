@@ -256,6 +256,7 @@ const ProfileHeader = ({
                   lastName={profile.lastName}
                   imageUrl={profile.imageUrl}
                   hasSentRequest={friendRequests.some((req: any) => req.profileId === profile.id && req.status === 0)}
+                  hasReceivedRequest={friendRequests.some((req: any) => req.profileId === profile.id && req.status === 1)}
                 />
               </>
             )}

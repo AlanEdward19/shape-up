@@ -20,9 +20,9 @@ export interface Notification {
 }
 
 export const topicToNotificationType: Record<number, NotificationType> = {
-  0: NotificationType.Message,
-  1: NotificationType.FriendRequest,
-  2: NotificationType.Reaction,
-  3: NotificationType.NewFollower,
-  4: NotificationType.Comment,
+  1: NotificationType.Message,
+  2: NotificationType.FriendRequest,
+  3: NotificationType.Reaction,
+  4: NotificationType.NewFollower,
+  5: NotificationType.Comment,
 };
