@@ -12,10 +12,14 @@ import { format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SocialService } from "@/services/socialService.ts";
 import { toast } from "sonner";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const NotificationIcon = () => {
-  const { notifications, unreadNotifications, markAsRead } = useNotificationStore();
+  const { notifications, unreadNotifications, markAllAsRead } = useNotificationStore();
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const generalNotifications = notifications.filter(
     (n) => n.type !== NotificationType.Message
@@ -36,11 +40,18 @@ const NotificationIcon = () => {
 
   const handleFriendRequest = (profileId: string, accept: boolean) => {
     manageFriendRequestMutation.mutate({ profileId, accept });
-    markAsRead(profileId);
+    markAllAsRead(); // Corrigido: marca todas como lidas
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      markAllAsRead(); // Marca todas como lidas ao abrir o modal
+    }
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-6 w-6 text-primary" />
@@ -67,40 +78,62 @@ const NotificationIcon = () => {
                   Nenhuma notificação
                 </div>
               ) : (
-                generalNotifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-3 rounded-lg ${
-                      !notification.read
-                        ? "bg-primary/10 hover:bg-primary/20"
-                        : "bg-muted hover:bg-muted/80"
-                    }`}
-                  >
-                    <p className="text-sm">{notification.message}</p>
-                    <span className="text-xs text-muted-foreground">
-                      {format(new Date(notification.createdAt), "PP")}
-                    </span>
-                    {notification.type === NotificationType.FriendRequest && notification.data?.senderId && !notification.read && (
-                      <div className="flex gap-2 mt-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleFriendRequest(notification.data!.senderId!, true)}
-                          disabled={manageFriendRequestMutation.isPending}
-                        >
-                          Aceitar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleFriendRequest(notification.data!.senderId!, false)}
-                          disabled={manageFriendRequestMutation.isPending}
-                        >
-                          Recusar
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))
+                generalNotifications.map((notification) => {
+                  const handleClick = () => {
+                    console.log('Notification clicked:', notification);
+                    setOpen(false); // Close popover before navigating
+                    if (
+                      (notification.type === NotificationType.NewFollower ||
+                        notification.type === NotificationType.FriendRequest) &&
+                      notification.data?.senderId
+                    ) {
+                      navigate(`/profile/${notification.data.senderId}`);
+                    } else if (
+                      (notification.type === NotificationType.Reaction ||
+                        notification.type === NotificationType.Comment) &&
+                      notification.data?.postId
+                    ) {
+                      navigate(`/post/${notification.data.postId}`);
+                    }
+                  };
+                  return (
+                    <div
+                      key={notification.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors duration-150 ${
+                        !notification.read
+                          ? "bg-primary/10 hover:bg-primary/20"
+                          : "bg-muted hover:bg-muted/80"
+                      }`}
+                      onClick={handleClick}
+                      tabIndex={0}
+                      role="button"
+                    >
+                      <p className="text-sm">{notification.message}</p>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(notification.createdAt), "PP")}
+                      </span>
+                      {notification.type === NotificationType.FriendRequest && notification.data?.senderId && !notification.read && (
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handleFriendRequest(notification.data!.senderId!, true); }}
+                            disabled={manageFriendRequestMutation.isPending}
+                          >
+                            Aceitar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => { e.stopPropagation(); handleFriendRequest(notification.data!.senderId!, false); }}
+                            disabled={manageFriendRequestMutation.isPending}
+                          >
+                            Recusar
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           </ScrollArea>

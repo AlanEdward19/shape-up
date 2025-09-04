@@ -27,7 +27,7 @@ export const SERVICES = {
       commentOnPost: 'v1/Post/id/commentOnPost',
       deleteComment: 'v1/Post/id/deleteComment',
       editComment: 'v1/Post/id/editComment',
-      getPost: 'v1/Post/id',
+      getPost: 'v1/Post/id/getPost',
       getProfilePosts: 'v1/Profile/id/getPosts?Page={page}',
       searchProfileByName: 'v1/Profile/searchProfileByName?Name={name}'
     }

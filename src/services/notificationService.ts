@@ -31,7 +31,7 @@ class NotificationService {
     }
   }
 
-  private async handleNotification(type: number, message: string, senderId: string): Promise<void> {
+  private async handleNotification(type: number, message: string, metadata): Promise<void> {
     const { addNotification } = useNotificationStore.getState();
     const { isProfileChatOpen } = useChatStore.getState();
     let notification: Notification | null = null;
@@ -42,6 +42,7 @@ class NotificationService {
       switch (parsedType) {
         case NotificationType.Message:
           {
+            const senderId = metadata.userId;
 
           // Se o chat com o remetente estiver aberto, não criamos notificação
           if (senderId && isProfileChatOpen(senderId, false) || isProfileChatOpen(senderId, true))
@@ -65,7 +66,10 @@ class NotificationService {
             type: NotificationType.NewFollower,
             message: message,
             createdAt: new Date().toISOString(),
-            read: false
+            read: false,
+            data: {
+              senderId: metadata.userId
+            }
           };
           break;
 
@@ -75,7 +79,10 @@ class NotificationService {
             type: NotificationType.FriendRequest,
             message: message,
             createdAt: new Date().toISOString(),
-            read: false
+            read: false,
+            data: {
+              senderId: metadata.userId
+            }
           };
           break;
 
@@ -85,7 +92,10 @@ class NotificationService {
             type: NotificationType.Comment,
             message: message,
             createdAt: new Date().toISOString(),
-            read: false
+            read: false,
+            data: {
+              postId: metadata.postId
+            }
           };
           break;
 
@@ -95,7 +105,10 @@ class NotificationService {
             type: NotificationType.Reaction,
             message: message,
             createdAt: new Date().toISOString(),
-            read: false
+            read: false,
+            data: {
+              postId: metadata.postId
+            }
           };
           break;
 
@@ -124,11 +137,12 @@ class NotificationService {
         return;
       }
 
+      console.log("Received notification content as JSON:", notificationData);
+
       const type = notificationData.topic?.toString() || '';
       const message = notificationData.body || '';
-      const senderId = notificationData.metadata.userId;
 
-      this.handleNotification(type, message, senderId);
+      this.handleNotification(type, message, notificationData.metadata);
     });
   }
 

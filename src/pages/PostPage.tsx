@@ -30,7 +30,9 @@ const PostPage = () => {
       background: "radial-gradient(1200px 600px at 10% -10%, #1b2437 0, transparent 60%), #0f1420"
     }}>
       <div className="container mx-auto py-8">
-        <Post post={post} expandComments={true} />
+        <div className="max-w-3xl w-full mx-auto">
+          <Post post={post} expandComments={true} />
+        </div>
       </div>
     </div>
   );
