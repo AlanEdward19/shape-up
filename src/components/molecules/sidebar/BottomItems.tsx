@@ -16,7 +16,6 @@ const BottomItems = () => {
   };
 
   const items = [
-    { icon: Settings, label: "Opções" },
     { icon: LogOut, label: "Sair", onClick: handleLogout },
   ];
 
