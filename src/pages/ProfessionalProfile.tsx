@@ -77,7 +77,11 @@ const ProfessionalProfile: React.FC = () => {
   function formatDate(dateStr: string) {
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return dateStr;
-    return date.toISOString().slice(0, 10);
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 
   const getServiceTypeLabel = (type: number) => {
@@ -270,7 +274,11 @@ const ProfessionalProfile: React.FC = () => {
                       <div className="mt-2">
                         <div className="flex gap-2 items-center mb-2">
                           <label className="text-xs">Nota:</label>
-                          <input type="number" min={1} max={5} value={editRating} onChange={e => setEditRating(Number(e.target.value))} className="w-16 px-2 py-1 rounded bg-[#23283a] text-[#e8ecf8] border border-[#222737] text-sm" />
+                          <input type="number" min={1} max={5} value={editRating} onChange={e =>
+                            {
+                              const val = Math.max(1, Math.min(5, Number(e.target.value)));
+                              setEditRating(Number(val))
+                            }} className="w-16 px-2 py-1 rounded bg-[#23283a] text-[#e8ecf8] border border-[#222737] text-sm" />
                         </div>
                         <textarea value={editComment} onChange={e => setEditComment(e.target.value)} className="w-full px-2 py-1 rounded bg-[#23283a] text-[#e8ecf8] border border-[#222737] text-sm mb-2" rows={2} />
                         {errorReviewAction && <div className="text-red-500 text-xs mb-2">{errorReviewAction}</div>}

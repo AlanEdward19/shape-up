@@ -56,6 +56,8 @@ function collectMuscleAreas(exercises: exerciseResponse[]) {
     const muscleArr = ex.muscleGroups ?? [];
     muscleArr.forEach(m => set.add(m.toString()));
   });
+
+  console.log(set)
   return Array.from(set);
 }
 

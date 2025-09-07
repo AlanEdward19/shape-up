@@ -892,14 +892,17 @@ const ProfessionalsHub: React.FC = () => {
               <div className="flex items-center gap-2 mt-2">
                 <label htmlFor="rating" className="text-sm">Nota:</label>
                 <input
-                  id="rating"
-                  type="number"
-                  min={1}
-                  max={5}
-                  value={reviewRating}
-                  onChange={e => setReviewRating(Number(e.target.value))}
-                  className="w-16 px-2 py-1 rounded border border-[#222737] bg-[#161b28] text-[#e8ecf8]"
-                  disabled={reviewLoading}
+                    id="rating"
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={reviewRating}
+                    onChange={e => {
+                      const val = Math.max(1, Math.min(5, Number(e.target.value)));
+                      setReviewRating(val);
+                    }}
+                    className="w-16 px-2 py-1 rounded border border-[#222737] bg-[#161b28] text-[#e8ecf8]"
+                    disabled={reviewLoading}
                 />
               </div>
               <div className="mt-2">
