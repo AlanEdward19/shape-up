@@ -12,11 +12,14 @@ import { toast } from "sonner";
 import { notificationService } from "@/services/notificationService";
 import PostModal from "@/components/organisms/PostModal";
 import { Post as PostType } from "@/types/socialService.ts";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileMainPage from "./MobileMainPage";
 
 const Index = () => {
   const navigate = useNavigate();
   const [selectedPost, setSelectedPost] = useState<PostType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const initializeNotifications = async () => {
@@ -62,6 +65,10 @@ const Index = () => {
     setSelectedPost(post);
     setIsModalOpen(true);
   };
+
+  if (isMobile) {
+    return <MobileMainPage />;
+  }
 
   return (
     <div className="min-h-screen w-full text-[#e8ecf8] bg-transparent">

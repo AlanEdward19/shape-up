@@ -1,12 +1,25 @@
 import Sidebar from "@/components/organisms/Sidebar";
 import Chat from "@/components/organisms/Chat";
 import SearchBar from "../molecules/SearchBar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
+  const isMobile = useIsMobile();
+  if (isMobile === undefined) {
+    // Prevent layout flash on initial load
+    return null;
+  }
+  if (isMobile) {
+    return (
+      <div className="min-h-screen w-full text-[#e8ecf8] bg-[#161b28]">
+        {children}
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen w-full text-[#e8ecf8]" style={{
       background: "radial-gradient(1200px 600px at 10% -10%, #1b2437 0, transparent 60%), #0f1420"
