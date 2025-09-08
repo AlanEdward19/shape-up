@@ -136,10 +136,10 @@ const ProfileHeader = ({
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
+    <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-8 p-2 md:p-0">
       <div className="relative group">
         <Avatar 
-          className="w-32 h-32 md:w-40 md:h-40 cursor-pointer overflow-hidden rounded-full flex items-center justify-center"
+          className="w-16 h-16 md:w-32 md:h-32 cursor-pointer overflow-hidden rounded-full flex items-center justify-center"
           onClick={handleAvatarClick}
         >
           <AvatarImage src={profile.imageUrl} alt={`${profile.firstName} ${profile.lastName}`} className="object-cover w-full h-full rounded-full" />
@@ -147,7 +147,7 @@ const ProfileHeader = ({
         </Avatar>
         {isOwnProfile && (
           <div 
-            className="absolute -top-1 -right-1 p-1.5 bg-secondary rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-muted"
+            className="absolute -top-1 -right-1 p-1 bg-secondary rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-muted"
             onClick={handleEditClick}
           >
             <Pencil className="h-4 w-4 text-white" />
@@ -163,10 +163,10 @@ const ProfileHeader = ({
         )}
       </div>
 
-      <div className="flex-1 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">
+      <div className="flex-1 space-y-2 md:space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <h1 className="text-lg md:text-2xl font-bold">
               {profile.firstName} {profile.lastName}
             </h1>
             {isOwnProfile && (

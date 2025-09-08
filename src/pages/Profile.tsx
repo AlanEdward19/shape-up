@@ -10,6 +10,8 @@ import ProfileInfo from "@/components/profile/ProfileInfo";
 import ProfilePosts from "@/components/profile/ProfilePosts";
 import FollowList from "@/components/profile/FollowList";
 import Sidebar from "@/components/organisms/Sidebar.tsx";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileSidebar from "@/components/organisms/MobileSidebar";
 
 const Profile = () => {
   const { id } = useParams();
@@ -128,7 +130,19 @@ const Profile = () => {
     setFollowingPage(1);
   };
 
+  const isMobile = useIsMobile();
+
   if (isLoadingProfile) {
+    if (isMobile) {
+      return (
+        <div className="flex flex-col min-h-screen w-full bg-[#161b28] text-[#e8ecf8] relative">
+          <div className="flex-1 p-4">Carregando...</div>
+          <div className="fixed bottom-0 left-0 w-full h-14 bg-[#222737] border-t border-[#161b28] z-50">
+            <MobileSidebar />
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex">
         <Sidebar />
@@ -140,11 +154,84 @@ const Profile = () => {
   }
 
   if (!profile) {
+    if (isMobile) {
+      return (
+        <div className="flex flex-col min-h-screen w-full bg-[#161b28] text-[#e8ecf8] relative">
+          <div className="flex-1 p-4">Perfil não encontrado</div>
+          <div className="fixed bottom-0 left-0 w-full h-14 bg-[#222737] border-t border-[#161b28] z-50">
+            <MobileSidebar />
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex">
         <Sidebar />
         <div className="flex-1 ml-20">
           <div>Perfil não encontrado</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col min-h-screen w-full bg-[#161b28] text-[#e8ecf8] relative">
+        <div className="flex-1 p-4 pb-20">
+          <Card className="mb-6">
+            <CardHeader>
+              <ProfileHeader
+                profile={profile}
+                isOwnProfile={isOwnProfile}
+                onFollowAction={handleFollowAction}
+                onShowFollowers={() => setShowFollowers(true)}
+                onShowFollowing={() => setShowFollowing(true)}
+                followActionPending={followMutation.isPending || unfollowMutation.isPending}
+              />
+            </CardHeader>
+            <CardContent>
+              <ProfileInfo
+                profile={profile}
+                hasReceivedRequest={hasReceivedRequest}
+              />
+            </CardContent>
+          </Card>
+          <ProfilePosts profileId={id!} />
+          <Dialog open={showFollowers} onOpenChange={setShowFollowers}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Seguidores</DialogTitle>
+              </DialogHeader>
+              <FollowList
+                users={followers ?? []}
+                isLoading={isLoadingFollowers}
+                title="Seguidores"
+                currentPage={followersPage}
+                onPageChange={handleFollowersPageChange}
+                onRowsChange={handleFollowersRowsChange}
+                totalUsers={followers?.length ?? 0}
+              />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={showFollowing} onOpenChange={setShowFollowing}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Seguindo</DialogTitle>
+              </DialogHeader>
+              <FollowList
+                users={following ?? []}
+                isLoading={isLoadingFollowing}
+                title="Seguindo"
+                currentPage={followingPage}
+                onPageChange={handleFollowingPageChange}
+                onRowsChange={handleFollowingRowsChange}
+                totalUsers={following?.length ?? 0}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+        <div className="fixed bottom-0 left-0 w-full h-14 bg-[#222737] border-t border-[#161b28] z-50">
+          <MobileSidebar />
         </div>
       </div>
     );
@@ -184,30 +271,29 @@ const Profile = () => {
                 <DialogTitle>Seguidores</DialogTitle>
               </DialogHeader>
               <FollowList
-                users={followers}
+                users={followers ?? []}
                 isLoading={isLoadingFollowers}
                 title="Seguidores"
                 currentPage={followersPage}
                 onPageChange={handleFollowersPageChange}
                 onRowsChange={handleFollowersRowsChange}
-                totalUsers={profile.followers}
+                totalUsers={followers?.length ?? 0}
               />
             </DialogContent>
           </Dialog>
-
           <Dialog open={showFollowing} onOpenChange={setShowFollowing}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Seguindo</DialogTitle>
               </DialogHeader>
               <FollowList
-                users={following}
+                users={following ?? []}
                 isLoading={isLoadingFollowing}
                 title="Seguindo"
                 currentPage={followingPage}
                 onPageChange={handleFollowingPageChange}
                 onRowsChange={handleFollowingRowsChange}
-                totalUsers={profile.following}
+                totalUsers={following?.length ?? 0}
               />
             </DialogContent>
           </Dialog>
