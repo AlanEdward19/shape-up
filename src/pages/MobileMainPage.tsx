@@ -50,24 +50,13 @@ const MobileMainPage = () => {
             <Post
               key={post.id}
               post={post}
-              onImageClick={() => {
-                setSelectedPost(post);
-                setIsModalOpen(true);
-              }}
+              onImageClick={setSelectedPost}
             />
           ))
         )}
       </ScrollArea>
-      {/* Modal for post details */}
-      {selectedPost && (
-        <PostModal
-          post={selectedPost}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
-      {/* Bottom navigation bar for Sidebar actions */}
-      <div className="fixed bottom-0 left-0 w-full h-14 bg-[#222737] flex items-center justify-around border-t border-[#161b28] z-50">
+      {/* Mobile Sidebar/Navbar */}
+      <div className="fixed bottom-0 left-0 w-full z-50">
         <MobileSidebar />
       </div>
     </div>
