@@ -140,8 +140,8 @@ const ProfessionalsHub: React.FC = () => {
   };
   const getProfessionalTypeLabel = (type: number) => {
     switch(type) {
-      case 0: return 'Personal Trainer';
-      case 1: return 'Nutricionista';
+      case 0: return 'Nutricionista';
+      case 1: return 'Personal Trainer';
       case 2: return 'Personal Trainer e Nutricionista';
       default: return 'Profissional';
     }
