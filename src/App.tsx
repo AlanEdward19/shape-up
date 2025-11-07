@@ -13,6 +13,7 @@ import ProfessionalsHub from "./pages/ProfessionalsHub";
 import MainLayout from "./components/templates/MainLayout";
 import ProfessionalProfile from "./pages/ProfessionalProfile";
 import Training from "./pages/Training.tsx";
+import Nutrition from "./pages/Nutrition";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/hub" element={<MainLayout><ProfessionalsHub /></MainLayout>} />
           <Route path="/profissional/:id" element={<MainLayout><ProfessionalProfile /></MainLayout>} />
           <Route path="/training" element={<MainLayout><Training /></MainLayout>} />
+          <Route path="/nutrition" element={<MainLayout><Nutrition /></MainLayout>} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

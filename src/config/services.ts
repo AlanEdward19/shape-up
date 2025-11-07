@@ -92,6 +92,65 @@ export const SERVICES = {
       getCurrentWorkoutSession:"v1/WorkoutSession/CurrentWorkoutSession",
       getWorkoutSessionsByUserId:"v1/User/userId/WorkoutSession"
     }
+  },
+  NUTRITION: {
+    baseUrl: import.meta.env.VITE_NUTRITION_API_BASE_URL,
+    endpoints: {
+      // Public Food endpoints
+      listPublicFoods: "v1/PublicFood",
+      getPublicFoodsByUser: "v1/PublicFood/createdByUser",
+      getPublicFoodsUsedByUser: "v1/PublicFood/usedByUser/userId",
+      getPublicFoodDetails: "v1/PublicFood/details/id",
+      listUnrevisedFoods: "v1/PublicFood/listUnrevisedFoods",
+      listRevisedFoods: "v1/PublicFood/listRevisedFoods",
+      createPublicFood: "v1/PublicFood/userId",
+      updatePublicFood: "v1/PublicFood/id",
+      deletePublicFood: "v1/PublicFood/id",
+      approvePublicFood: "v1/PublicFood/approve/id",
+      getPublicFoodByBarcode: "v1/PublicFood/byBarCode",
+      
+      // User Food endpoints
+      listUserFoods: "v1/UserFood/list/userId",
+      getUserFoodDetails: "v1/UserFood/details/id",
+      createUserFood: "v1/UserFood/userId",
+      updateUserFood: "v1/UserFood/id",
+      deleteUserFood: "v1/UserFood/id",
+      insertPublicFoodsInUserFood: "v1/UserFood/insertPublicFoods/userId",
+      approveUserFood: "v1/UserFood/approve/id",
+      getUserFoodByBarcode: "v1/UserFood/byBarCode",
+      
+      // Dish endpoints
+      getDishDetails: "v1/Dish/details/id",
+      listDishes: "v1/Dish/list/userId",
+      createDish: "v1/Dish",
+      createDishForUser: "v1/Dish/userId",
+      updateDish: "v1/Dish/id",
+      deleteDish: "v1/Dish/id",
+      
+      // Meal endpoints
+      createMeal: "v1/Meal",
+      createMealForUser: "v1/Meal/userId",
+      deleteMeal: "v1/Meal/mealId",
+      updateMeal: "v1/Meal/mealId",
+      getMealDetails: "v1/Meal/details/mealId",
+      listMeals: "v1/Meal/list/userId",
+      
+      // Daily Menu endpoints
+      createDailyMenu: "v1/DailyMenu",
+      createDailyMenuForUser: "v1/DailyMenu/userId",
+      deleteDailyMenu: "v1/DailyMenu/id",
+      updateDailyMenu: "v1/DailyMenu/id",
+      getDailyMenuDetails: "v1/DailyMenu/details/id",
+      listDailyMenus: "v1/DailyMenu/list/userId",
+      
+      // User Nutrition endpoints
+      createUserNutrition: "v1/UserNutrition/userId",
+      deleteUserNutrition: "v1/UserNutrition/id",
+      updateUserNutrition: "v1/UserNutrition/id",
+      getUserNutritionDetails: "v1/UserNutrition/details/id",
+      listUserNutritions: "v1/UserNutrition/list/managerId",
+      getUserSpecificNutrition: "v1/UserNutrition/user/userId"
+    }
   }
 };
 
