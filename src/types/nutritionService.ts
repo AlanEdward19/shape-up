@@ -19,43 +19,43 @@ export enum MealType {
 }
 
 // Core nutrition interfaces based on Swagger schemas
-export interface MicronutrientDetails {
-    quantity: number;
-    unit: string;
-}
-
 export interface SugarDetails {
-    total: number;
-    addedSugar?: number;
-    sugarAlcohols?: number;
+  total: number;
+  addedSugar: number | null;
+  sugarAlcohols: number | null;
 }
 
 export interface Carbohydrates {
-    total: number;
-    dietaryFiber?: number;
-    sugar: SugarDetails;
+  total: number;
+  dietaryFiber: number | null;
+  sugar: SugarDetails | null;
 }
 
 export interface Fats {
-    total: number;
-    saturatedFat?: number;
-    transFat?: number;
-    polyunsaturatedFat?: number;
-    monounsaturatedFat?: number;
-    cholesterol?: number;
+  total: number;
+  saturatedFat: number | null;
+  transFat: number | null;
+  polyunsaturatedFat: number | null;
+  monounsaturatedFat: number | null;
+  cholesterol: number | null;
 }
 
 export interface Macronutrients {
-    proteins?: number;
-    carbohydrates: Carbohydrates;
-    fats: Fats;
+  proteins: number | null;
+  carbohydrates: Carbohydrates | null;
+  fats: Fats | null;
+}
+
+export interface MicronutrientDetails {
+  quantity: number;
+  unit: string;
 }
 
 export interface NutritionalInfo {
-    macronutrients: Macronutrients;
-    micronutrients?: Record<string, MicronutrientDetails>;
-    servingSize: number;
-    calories?: number;
+  macronutrients: Macronutrients | null;
+  micronutrients: Record<string, MicronutrientDetails> | null; // Usando Record para o Dictionary
+  servingSize: number;
+  calories: number | null;
 }
 
 // Food interfaces

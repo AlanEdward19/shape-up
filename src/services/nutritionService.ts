@@ -1,309 +1,634 @@
-import {
-    FoodDto,
-    DishDto,
-    MealDto,
-    DailyMenuDto,
-    UserNutritionDto,
-    CreateUserFoodCommand,
-    CreateDishForSameUserCommand,
-    CreateMealForSameUserCommand,
-    CreateDailyMenuForSameUserCommand,
-    CreateUserNutritionCommand,
-    EditUserFoodCommand,
-    EditDishCommand,
-    EditMealCommand,
-    EditDailyMenuCommand,
-    EditUserNutritionCommand,
-    PaginationQuery,
-    UserPaginationQuery,
-    DailyMenuListQuery
-} from "@/types/nutritionService";
 import { SERVICES } from "@/config/services";
 import { createHeaders } from "@/services/utils/serviceUtils";
 
+// Importa os tipos REAIS do seu
+import { 
+  FoodDto, 
+  DishDto, 
+  MealDto, 
+  DailyMenuDto,
+  UserNutritionDto,
+  
+  // Create Commands
+  CreateUserFoodCommand,
+  CreatePublicFoodCommand,
+  CreateDishForSameUserCommand,
+  CreateMealForSameUserCommand,
+  CreateDailyMenuForSameUserCommand,
+  CreateUserNutritionCommand,
+
+  // Edit Commands
+  EditUserFoodCommand,
+  EditPublicFoodCommand,
+  EditDishCommand,
+  EditMealCommand,
+  EditDailyMenuCommand,
+  EditUserNutritionCommand,
+  
+  // Other
+  InsertPublicFoodsInUserFoodCommand
+} from "@/types/nutritionService";
+
+// Helpers
+const baseUrl = SERVICES.NUTRITION.baseUrl;
+const endpoints = SERVICES.NUTRITION.endpoints;
+
+/**
+ * Limpa o 'userId' do corpo do comando, pois ele já está sendo
+ * passado na URL para endpoints 'ForUser'.
+ */
+const cleanCommand = (command: any) => {
+  const { userId, ...body } = command;
+  return body;
+};
+
 export const NutritionService = {
-    // Public Food operations
-    listPublicFoods: async (query?: PaginationQuery): Promise<FoodDto[]> => {
-        const url = new URL(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.listPublicFoods}`);
-        if (query?.page) url.searchParams.append('Page', query.page.toString());
-        if (query?.rows) url.searchParams.append('Rows', query.rows.toString());
 
-        const response = await fetch(url.toString(), {
-            method: "GET",
-            headers: await createHeaders()
-        });
+  // --- Public Food ---
 
-        if (!response.ok) throw new Error('Failed to fetch public foods');
-        return response.json();
-    },
-
-    // User Food operations
-    listUserFoods: async (userId: string, query?: UserPaginationQuery): Promise<FoodDto[]> => {
-        const url = new URL(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.listUserFoods.replace('userId', userId)}`);
-        if (query?.page) url.searchParams.append('Page', query.page.toString());
-        if (query?.rows) url.searchParams.append('Rows', query.rows.toString());
-        if (query?.userId) url.searchParams.append('UserId', query.userId);
-
-        const response = await fetch(url.toString(), {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch user foods');
-        return response.json();
-    },
-
-    getUserFoodDetails: async (id: string): Promise<FoodDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.getUserFoodDetails.replace('id', id)}`, {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch user food details');
-        return response.json();
-    },
-
-    createUserFood: async (userId: string, details: CreateUserFoodCommand): Promise<FoodDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.createUserFood.replace('userId', userId)}`, {
-            method: "POST",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to create user food');
-        return response.json();
-    },
-
-    updateUserFood: async (id: string, details: EditUserFoodCommand): Promise<void> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.updateUserFood.replace('id', id)}`, {
-            method: "PUT",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to update user food');
-    },
-
-    deleteUserFood: async (id: string): Promise<void> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.deleteUserFood.replace('id', id)}`, {
-            method: "DELETE",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to delete user food');
-    },
-
-    getUserFoodByBarcode: async (barCode: string): Promise<FoodDto> => {
-        const url = new URL(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.getUserFoodByBarcode}`);
-        url.searchParams.append('BarCode', barCode);
-
-        const response = await fetch(url.toString(), {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch user food by barcode');
-        return response.json();
-    },
-
-    // Dish operations
-    getDishDetails: async (id: string): Promise<DishDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.getDishDetails.replace('id', id)}`, {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch dish details');
-        return response.json();
-    },
-
-    listDishes: async (userId: string, query?: UserPaginationQuery): Promise<DishDto[]> => {
-        const url = new URL(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.listDishes.replace('userId', userId)}`);
-        if (query?.page) url.searchParams.append('Page', query.page.toString());
-        if (query?.rows) url.searchParams.append('Rows', query.rows.toString());
-        if (query?.userId) url.searchParams.append('UserId', query.userId);
-
-        const response = await fetch(url.toString(), {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch dishes');
-        return response.json();
-    },
-
-    createDish: async (details: CreateDishForSameUserCommand): Promise<DishDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.createDish}`, {
-            method: "POST",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to create dish');
-        return response.json();
-    },
-
-    updateDish: async (id: string, details: EditDishCommand): Promise<void> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.updateDish.replace('id', id)}`, {
-            method: "PUT",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to update dish');
-    },
-
-    deleteDish: async (id: string): Promise<void> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.deleteDish.replace('id', id)}`, {
-            method: "DELETE",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to delete dish');
-    },
-
-    // Meal operations
-    createMeal: async (details: CreateMealForSameUserCommand): Promise<MealDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.createMeal}`, {
-            method: "POST",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to create meal');
-        return response.json();
-    },
-
-    getMealDetails: async (mealId: string): Promise<MealDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.getMealDetails.replace('mealId', mealId)}`, {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch meal details');
-        return response.json();
-    },
-
-    listMeals: async (userId: string, query?: UserPaginationQuery): Promise<MealDto[]> => {
-        const url = new URL(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.listMeals.replace('userId', userId)}`);
-        if (query?.page) url.searchParams.append('Page', query.page.toString());
-        if (query?.rows) url.searchParams.append('Rows', query.rows.toString());
-        if (query?.userId) url.searchParams.append('UserId', query.userId);
-
-        const response = await fetch(url.toString(), {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch meals');
-        return response.json();
-    },
-
-    updateMeal: async (mealId: string, details: EditMealCommand): Promise<void> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.updateMeal.replace('mealId', mealId)}`, {
-            method: "PUT",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to update meal');
-    },
-
-    deleteMeal: async (mealId: string): Promise<void> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.deleteMeal.replace('mealId', mealId)}`, {
-            method: "DELETE",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to delete meal');
-    },
-
-    // Daily Menu operations
-    createDailyMenu: async (details: CreateDailyMenuForSameUserCommand): Promise<DailyMenuDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.createDailyMenu}`, {
-            method: "POST",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to create daily menu');
-        return response.json();
-    },
-
-    getDailyMenuDetails: async (id: string): Promise<DailyMenuDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.getDailyMenuDetails.replace('id', id)}`, {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch daily menu details');
-        return response.json();
-    },
-
-    listDailyMenus: async (userId: string, query?: DailyMenuListQuery): Promise<DailyMenuDto[]> => {
-        const url = new URL(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.listDailyMenus.replace('userId', userId)}`);
-        if (query?.dayOfWeek) url.searchParams.append('DayOfWeek', query.dayOfWeek);
-        if (query?.page) url.searchParams.append('Page', query.page.toString());
-        if (query?.size) url.searchParams.append('Size', query.size.toString());
-        if (query?.userId) url.searchParams.append('UserId', query.userId);
-
-        const response = await fetch(url.toString(), {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch daily menus');
-        return response.json();
-    },
-
-    updateDailyMenu: async (id: string, details: EditDailyMenuCommand): Promise<void> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.updateDailyMenu.replace('id', id)}`, {
-            method: "PUT",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to update daily menu');
-    },
-
-    deleteDailyMenu: async (id: string): Promise<void> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.deleteDailyMenu.replace('id', id)}`, {
-            method: "DELETE",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to delete daily menu');
-    },
-
-    // User Nutrition operations
-    createUserNutrition: async (userId: string, details: CreateUserNutritionCommand): Promise<UserNutritionDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.createUserNutrition.replace('userId', userId)}`, {
-            method: "POST",
-            body: JSON.stringify(details),
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to create user nutrition');
-        return response.json();
-    },
-
-    getUserNutritionDetails: async (id: string): Promise<UserNutritionDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.getUserNutritionDetails.replace('id', id)}`, {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch user nutrition details');
-        return response.json();
-    },
-
-    getUserSpecificNutrition: async (userId: string): Promise<UserNutritionDto> => {
-        const response = await fetch(`${SERVICES.NUTRITION.baseUrl}${SERVICES.NUTRITION.endpoints.getUserSpecificNutrition.replace('userId', userId)}`, {
-            method: "GET",
-            headers: await createHeaders()
-        });
-
-        if (!response.ok) throw new Error('Failed to fetch user specific nutrition');
-        return response.json();
+  listPublicFoods: async (): Promise<FoodDto[]> => {
+    try {
+      const response = await fetch(`${baseUrl}${endpoints.listPublicFoods}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao listar comidas públicas");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
+  },
+
+  getPublicFoodsByUser: async (): Promise<FoodDto[]> => {
+    try {
+      const response = await fetch(`${baseUrl}${endpoints.getPublicFoodsByUser}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar comidas públicas por usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getPublicFoodsUsedByUser: async (userId: string): Promise<FoodDto[]> => {
+    try {
+      const endpoint = endpoints.getPublicFoodsUsedByUser.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar comidas públicas usadas pelo usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getPublicFoodDetails: async (id: string): Promise<FoodDto> => {
+    try {
+      const endpoint = endpoints.getPublicFoodDetails.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar detalhes da comida pública");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  listUnrevisedFoods: async (): Promise<FoodDto[]> => {
+    try {
+      const response = await fetch(`${baseUrl}${endpoints.listUnrevisedFoods}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao listar comidas não revisadas");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  listRevisedFoods: async (): Promise<FoodDto[]> => {
+    try {
+      const response = await fetch(`${baseUrl}${endpoints.listRevisedFoods}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao listar comidas revisadas");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  createPublicFood: async (userId: string, command: CreatePublicFoodCommand): Promise<string> => {
+    try {
+      const endpoint = endpoints.createPublicFood.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(cleanCommand(command))
+      });
+      if (!response.ok) throw new Error("Erro ao criar comida pública");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  updatePublicFood: async (id: string, command: EditPublicFoodCommand): Promise<void> => {
+    try {
+      const endpoint = endpoints.updatePublicFood.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PUT',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar comida pública");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  deletePublicFood: async (id: string): Promise<void> => {
+    try {
+      const endpoint = endpoints.deletePublicFood.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'DELETE',
+        headers: await createHeaders()
+      });
+      if (!response.ok) throw new Error("Erro ao deletar comida pública");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  approvePublicFood: async (id: string): Promise<void> => {
+    try {
+      const endpoint = endpoints.approvePublicFood.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PATCH',
+        headers: await createHeaders()
+      });
+      if (!response.ok) throw new Error("Erro ao aprovar comida pública");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getPublicFoodByBarcode: async (barcode: string): Promise<FoodDto> => {
+    try {
+      // Assumindo que o endpoint espera um query param ?barcode=
+      const endpoint = `${endpoints.getPublicFoodByBarcode}?barcode=${encodeURIComponent(barcode)}`;
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar comida pública por código de barras");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  // --- User Food ---
+
+  listUserFoods: async (userId: string): Promise<FoodDto[]> => {
+    try {
+      const endpoint = endpoints.listUserFoods.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao listar comidas do usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getUserFoodDetails: async (id: string): Promise<FoodDto> => {
+    try {
+      const endpoint = endpoints.getUserFoodDetails.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar detalhes da comida do usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  createUserFood: async (userId: string, command: CreateUserFoodCommand): Promise<string> => {
+    try {
+      const endpoint = endpoints.createUserFood.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(cleanCommand(command))
+      });
+      if (!response.ok) throw new Error("Erro ao criar comida do usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  updateUserFood: async (id: string, command: EditUserFoodCommand): Promise<void> => {
+    try {
+      const endpoint = endpoints.updateUserFood.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PUT',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar comida do usuário");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  deleteUserFood: async (id: string): Promise<void> => {
+    try {
+      const endpoint = endpoints.deleteUserFood.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'DELETE',
+        headers: await createHeaders()
+      });
+      if (!response.ok) throw new Error("Erro ao deletar comida do usuário");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  insertPublicFoodsInUserFood: async (userId: string, command: InsertPublicFoodsInUserFoodCommand): Promise<void> => {
+    try {
+      const endpoint = endpoints.insertPublicFoodsInUserFood.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(cleanCommand(command))
+      });
+      if (!response.ok) throw new Error("Erro ao inserir comidas públicas no usuário");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  approveUserFood: async (id: string): Promise<void> => {
+    try {
+      const endpoint = endpoints.approveUserFood.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PATCH',
+        headers: await createHeaders()
+      });
+      if (!response.ok) throw new Error("Erro ao aprovar comida do usuário");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getUserFoodByBarcode: async (barcode: string): Promise<FoodDto> => {
+    try {
+      const endpoint = `${endpoints.getUserFoodByBarcode}?barcode=${encodeURIComponent(barcode)}`;
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar comida do usuário por código de barras");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  // --- Dish ---
+
+  getDishDetails: async (id: string): Promise<DishDto> => {
+    try {
+      const endpoint = endpoints.getDishDetails.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar detalhes do prato");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  listDishes: async (userId: string): Promise<DishDto[]> => {
+    try {
+      const endpoint = endpoints.listDishes.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao listar pratos");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+  
+  createDishForUser: async (userId: string, command: CreateDishForSameUserCommand): Promise<string> => {
+    try {
+      const endpoint = endpoints.createDishForUser.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao criar prato para usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  updateDish: async (id: string, command: EditDishCommand): Promise<void> => {
+    try {
+      const endpoint = endpoints.updateDish.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PUT',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar prato");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  deleteDish: async (id: string): Promise<void> => {
+    try {
+      const endpoint = endpoints.deleteDish.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'DELETE',
+        headers: await createHeaders()
+      });
+      if (!response.ok) throw new Error("Erro ao deletar prato");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  // --- Meal ---
+
+  createMealForUser: async (userId: string, command: CreateMealForSameUserCommand): Promise<string> => {
+    try {
+      const endpoint = endpoints.createMealForUser.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao criar refeição para usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  deleteMeal: async (mealId: string): Promise<void> => {
+    try {
+      const endpoint = endpoints.deleteMeal.replace("mealId", mealId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'DELETE',
+        headers: await createHeaders()
+      });
+      if (!response.ok) throw new Error("Erro ao deletar refeição");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  updateMeal: async (mealId: string, command: EditMealCommand): Promise<void> => {
+    try {
+      const endpoint = endpoints.updateMeal.replace("mealId", mealId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PUT',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar refeição");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getMealDetails: async (mealId: string): Promise<MealDto> => {
+    try {
+      const endpoint = endpoints.getMealDetails.replace("mealId", mealId);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar detalhes da refeição");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  listMeals: async (userId: string): Promise<MealDto[]> => {
+    try {
+      const endpoint = endpoints.listMeals.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao listar refeições");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  // --- Daily Menu ---
+
+  createDailyMenuForUser: async (userId: string, command: CreateDailyMenuForSameUserCommand): Promise<string> => {
+    try {
+      const endpoint = endpoints.createDailyMenuForUser.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao criar cardápio diário para usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  deleteDailyMenu: async (id: string): Promise<void> => {
+    try {
+      const endpoint = endpoints.deleteDailyMenu.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'DELETE',
+        headers: await createHeaders()
+      });
+      if (!response.ok) throw new Error("Erro ao deletar cardápio diário");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  updateDailyMenu: async (id: string, command: EditDailyMenuCommand): Promise<void> => {
+    try {
+      const endpoint = endpoints.updateDailyMenu.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PUT',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar cardápio diário");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getDailyMenuDetails: async (id: string): Promise<DailyMenuDto> => {
+    try {
+      const endpoint = endpoints.getDailyMenuDetails.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar detalhes do cardápio diário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  listDailyMenus: async (userId: string): Promise<DailyMenuDto[]> => {
+    try {
+      const endpoint = endpoints.listDailyMenus.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao listar cardápios diários");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  // --- User Nutrition ---
+
+  createUserNutrition: async (userId: string, command: CreateUserNutritionCommand): Promise<string> => {
+    try {
+      const endpoint = endpoints.createUserNutrition.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(cleanCommand(command))
+      });
+      if (!response.ok) throw new Error("Erro ao criar nutrição do usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  deleteUserNutrition: async (id: string): Promise<void> => {
+    try {
+      const endpoint = endpoints.deleteUserNutrition.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'DELETE',
+        headers: await createHeaders()
+      });
+      if (!response.ok) throw new Error("Erro ao deletar nutrição do usuário");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  updateUserNutrition: async (id: string, command: EditUserNutritionCommand): Promise<void> => {
+    try {
+      const endpoint = endpoints.updateUserNutrition.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'PUT',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar nutrição do usuário");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getUserNutritionDetails: async (id: string): Promise<UserNutritionDto> => {
+    try {
+      const endpoint = endpoints.getUserNutritionDetails.replace("id", id);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar detalhes da nutrição do usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  listUserNutritions: async (managerId: string): Promise<UserNutritionDto[]> => {
+    try {
+      const endpoint = endpoints.listUserNutritions.replace("managerId", managerId);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao listar nutrições de usuários");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  getUserSpecificNutrition: async (userId: string): Promise<UserNutritionDto> => {
+    try {
+      const endpoint = endpoints.getUserSpecificNutrition.replace("userId", userId);
+      const response = await fetch(`${baseUrl}${endpoint}`, { 
+        headers: await createHeaders() 
+      });
+      if (!response.ok) throw new Error("Erro ao buscar nutrição específica do usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
 };
