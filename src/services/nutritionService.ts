@@ -51,7 +51,8 @@ export const NutritionService = {
       const response = await fetch(`${baseUrl}${endpoints.listPublicFoods}`, { 
         headers: await createHeaders() 
       });
-      if (!response.ok) throw new Error("Erro ao listar comidas públicas");
+
+      if (!response.ok) throw new Error(`Erro estranho`);
       return response.json();
     } catch (error) {
       console.error(error);
