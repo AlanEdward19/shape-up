@@ -13,17 +13,28 @@ interface FoodCardProps {
   onToggleDetails?: (id?: string) => void;
   addState?: 'idle' | 'loading' | 'done';
   compact?: boolean;
+  onDelete?: (food: FoodDto) => void;
 }
 
-export const FoodCard: React.FC<FoodCardProps> = ({ food, onAdd, onSelect, showDetails, loadingDetails, onToggleDetails, addState, compact }) => {
+export const FoodCard: React.FC<FoodCardProps> = ({ food, onAdd, onSelect, showDetails, loadingDetails, onToggleDetails, addState, compact, onDelete }) => {
   const isRevised = food.isRevised;
   const isAdding = addState === 'loading';
   const isDone = addState === 'done';
 
   return (
-    <div className={compact ? "border rounded-md p-3 flex flex-col text-center bg-background" : "border rounded-md p-3 flex flex-col gap-1 bg-background"}>
+    <div className={(compact ? "relative " : "") + (compact ? "border rounded-md p-3 flex flex-col items-center text-center bg-background" : "border rounded-md p-3 flex flex-col gap-1 bg-background")}>
+      {compact && onDelete && (
+        <button
+          type="button"
+          aria-label="Remover"
+          className="absolute top-1 right-1 text-xs px-2 py-1 rounded hover:bg-accent"
+          onClick={(e) => { e.stopPropagation(); onDelete(food); }}
+        >
+          X
+        </button>
+      )}
       <div className={compact ? "flex flex-col items-center" : "flex items-center justify-between gap-2"}>
-        <div className={compact ? "flex flex-col items-center" : "flex flex-col items-start"}>
+        <div className="flex flex-col items-center">
           <div className="flex items-center gap-2">
             <span className="font-medium">{food.name || "Sem nome"}</span>
             {isRevised && <span>☑️</span>}

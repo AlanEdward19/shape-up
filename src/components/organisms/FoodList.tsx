@@ -11,9 +11,10 @@ interface FoodListProps {
   onSelect?: (food: FoodDto) => void;
   addStateById?: Record<string, 'idle' | 'loading' | 'done'>;
   compact?: boolean;
+  onDelete?: (food: FoodDto) => void;
 }
 
-export const FoodList: React.FC<FoodListProps> = ({ foods, detailsById, expandedId, onToggleDetails, onAdd, onSelect, addStateById, compact }) => {
+export const FoodList: React.FC<FoodListProps> = ({ foods, detailsById, expandedId, onToggleDetails, onAdd, onSelect, addStateById, compact, onDelete }) => {
   return (
     <div className="flex flex-col gap-2">
       {foods.map((food) => (
@@ -27,6 +28,7 @@ export const FoodList: React.FC<FoodListProps> = ({ foods, detailsById, expanded
           onToggleDetails={onToggleDetails}
           addState={food.id ? addStateById?.[food.id] : undefined}
           compact={compact}
+          onDelete={onDelete}
         />
       ))}
     </div>

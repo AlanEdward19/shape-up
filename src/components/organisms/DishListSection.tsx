@@ -1,21 +1,21 @@
 import React from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { FoodDto } from "@/types/nutritionService";
+import { DishDto } from "@/types/nutritionService";
 import SectionHeader from "@/components/molecules/SectionHeader";
 import EmptyState from "@/components/atoms/EmptyState";
-import FoodList from "./FoodList";
+import DishList from "./DishList";
 
-interface FoodListSectionProps {
+interface DishListSectionProps {
   title: string;
   description?: string;
-  foods: FoodDto[];
+  dishes: DishDto[];
   expanded: boolean;
   onToggle: () => void;
   onAddClick?: () => void;
-  onDeleteFood?: (food: FoodDto) => void;
+  onDeleteDish?: (dish: DishDto) => void;
 }
 
-export const FoodListSection: React.FC<FoodListSectionProps> = ({ title, description, foods, expanded, onToggle, onAddClick, onDeleteFood }) => {
+const DishListSection: React.FC<DishListSectionProps> = ({ title, description, dishes, expanded, onToggle, onAddClick, onDeleteDish }) => {
   return (
     <Collapsible open={expanded} onOpenChange={onToggle}>
       <div className="card p-4 cursor-pointer">
@@ -25,10 +25,10 @@ export const FoodListSection: React.FC<FoodListSectionProps> = ({ title, descrip
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-3">
-          {foods.length === 0 ? (
-            <EmptyState message="Nenhuma comida cadastrada." />
+          {dishes.length === 0 ? (
+            <EmptyState message="Nenhum prato encontrado." />
           ) : (
-            <FoodList foods={foods} compact={true} onDelete={onDeleteFood} />
+            <DishList dishes={dishes} compact={true} onDelete={onDeleteDish} />
           )}
         </CollapsibleContent>
       </div>
@@ -36,4 +36,4 @@ export const FoodListSection: React.FC<FoodListSectionProps> = ({ title, descrip
   );
 };
 
-export default FoodListSection;
+export default DishListSection;
