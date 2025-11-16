@@ -12,9 +12,10 @@ interface DailyMenuListSectionProps {
   expanded: boolean;
   onToggle: () => void;
   onAddClick?: () => void;
+  onDeleteDailyMenu?: (dm: DailyMenuDto) => void;
 }
 
-const DailyMenuListSection: React.FC<DailyMenuListSectionProps> = ({ title, description, dailyMenus, expanded, onToggle, onAddClick }) => {
+const DailyMenuListSection: React.FC<DailyMenuListSectionProps> = ({ title, description, dailyMenus, expanded, onToggle, onAddClick, onDeleteDailyMenu }) => {
   return (
     <Collapsible open={expanded} onOpenChange={onToggle}>
       <div className="card p-4 cursor-pointer">
@@ -27,7 +28,7 @@ const DailyMenuListSection: React.FC<DailyMenuListSectionProps> = ({ title, desc
           {dailyMenus.length === 0 ? (
             <EmptyState message="Nenhum cardápio diário cadastrado." />
           ) : (
-            <DailyMenuList dailyMenus={dailyMenus} compact={true} />
+            <DailyMenuList dailyMenus={dailyMenus} compact={true} onDelete={onDeleteDailyMenu} />
           )}
         </CollapsibleContent>
       </div>
@@ -36,4 +37,3 @@ const DailyMenuListSection: React.FC<DailyMenuListSectionProps> = ({ title, desc
 };
 
 export default DailyMenuListSection;
-

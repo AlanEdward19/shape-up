@@ -349,10 +349,10 @@ export const NutritionService = {
     }
   },
 
-  createDishForUser: async (userId: string, command: CreateDishForSameUserCommand): Promise<string> => {
+  createDishForUser: async (userId: string, command: CreateDishForDifferentUserCommand): Promise<string> => {
     try {
-      const endpoint = endpoints.createDishForUser.replace("userId", userId);
-      const response = await fetch(`${baseUrl}${endpoint}`, {
+      const endpoint = endpoints.createDishForUser;
+      const response = await fetch(`${baseUrl}${endpoint}?userId=${userId}`, {
         method: 'POST',
         headers: await createHeaders(),
         body: JSON.stringify(command)
@@ -365,7 +365,7 @@ export const NutritionService = {
     }
   },
 
-  createDish: async (command: CreateDishForDifferentUserCommand): Promise<string> => {
+  createDish: async (command: CreateDishForSameUserCommand): Promise<string> => {
     try {
       const endpoint = endpoints.createDish;
       const response = await fetch(`${baseUrl}${endpoint}`, {

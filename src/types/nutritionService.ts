@@ -148,7 +148,6 @@ export interface CreateDishForSameUserCommand {
 export interface CreateDishForDifferentUserCommand {
     name?: string;
     ingredients?: IngredientInputForDifferentUser[];
-    userId?: string;
 }
 
 export interface MealIngredientInputForSameUser {
