@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Nutrition() {
   const { toast } = useToast();
+  const [isProfessional, setIsProfessional] = useState<boolean | null>(null);
   // --- Minha Nutrição ---
   const [foods, setFoods] = useState<FoodDto[]>([]);
   const [dishes, setDishes] = useState<DishDto[]>([]);
@@ -158,6 +159,19 @@ export default function Nutrition() {
   // --- Effects ---
   useEffect(() => {
     loadNutritionData();
+    // Validate professional access
+    (async () => {
+      const uid = getUserId() || sessionStorage.getItem("userId") || localStorage.getItem("userId");
+      if (!uid) { setIsProfessional(false); return; }
+      try {
+        // Usa o serviço já existente; se lançar erro, considera não profissional
+        await ProfessionalManagementService.getProfessionalById(uid);
+        setIsProfessional(true);
+      } catch {
+        setIsProfessional(false);
+        setActiveTab("minha-nutricao");
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -1225,7 +1239,13 @@ export default function Nutrition() {
 
   return (
     <div>
-      <NutritionTemplate activeTab={activeTab} onTabChange={setActiveTab} left={left} right={right} />
+      <NutritionTemplate
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab)}
+        left={left}
+        right={right}
+        showClientsTab={!!isProfessional}
+      />
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="min-w-[500px] max-w-screen-xl flex flex-col max-h-[90vh]">

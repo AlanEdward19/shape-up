@@ -6,21 +6,23 @@ interface NutritionTemplateProps {
   onTabChange: (v: string) => void;
   left: React.ReactNode;
   right: React.ReactNode;
+  showClientsTab?: boolean;
 }
 
-export const NutritionTemplate: React.FC<NutritionTemplateProps> = ({ activeTab, onTabChange, left, right }) => {
+export const NutritionTemplate: React.FC<NutritionTemplateProps> = ({ activeTab, onTabChange, left, right, showClientsTab = true }) => {
+  const items = showClientsTab
+    ? [
+        { value: "minha-nutricao", label: "Minha Nutrição" },
+        { value: "clientes", label: "Clientes" },
+      ]
+    : [
+        { value: "minha-nutricao", label: "Minha Nutrição" },
+      ];
   return (
     <div className="training-main">
       <section className="col">
         <div className="flex flex-col items-center w-full">
-          <NutritionTabs
-            value={activeTab}
-            onValueChange={onTabChange}
-            items={[
-              { value: "minha-nutricao", label: "Minha Nutrição" },
-              { value: "clientes", label: "Clientes" },
-            ]}
-          />
+          <NutritionTabs value={activeTab} onValueChange={onTabChange} items={items} />
         </div>
         <div className="list" style={{ padding: "20px 16px", gap: "12px" }}>
           {left}
