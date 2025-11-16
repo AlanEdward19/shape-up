@@ -208,7 +208,7 @@ export const getProfessionalProfile = async (professionalId: string, client?: cl
     const feedbacksRaw = await ProfessionalManagementService.getProfessionalReviewsById(professionalId);
     const score = await ProfessionalManagementService.getProfessionalScoreById(professionalId);
 
-    const typeLabels = ['Personal Trainer', 'Nutricionista', 'Personal Trainer e Nutricionista'];
+    const typeLabels = ['Nutricionista', 'Personal Trainer', 'Personal Trainer e Nutricionista'];
     const tags = [typeLabels[professional.type] || 'Profissional'];
 
     // Prepare feedbacks
