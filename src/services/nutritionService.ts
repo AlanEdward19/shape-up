@@ -2,31 +2,31 @@ import { SERVICES } from "@/config/services";
 import { createHeaders } from "@/services/utils/serviceUtils";
 
 // Importa os tipos REAIS do seu
-import { 
-  FoodDto, 
-  DishDto, 
-  MealDto, 
-  DailyMenuDto,
-  UserNutritionDto,
-  
-  // Create Commands
-  CreateUserFoodCommand,
-  CreatePublicFoodCommand,
-  CreateDishForSameUserCommand,
-  CreateMealForSameUserCommand,
-  CreateDailyMenuForSameUserCommand,
-  CreateUserNutritionCommand,
+import {
+    FoodDto,
+    DishDto,
+    MealDto,
+    DailyMenuDto,
+    UserNutritionDto,
 
-  // Edit Commands
-  EditUserFoodCommand,
-  EditPublicFoodCommand,
-  EditDishCommand,
-  EditMealCommand,
-  EditDailyMenuCommand,
-  EditUserNutritionCommand,
-  
-  // Other
-  InsertPublicFoodsInUserFoodCommand
+    // Create Commands
+    CreateUserFoodCommand,
+    CreatePublicFoodCommand,
+    CreateDishForSameUserCommand,
+    CreateMealForSameUserCommand,
+    CreateDailyMenuForSameUserCommand,
+    CreateUserNutritionCommand,
+
+    // Edit Commands
+    EditUserFoodCommand,
+    EditPublicFoodCommand,
+    EditDishCommand,
+    EditMealCommand,
+    EditDailyMenuCommand,
+    EditUserNutritionCommand,
+
+    // Other
+    InsertPublicFoodsInUserFoodCommand, CreateDishForDifferentUserCommand, CreateDailyMenuForDifferentUserCommand
 } from "@/types/nutritionService";
 
 // Helpers
@@ -51,7 +51,8 @@ export const NutritionService = {
       const response = await fetch(`${baseUrl}${endpoints.listPublicFoods}`, { 
         headers: await createHeaders() 
       });
-      if (!response.ok) throw new Error("Erro ao listar comidas públicas");
+
+      if (!response.ok) throw new Error(`Erro estranho`);
       return response.json();
     } catch (error) {
       console.error(error);
@@ -347,7 +348,7 @@ export const NutritionService = {
       throw error;
     }
   },
-  
+
   createDishForUser: async (userId: string, command: CreateDishForSameUserCommand): Promise<string> => {
     try {
       const endpoint = endpoints.createDishForUser.replace("userId", userId);
@@ -357,6 +358,22 @@ export const NutritionService = {
         body: JSON.stringify(command)
       });
       if (!response.ok) throw new Error("Erro ao criar prato para usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  createDish: async (command: CreateDishForDifferentUserCommand): Promise<string> => {
+    try {
+      const endpoint = endpoints.createDish;
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao criar prato");
       return response.json();
     } catch (error) {
       console.error(error);
@@ -479,6 +496,22 @@ export const NutritionService = {
         body: JSON.stringify(command)
       });
       if (!response.ok) throw new Error("Erro ao criar cardápio diário para usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  createDailyMenu: async (command: CreateDailyMenuForDifferentUserCommand | { dayOfWeek: number; mealIds?: string[]; userId?: string }): Promise<string> => {
+    try {
+      const endpoint = endpoints.createDailyMenu;
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao criar cardápio diário");
       return response.json();
     } catch (error) {
       console.error(error);
