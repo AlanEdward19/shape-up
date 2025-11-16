@@ -26,7 +26,7 @@ import {
     EditUserNutritionCommand,
 
     // Other
-    InsertPublicFoodsInUserFoodCommand, CreateDishForDifferentUserCommand
+    InsertPublicFoodsInUserFoodCommand, CreateDishForDifferentUserCommand, CreateDailyMenuForDifferentUserCommand
 } from "@/types/nutritionService";
 
 // Helpers
@@ -496,6 +496,22 @@ export const NutritionService = {
         body: JSON.stringify(command)
       });
       if (!response.ok) throw new Error("Erro ao criar cardápio diário para usuário");
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  createDailyMenu: async (command: CreateDailyMenuForDifferentUserCommand | { dayOfWeek: number; mealIds?: string[]; userId?: string }): Promise<string> => {
+    try {
+      const endpoint = endpoints.createDailyMenu;
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: await createHeaders(),
+        body: JSON.stringify(command)
+      });
+      if (!response.ok) throw new Error("Erro ao criar cardápio diário");
       return response.json();
     } catch (error) {
       console.error(error);
