@@ -19,7 +19,6 @@ export const NutritionTemplate: React.FC<NutritionTemplateProps> = ({ activeTab,
             items={[
               { value: "minha-nutricao", label: "Minha Nutrição" },
               { value: "clientes", label: "Clientes" },
-              { value: "tutorial", label: "Tutorial" },
             ]}
           />
         </div>
@@ -35,4 +34,3 @@ export const NutritionTemplate: React.FC<NutritionTemplateProps> = ({ activeTab,
 };
 
 export default NutritionTemplate;
-

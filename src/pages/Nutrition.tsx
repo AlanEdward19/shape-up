@@ -23,8 +23,10 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProfessionalManagementService } from "@/services/professionalManagementService";
 import { clientResponse } from "@/types/professionalManagementService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Nutrition() {
+  const { toast } = useToast();
   // --- Minha Nutrição ---
   const [foods, setFoods] = useState<FoodDto[]>([]);
   const [dishes, setDishes] = useState<DishDto[]>([]);
@@ -63,6 +65,21 @@ export default function Nutrition() {
   const [clientFoods, setClientFoods] = useState<FoodDto[]>([]);
   const [clientDishes, setClientDishes] = useState<DishDto[]>([]);
   const [clientManagementMode, setClientManagementMode] = useState(false);
+  // helper to load client foods/dishes/meals
+  const loadClientLists = async (clientId: string) => {
+    try {
+      const [ms, foodsResp, dishesResp] = await Promise.all([
+        NutritionService.listMeals(clientId),
+        NutritionService.listUserFoods(clientId),
+        NutritionService.listDishes(clientId),
+      ]);
+      setClientMeals(ms ?? []);
+      setClientFoods(foodsResp ?? []);
+      setClientDishes(dishesResp ?? []);
+    } catch (e) {
+      console.error("Erro ao carregar listas do cliente:", e);
+    }
+  };
 
   // Food create/edit/import states (client)
   const [publicFoodsForImport, setPublicFoodsForImport] = useState<FoodDto[]>([]);
@@ -81,6 +98,29 @@ export default function Nutrition() {
   const [showClientMealCreate, setShowClientMealCreate] = useState(false);
   const [editingClientMeal, setEditingClientMeal] = useState<MealDto | null>(null);
   const [clientMealForm, setClientMealForm] = useState<{ type: number; name: string; dishIds: string[]; ingredients: Record<string, number>; }>({ type: 0, name: "", dishIds: [], ingredients: {} });
+
+  // Track meals selected to compose the client's Daily Menu
+  const [selectedClientMealIds, setSelectedClientMealIds] = useState<Record<string, boolean>>({});
+
+  // Save Daily Menu directly from right column (clients tab)
+  const handleSaveClientDailyMenu = async () => {
+    if (!selectedClientId) return;
+    const mealIds = Object.entries(selectedClientMealIds).filter(([, v]) => v).map(([id]) => id);
+    if (mealIds.length === 0) {
+      toast({ title: "Selecione ao menos uma refeição", description: "Marque as refeições na seção Refeições" });
+      return;
+    }
+    try {
+      await NutritionService.createDailyMenuForUser(selectedClientId, { dayOfWeek: dailyMenuForm.dayOfWeek, mealIds });
+      toast({ title: "Cardápio salvo", description: "O cardápio diário foi criado com sucesso." });
+      const dms = await NutritionService.listDailyMenus(selectedClientId);
+      setClientDailyMenus(dms ?? []);
+      setSelectedClientMealIds({});
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: "Erro ao salvar cardápio", description: e?.message || "Tente novamente." });
+    }
+  };
 
   // --- Effects ---
   useEffect(() => {
@@ -112,21 +152,14 @@ export default function Nutrition() {
   }, [activeTab]);
 
   useEffect(() => {
-    // Load selected client's daily menus and meals plus foods & dishes when in clients tab
+    // Load selected client's daily menus and items when in clients tab
     if (activeTab === "clientes" && selectedClientId) {
       (async () => {
         try {
           setLoadingClientData(true);
-          const [dms, ms, foodsResp, dishesResp] = await Promise.all([
-            NutritionService.listDailyMenus(selectedClientId),
-            NutritionService.listMeals(selectedClientId),
-            NutritionService.listUserFoods(selectedClientId),
-            NutritionService.listDishes(selectedClientId),
-          ]);
+          const dms = await NutritionService.listDailyMenus(selectedClientId);
           setClientDailyMenus(dms ?? []);
-          setClientMeals(ms ?? []);
-          setClientFoods(foodsResp ?? []);
-          setClientDishes(dishesResp ?? []);
+          await loadClientLists(selectedClientId);
         } catch (e) {
           console.error("Erro ao carregar dados do cliente:", e);
         } finally {
@@ -454,7 +487,8 @@ export default function Nutrition() {
       await NutritionService.deleteUserFood(food.id);
       const foodsResp = await NutritionService.listUserFoods(selectedClientId);
       setClientFoods(foodsResp ?? []);
-    } catch (e) { console.error("Erro ao deletar comida do cliente:", e); }
+      toast({ title: "Comida removida" });
+    } catch (e: any) { console.error("Erro ao deletar comida do cliente:", e); toast({ title: "Erro ao remover comida", description: e?.message || "" }); }
   };
   // Import public foods
   const togglePublicFoodSelection = (id: string) => {
@@ -472,13 +506,14 @@ export default function Nutrition() {
     if (!selectedClientId) return;
     try {
       const ids = Object.entries(selectedPublicFoodIds).filter(([, v]) => v).map(([id]) => id);
-      if (ids.length === 0) return;
+      if (ids.length === 0) { toast({ title: "Selecione ao menos uma comida pública" }); return; }
       await NutritionService.insertPublicFoodsInUserFood(selectedClientId, { publicFoodIds: ids, userId: selectedClientId });
       const foodsResp = await NutritionService.listUserFoods(selectedClientId);
       setClientFoods(foodsResp ?? []);
       setSelectedPublicFoodIds({});
       setClientFoodsModalOpen(false);
-    } catch (e) { console.error("Erro ao inserir comidas públicas:", e); }
+      toast({ title: "Comidas importadas" });
+    } catch (e: any) { console.error("Erro ao inserir comidas públicas:", e); toast({ title: "Erro ao importar comidas", description: e?.message || "" }); }
   };
 
   // Dishes
@@ -496,14 +531,15 @@ export default function Nutrition() {
     if (!selectedClientId) return;
     try {
       const ingredients = Object.entries(clientDishIngredients).map(([foodId, quantity]) => ({ foodId, quantity }));
-      if (ingredients.length === 0) return;
-      await NutritionService.createDishForUser(selectedClientId, {name: clientDishName || undefined, ingredients });
+      if (ingredients.length === 0) { toast({ title: "Selecione ingredientes", description: "Marque comidas para o prato" }); return; }
+      await NutritionService.createDishForUser(selectedClientId, { name: clientDishName || undefined, ingredients });
       const dishesResp = await NutritionService.listDishes(selectedClientId);
       setClientDishes(dishesResp ?? []);
       setShowClientDishCreate(false);
       setClientDishIngredients({});
       setClientDishName("");
-    } catch (e) { console.error("Erro ao criar prato do cliente:", e); }
+      toast({ title: "Prato criado" });
+    } catch (e: any) { console.error("Erro ao criar prato do cliente:", e); toast({ title: "Erro ao criar prato", description: e?.message || "" }); }
   };
   const handleClientDeleteDish = async (dish: DishDto) => {
     if (!dish.id || !selectedClientId) return;
@@ -511,7 +547,8 @@ export default function Nutrition() {
       await NutritionService.deleteDish(dish.id);
       const dishesResp = await NutritionService.listDishes(selectedClientId);
       setClientDishes(dishesResp ?? []);
-    } catch (e) { console.error("Erro ao deletar prato:", e); }
+      toast({ title: "Prato removido" });
+    } catch (e: any) { console.error("Erro ao deletar prato:", e); toast({ title: "Erro ao remover prato", description: e?.message || "" }); }
   };
 
   // Meals
@@ -542,7 +579,8 @@ export default function Nutrition() {
       setClientMeals(mealsResp ?? []);
       setShowClientMealCreate(false);
       setClientMealForm({ type: 0, name: "", dishIds: [], ingredients: {} });
-    } catch (e) { console.error("Erro ao criar refeição do cliente:", e); }
+      toast({ title: "Refeição criada" });
+    } catch (e: any) { console.error("Erro ao criar refeição do cliente:", e); toast({ title: "Erro ao criar refeição", description: e?.message || "" }); }
   };
   const handleClientDeleteMeal = async (meal: MealDto) => {
     if (!meal.id || !selectedClientId) return;
@@ -550,7 +588,10 @@ export default function Nutrition() {
       await NutritionService.deleteMeal(meal.id);
       const mealsResp = await NutritionService.listMeals(selectedClientId);
       setClientMeals(mealsResp ?? []);
-    } catch (e) { console.error("Erro ao remover refeição:", e); }
+      // se estava selecionado, remove
+      setSelectedClientMealIds(prev => { const n = { ...prev }; delete n[meal.id!]; return n; });
+      toast({ title: "Refeição removida" });
+    } catch (e: any) { console.error("Erro ao remover refeição:", e); toast({ title: "Erro ao remover refeição", description: e?.message || "" }); }
   };
   const startClientMealEdit = (meal: MealDto) => {
     setEditingClientMeal(meal);
@@ -578,7 +619,8 @@ export default function Nutrition() {
       setEditingClientMeal(null);
       setShowClientMealCreate(false);
       setClientMealForm({ type: 0, name: "", dishIds: [], ingredients: {} });
-    } catch (e) { console.error("Erro ao atualizar refeição do cliente:", e); }
+      toast({ title: "Refeição atualizada" });
+    } catch (e: any) { console.error("Erro ao atualizar refeição do cliente:", e); toast({ title: "Erro ao atualizar refeição", description: e?.message || "" }); }
   };
 
   // --- Minha Nutrição columns ---
@@ -686,7 +728,7 @@ export default function Nutrition() {
             )}
           </div>
           <div className="pt-2 border-t flex flex-col gap-2">
-            <Button className="btn primary" onClick={() => setClientManagementMode(true)} disabled={!selectedClientId}>
+            <Button className="btn primary" onClick={async () => { if (!selectedClientId) return; setClientManagementMode(true); await loadClientLists(selectedClientId); }} disabled={!selectedClientId}>
               Adicionar Cardápio diário
             </Button>
             {clientManagementMode && (
@@ -700,11 +742,28 @@ export default function Nutrition() {
 
   const rightColumnClients = clientManagementMode ? (
     <div className="detail flex flex-col h-full" style={{ overflowY: "auto" }}>
-      <div className="head"><h2 className="p-0 border-0 m-0">Gerenciar Cardápio do Cliente</h2></div>
+      <div className="head flex items-center justify-between">
+        <h2 className="p-0 border-0 m-0">Gerenciar Cardápio do Cliente</h2>
+        <div className="flex items-center gap-2">
+          <label className="text-xs">Dia</label>
+            <select
+                className="h-8 min-w-[140px] px-3 py-0 leading-8 rounded border border-neutral-700" value={dailyMenuForm.dayOfWeek} onChange={(e) => setDailyMenuForm(p => ({ ...p, dayOfWeek: Number(e.target.value) }))}>
+                <option value={0}>Dom</option>
+                <option value={1}>Seg</option>
+                <option value={2}>Ter</option>
+                <option value={3}>Qua</option>
+                <option value={4}>Qui</option>
+                <option value={5}>Sex</option>
+                <option value={6}>Sáb</option>
+            </select>
+
+            <Button className="btn" onClick={handleSaveClientDailyMenu} disabled={!selectedClientId}>Adicionar Menu Diário</Button>
+        </div>
+      </div>
       <div className="body p-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px,1fr))', gap: '16px' }}>
         {/* Comidas */}
         <div className="panel">
-          <h3 className="text-sm font-semibold mb-3">Comidas</h3>
+          <h3 className="text-sm font-semibold mb-3">Comidas <span className="text-xs text-muted-foreground">({clientFoods.length})</span></h3>
           <div className="flex gap-2 mb-3 flex-wrap">
             <Button className="btn" onClick={() => { setClientFoodsModalMode("manage"); setClientFoodsModalOpen(true); }}>+ Adicionar Comida</Button>
             <Button className="btn" onClick={async () => { setClientFoodsModalMode("import"); setClientFoodsModalOpen(true); }}>Importar Públicas</Button>
@@ -727,7 +786,7 @@ export default function Nutrition() {
         </div>
         {/* Pratos */}
         <div className="panel">
-          <h3 className="text-sm font-semibold mb-3">Pratos</h3>
+          <h3 className="text-sm font-semibold mb-3">Pratos <span className="text-xs text-muted-foreground">({clientDishes.length})</span></h3>
           {!showClientDishCreate && (
             <div className="flex gap-2 mb-3">
               <Button className="btn" onClick={() => setShowClientDishCreate(true)}>+ Criar Prato</Button>
@@ -757,9 +816,12 @@ export default function Nutrition() {
                   );
                 })}
               </div>
-              <div className="flex gap-2">
-                <Button className="btn" onClick={handleClientCreateDish}>Salvar</Button>
-                <Button className="btn" variant="outline" onClick={() => { setShowClientDishCreate(false); setClientDishIngredients({}); setClientDishName(""); }}>Cancelar</Button>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Selecionados: {Object.keys(clientDishIngredients).length}</span>
+                <div className="flex gap-2">
+                  <Button className="btn" onClick={handleClientCreateDish}>Salvar</Button>
+                  <Button className="btn" variant="outline" onClick={() => { setShowClientDishCreate(false); setClientDishIngredients({}); setClientDishName(""); }}>Cancelar</Button>
+                </div>
               </div>
             </div>
           )}
@@ -775,7 +837,7 @@ export default function Nutrition() {
         </div>
         {/* Refeições */}
         <div className="panel">
-          <h3 className="text-sm font-semibold mb-3">Refeições</h3>
+          <h3 className="text-sm font-semibold mb-3">Refeições <span className="text-xs text-muted-foreground">(selecionadas: {Object.values(selectedClientMealIds).filter(Boolean).length})</span></h3>
           {!showClientMealCreate && (
             <div className="flex gap-2 mb-3">
               <Button className="btn" onClick={() => { setShowClientMealCreate(true); setEditingClientMeal(null); setClientMealForm({ type: 0, name: "", dishIds: [], ingredients: {} }); }}>+ Criar Refeição</Button>
@@ -833,24 +895,33 @@ export default function Nutrition() {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2">
-                {!editingClientMeal && <Button className="btn" onClick={handleClientCreateMeal}>Salvar</Button>}
-                {editingClientMeal && <Button className="btn" onClick={handleClientUpdateMeal}>Atualizar</Button>}
-                <Button className="btn" variant="outline" onClick={() => { setShowClientMealCreate(false); setEditingClientMeal(null); }}>Cancelar</Button>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Selecionados: pratos {clientMealForm.dishIds.length} • alimentos {Object.keys(clientMealForm.ingredients).length}</span>
+                <div className="flex gap-2">
+                  {!editingClientMeal && <Button className="btn" onClick={handleClientCreateMeal}>Salvar</Button>}
+                  {editingClientMeal && <Button className="btn" onClick={handleClientUpdateMeal}>Atualizar</Button>}
+                  <Button className="btn" variant="outline" onClick={() => { setShowClientMealCreate(false); setEditingClientMeal(null); }}>Cancelar</Button>
+                </div>
               </div>
             </div>
           )}
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
             {clientMeals.length === 0 && !loadingClientData && <div className="empty text-xs">Sem refeições.</div>}
-            {clientMeals.map(m => (
-              <div key={m.id || m.name} className="border rounded-md p-2 text-xs flex justify-between items-center">
-                <span className="font-medium">{m.name || 'Refeição'}</span>
-                <div className="flex gap-2">
-                  <Button className="btn" size="sm" onClick={() => startClientMealEdit(m)}>Editar</Button>
-                  <Button className="btn danger" size="sm" onClick={() => handleClientDeleteMeal(m)}>X</Button>
+            {clientMeals.map(m => {
+              const selected = !!selectedClientMealIds[m.id || ""];
+              return (
+                <div key={m.id || m.name} className="border rounded-md p-2 text-xs flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" checked={selected} onChange={e => setSelectedClientMealIds(prev => ({ ...prev, [m.id || ""]: e.target.checked }))} />
+                    <span className="font-medium">{m.name || 'Refeição'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button className="btn" size="sm" onClick={() => startClientMealEdit(m)}>Editar</Button>
+                    <Button className="btn danger" size="sm" onClick={() => handleClientDeleteMeal(m)}>X</Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -877,9 +948,11 @@ export default function Nutrition() {
         return (
           <PublicFoodsBrowser
             pageSize={30}
+            onFoodSelect={() => setShowModal(false)}
             onAdded={async () => {
               await loadNutritionData();
               setOpenSections((prev) => ({ ...prev, foods: true }));
+              toast({ title: "Comida adicionada" });
             }}
           />
         );
@@ -1157,11 +1230,17 @@ export default function Nutrition() {
                 pageSize={30}
                 userIdOverride={selectedClientId || undefined}
                 allowCreate={true}
+                onFoodSelect={(food) => {
+                  // Adiciona à seleção local para o formulário, sem carregar tudo do usuário
+                  setClientFoods((prev) => {
+                    const exists = prev.some((f) => (f.id && f.id === food.id));
+                    return exists ? prev : [...prev, food];
+                  });
+                  setClientFoodsModalOpen(false);
+                  toast({ title: "Comida adicionada" });
+                }}
                 onAdded={async () => {
-                  if (selectedClientId) {
-                    const foodsResp = await NutritionService.listUserFoods(selectedClientId);
-                    setClientFoods(foodsResp ?? []);
-                  }
+                  // Após criar, a lista dentro do modal já se atualiza; o usuário seleciona a comida para adicioná-la à seleção local
                 }}
               />
             ) : (
