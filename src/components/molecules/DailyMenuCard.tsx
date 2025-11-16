@@ -5,6 +5,7 @@ interface DailyMenuCardProps {
   dailyMenu: DailyMenuDto;
   compact?: boolean;
   onSelect?: (dm: DailyMenuDto) => void;
+  onDelete?: (dm: DailyMenuDto) => void;
 }
 
 const dayLabel = (d?: number) => {
@@ -20,15 +21,25 @@ const dayLabel = (d?: number) => {
   }
 };
 
-const DailyMenuCard: React.FC<DailyMenuCardProps> = ({ dailyMenu, compact = true, onSelect }) => {
+const DailyMenuCard: React.FC<DailyMenuCardProps> = ({ dailyMenu, compact = true, onSelect, onDelete }) => {
   const mealsCount = dailyMenu.meals?.length || 0;
   return (
     <div
-      className={compact
+      className={(compact ? "relative " : "relative ") + (compact
         ? "border rounded-md p-3 flex flex-col items-center text-center bg-background cursor-pointer"
-        : "border rounded-md p-3 flex flex-col gap-1 bg-background cursor-pointer"}
+        : "border rounded-md p-3 flex flex-col gap-1 bg-background cursor-pointer")}
       onClick={() => onSelect?.(dailyMenu)}
     >
+      {onDelete && (
+        <button
+          type="button"
+          aria-label="Remover"
+          className="absolute top-1 right-1 text-xs px-2 py-1 rounded hover:bg-accent"
+          onClick={(e) => { e.stopPropagation(); onDelete(dailyMenu); }}
+        >
+          X
+        </button>
+      )}
       <div className="flex flex-col items-center">
         <span className="font-medium">{dayLabel(dailyMenu.dayOfWeek)}</span>
       </div>
