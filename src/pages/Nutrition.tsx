@@ -65,6 +65,7 @@ export default function Nutrition() {
   const [clientFoods, setClientFoods] = useState<FoodDto[]>([]);
   const [clientDishes, setClientDishes] = useState<DishDto[]>([]);
   const [clientManagementMode, setClientManagementMode] = useState(false);
+  const [editingClientDailyMenu, setEditingClientDailyMenu] = useState<DailyMenuDto | null>(null);
   // helper to load client foods/dishes/meals
   const loadClientLists = async (clientId: string) => {
     try {
@@ -78,6 +79,38 @@ export default function Nutrition() {
       setClientDishes(dishesResp ?? []);
     } catch (e) {
       console.error("Erro ao carregar listas do cliente:", e);
+    }
+  };
+  // open existing daily menu for editing
+  const startClientDailyMenuEdit = async (dm: DailyMenuDto) => {
+    if (!selectedClientId || !dm.id) return;
+    try {
+      setClientManagementMode(true);
+      await loadClientLists(selectedClientId);
+      const details = await NutritionService.getDailyMenuDetails(dm.id);
+      setEditingClientDailyMenu(details);
+      setDailyMenuForm({ dayOfWeek: Number(details.dayOfWeek) as any, mealIds: (details.meals || []).map(m => m.id || "") });
+      // mark selected meals in the checkbox list
+      const map: Record<string, boolean> = {};
+      (details.meals || []).forEach(m => { if (m.id) map[m.id] = true; });
+      setSelectedClientMealIds(map);
+      toast({ title: "Editando cardápio de " + dm.dayOfWeek });
+    } catch (e: any) {
+      console.error("Erro ao carregar detalhes do cardápio:", e);
+      toast({ title: "Erro ao abrir cardápio", description: e?.message || "" });
+    }
+  };
+  const handleUpdateClientDailyMenu = async () => {
+    if (!editingClientDailyMenu?.id) return;
+    try {
+      const mealIds = Object.entries(selectedClientMealIds).filter(([, v]) => v).map(([id]) => id);
+      await NutritionService.updateDailyMenu(editingClientDailyMenu.id, { id: editingClientDailyMenu.id, dayOfWeek: dailyMenuForm.dayOfWeek as any, mealIds });
+      const dms = selectedClientId ? await NutritionService.listDailyMenus(selectedClientId) : [];
+      setClientDailyMenus(dms ?? []);
+      toast({ title: "Cardápio atualizado" });
+    } catch (e: any) {
+      console.error("Erro ao atualizar cardápio:", e);
+      toast({ title: "Erro ao atualizar cardápio", description: e?.message || "" });
     }
   };
 
@@ -171,6 +204,8 @@ export default function Nutrition() {
       setClientMeals([]);
       setClientFoods([]);
       setClientDishes([]);
+      setEditingClientDailyMenu(null);
+      setSelectedClientMealIds({});
     }
   }, [activeTab, selectedClientId]);
 
@@ -724,11 +759,11 @@ export default function Nutrition() {
             ) : clientDailyMenus.length === 0 ? (
               <div className="empty">Nenhum cardápio diário encontrado.</div>
             ) : (
-              <DailyMenuList dailyMenus={clientDailyMenus} compact onDelete={handleDeleteDailyMenu} />
+              <DailyMenuList dailyMenus={clientDailyMenus} compact onSelect={startClientDailyMenuEdit} onDelete={handleDeleteDailyMenu} />
             )}
           </div>
           <div className="pt-2 border-t flex flex-col gap-2">
-            <Button className="btn primary" onClick={async () => { if (!selectedClientId) return; setClientManagementMode(true); await loadClientLists(selectedClientId); }} disabled={!selectedClientId}>
+            <Button className="btn primary" onClick={async () => { if (!selectedClientId) return; setEditingClientDailyMenu(null); setSelectedClientMealIds({}); setDailyMenuForm({ dayOfWeek: 0, mealIds: [] }); setClientManagementMode(true); await loadClientLists(selectedClientId); }} disabled={!selectedClientId}>
               Adicionar Cardápio diário
             </Button>
             {clientManagementMode && (
@@ -747,7 +782,10 @@ export default function Nutrition() {
         <div className="flex items-center gap-2">
           <label className="text-xs">Dia</label>
             <select
-                className="h-8 min-w-[140px] px-3 py-0 leading-8 rounded border border-neutral-700" value={dailyMenuForm.dayOfWeek} onChange={(e) => setDailyMenuForm(p => ({ ...p, dayOfWeek: Number(e.target.value) }))}>
+                className="appearance-none h-8 min-w-[140px] px-3 py-0 leading-8 rounded border border-neutral-700"
+                value={dailyMenuForm.dayOfWeek}
+                onChange={(e) => setDailyMenuForm(p => ({ ...p, dayOfWeek: Number(e.target.value) }))}
+            >
                 <option value={0}>Dom</option>
                 <option value={1}>Seg</option>
                 <option value={2}>Ter</option>
@@ -757,7 +795,11 @@ export default function Nutrition() {
                 <option value={6}>Sáb</option>
             </select>
 
+            {editingClientDailyMenu ? (
+            <Button className="btn" onClick={handleUpdateClientDailyMenu} disabled={!selectedClientId}>Atualizar Menu Diário</Button>
+          ) : (
             <Button className="btn" onClick={handleSaveClientDailyMenu} disabled={!selectedClientId}>Adicionar Menu Diário</Button>
+          )}
         </div>
       </div>
       <div className="body p-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px,1fr))', gap: '16px' }}>
